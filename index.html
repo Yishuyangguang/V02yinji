@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 动态可替换的图标预留 -->
-    <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Q0YWYzNyIvPjwvc3ZnPg==">
-    <link id="dynamic-apple-touch-icon" rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Q0YWYzNyIvPjwvc3ZnPg==">
+    <!-- 读取 GitHub 仓库中的静态图标 -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="shortcut icon" href="favicon.ico">
     <title>恒久印记</title>
     <style>
         /* ================= 全局重置与双轨变量 ================= */
@@ -46,8 +48,10 @@
 
         body, html {
             width: 100%;
+            max-width: 100vw;
             height: 100%;
-            overflow: hidden;
+            overflow-x: hidden; /* 绝对防止横向溢出 */
+            overflow-y: hidden; 
             background-color: var(--theme-bg-color);
             color: var(--theme-text);
             font-family: var(--font-main);
@@ -175,7 +179,6 @@
         input:focus, textarea:focus { border-color: var(--theme-primary); }
         textarea { resize: vertical; min-height: 80px; }
         
-        /* 占位符颜色适配 */
         input::placeholder, textarea::placeholder {
             color: var(--theme-text);
             opacity: 0.5;
@@ -187,7 +190,7 @@
         p { font-size: clamp(0.95rem, 4vw, 1.1rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
         .slogan-verse { font-family: var(--font-title); font-size: 1.05rem; opacity: 0.9; margin-bottom: 2rem; }
 
-        /* ================= 小挂件 (悬浮控制/主题/音乐/微信二维码) ================= */
+        /* ================= 小挂件 ================= */
         .widget-controls {
             position: absolute; top: 20px; left: 20px; z-index: 100;
             display: flex; gap: 10px;
@@ -206,7 +209,7 @@
         /* 苹果风黑色音乐播放框 */
         .apple-music-player {
             position: absolute; top: 20px; right: 20px; z-index: 100;
-            background: #111111; /* 始终保持黑色以符合苹果风格 */
+            background: #111111; 
             border-radius: 14px;
             padding: 8px 12px;
             display: flex; align-items: center; gap: 8px;
@@ -217,24 +220,66 @@
         .apple-music-player.playing { opacity: 1; pointer-events: auto; }
         
         .music-icon {
-            width: 20px; height: 20px;
-            background-size: contain; background-position: center; background-repeat: no-repeat;
-            /* 默认音符SVG */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>');
+            width: 20px; height: 20px; border-radius: 4px;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            background-image: url('music-artwork.png');
         }
-        .music-bars {
-            display: flex; gap: 3px; align-items: flex-end; height: 15px;
-        }
+        .music-bars { display: flex; gap: 3px; align-items: flex-end; height: 15px; }
         .bar { width: 3px; background: #fff; border-radius: 2px; animation: bounce 1s infinite alternate; }
         .bar:nth-child(2) { animation-delay: 0.2s; }
         .bar:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0% { height: 4px; } 100% { height: 14px; } }
 
-        .link-text {
-            color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block;
+        .link-text { color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block; }
+
+        /* ================= 阶段卡片网格 (双列) ================= */
+        .stage-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+            padding: 5px;
         }
 
-        /* ================= 管理员控件 & 卡片列表 ================= */
+        .stage-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--theme-glass-border);
+            border-radius: 20px;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px var(--theme-glass-shadow), inset 0 1px 1px rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .stage-card:active {
+            transform: translateY(2px) scale(0.96);
+            box-shadow: 0 2px 5px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .stage-card-title {
+            margin-top: 12px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--theme-text);
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
+        .stage-icon-dropzone {
+            width: 65px; height: 65px; border-radius: 50%;
+            background-size: cover; background-position: center; background-color: var(--theme-input-bg);
+            border: 2px solid transparent; transition: all 0.3s; position: relative;
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
+            box-shadow: 0 4px 10px var(--theme-glass-shadow);
+        }
+        .edit-mode .stage-icon-dropzone { border: 2px dashed var(--theme-primary); cursor: pointer; pointer-events: auto; }
+
+        /* ================= 操练卡片列表 ================= */
         .admin-controls {
             position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100;
             display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 90%;
@@ -265,15 +310,6 @@
         .edit-mode .admin-card-actions { display: flex; }
         .edit-mode .day-card { border: 1px dashed var(--theme-primary); }
 
-        .stage-icon-dropzone {
-            width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%;
-            background-size: cover; background-position: center; background-color: var(--theme-input-bg);
-            border: 2px solid transparent; transition: all 0.3s; position: relative;
-            display: flex; justify-content: center; align-items: center; overflow: hidden;
-            box-shadow: 0 4px 10px var(--theme-glass-shadow);
-        }
-        .edit-mode .stage-icon-dropzone { border: 2px dashed var(--theme-primary); cursor: pointer; }
-
         /* ================= 合并动画 ================= */
         .progress-bar { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
         .progress-dot { width: 10px; height: 10px; border-radius: 50%; background-color: var(--theme-glass-border); transition: all 0.4s; }
@@ -296,7 +332,7 @@
         .sync-container.merged .boy { transform: translateX(0); opacity: 1; border-right: transparent; }
         .sync-container.merged .girl { transform: translateX(0); opacity: 1; border-left: transparent; }
 
-        /* ================= 长按进度 ================= */
+        /* ================= 长按宣告进度 ================= */
         .long-press-area {
             position: relative; width: 130px; height: 130px; border-radius: 50%;
             background: linear-gradient(135deg, var(--theme-glass-bg), transparent);
@@ -322,7 +358,6 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
         
-        /* 微信二维码图 */
         .qr-image { width: 200px; height: auto; border-radius: 12px; margin: 15px auto; display: block; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
     </style>
@@ -343,7 +378,7 @@
 
 <!-- 顶部挂件：苹果风音乐播放框 -->
 <div class="apple-music-player" id="apple-music-box">
-    <div class="music-icon" id="dynamic-music-icon"></div>
+    <div class="music-icon"></div>
     <div class="music-bars">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
     </div>
@@ -354,8 +389,7 @@
     <!-- 全局管理控件 -->
     <div class="admin-controls" id="top-admin-controls" style="display: none;">
         <button class="btn-glass btn-small" onclick="toggleEditMode()" id="btn-edit-toggle">开启卡片编辑</button>
-        <button class="btn-glass btn-small" onclick="openSystemIconModal()">系统图标管理</button>
-        <button class="btn-glass btn-small" onclick="logout()">退出</button>
+        <button class="btn-glass btn-small" onclick="logout()">退出管理</button>
     </div>
 
     <!-- 0. 登录/注册屏 -->
@@ -371,13 +405,13 @@
         </div>
     </div>
 
-    <!-- 1. 阶段选择屏 -->
+    <!-- 1. 阶段选择屏 (2列网格卡片) -->
     <div class="screen" id="screen-stage">
         <h1>恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的操练</p>
-        <div class="glass-panel" style="padding: 1rem; background: transparent; border: none; box-shadow: none;">
-            <div id="stage-buttons-container" style="display: flex; flex-direction: column; gap: 15px;">
-                <!-- 动态渲染阶段 -->
+        <div class="glass-panel" style="padding: 1rem 0; background: transparent; border: none; box-shadow: none;">
+            <div id="stage-buttons-container" class="stage-grid">
+                <!-- 动态渲染 2 列网格卡片 -->
             </div>
         </div>
     </div>
@@ -472,31 +506,6 @@
     </div>
 </div>
 
-<!-- 管理员：系统图标设置弹窗 -->
-<div class="modal-overlay" id="sys-icon-modal">
-    <div class="modal-content" style="max-width: 400px;">
-        <h2 style="margin-bottom: 15px; color: var(--theme-primary);">系统图标管理</h2>
-        <p style="font-size: 0.85rem; margin-bottom: 15px; opacity: 0.8;">点击下方框体上传对应的系统图标。建议上传正方形 PNG/JPG 图片。</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>浏览器标签图标 (Favicon)</span>
-                <div class="stage-icon-dropzone" id="prev-favicon" onclick="triggerSysIconUpload('favicon')" style="width: 50px; height: 50px; border-radius: 8px;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>添加桌面图标 (Apple Touch)</span>
-                <div class="stage-icon-dropzone" id="prev-apple" onclick="triggerSysIconUpload('appleTouch')" style="width: 50px; height: 50px; border-radius: 12px;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>播放器内图标 (Music Box)</span>
-                <div class="stage-icon-dropzone" id="prev-music" onclick="triggerSysIconUpload('music')" style="width: 50px; height: 50px; border-radius: 50%;"></div>
-            </div>
-        </div>
-        
-        <button class="btn-glass btn-primary" style="margin-top: 25px;" onclick="document.getElementById('sys-icon-modal').style.display='none'">完 成</button>
-    </div>
-</div>
-
 <!-- 管理员：编辑卡片模态框 -->
 <div class="modal-overlay" id="edit-modal">
     <div class="modal-content">
@@ -530,7 +539,6 @@
     
     const defaultDB = {
         users: { 'yishuyangguang': 'caoheng199410' }, 
-        globalIcons: { favicon: '', appleTouch: '', music: '' },
         stages: {
             '恋爱期': {
                 themeParams: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' },
@@ -563,18 +571,16 @@
         }
     }
 
-    let db = JSON.parse(localStorage.getItem('sealOfLoveDB_v2'));
+    let db = JSON.parse(localStorage.getItem('sealOfLoveDB_v3'));
     if (!db) {
         db = defaultDB;
         saveDB();
     } else {
-        // 兼容数据结构升级
-        if(!db.globalIcons) db.globalIcons = { favicon: '', appleTouch: '', music: '' };
         if(!db.users['yishuyangguang']) db.users['yishuyangguang'] = 'caoheng199410'; 
     }
 
     function saveDB() {
-        localStorage.setItem('sealOfLoveDB_v2', JSON.stringify(db));
+        localStorage.setItem('sealOfLoveDB_v3', JSON.stringify(db));
     }
 
     /* ================= 2. 状态与主题切换 ================= */
@@ -598,20 +604,7 @@
     let audioPlayer = document.getElementById('bgm-player');
     const stagesList = ['恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
-    /* ================= 3. 系统全局图标注入 ================= */
-    function applyGlobalIcons() {
-        if (db.globalIcons.favicon) document.getElementById('dynamic-favicon').href = db.globalIcons.favicon;
-        if (db.globalIcons.appleTouch) document.getElementById('dynamic-apple-touch-icon').href = db.globalIcons.appleTouch;
-        if (db.globalIcons.music) document.getElementById('dynamic-music-icon').style.backgroundImage = `url(${db.globalIcons.music})`;
-        
-        // 更新预览面板
-        document.getElementById('prev-favicon').style.backgroundImage = db.globalIcons.favicon ? `url(${db.globalIcons.favicon})` : '';
-        document.getElementById('prev-apple').style.backgroundImage = db.globalIcons.appleTouch ? `url(${db.globalIcons.appleTouch})` : '';
-        document.getElementById('prev-music').style.backgroundImage = db.globalIcons.music ? `url(${db.globalIcons.music})` : '';
-    }
-    applyGlobalIcons();
-
-    /* ================= 4. 对称粒子系统 ================= */
+    /* ================= 3. 对称粒子系统 ================= */
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -668,14 +661,14 @@
     }
     initParticles(); animateParticles();
 
-    /* ================= 5. 鉴权与后台逻辑 ================= */
+    /* ================= 4. 鉴权与后台逻辑 ================= */
     function handleLogin() {
         const u = document.getElementById('ipt-username').value.trim();
         const p = document.getElementById('ipt-pwd').value.trim();
         if(db.users[u] && db.users[u] === p) {
             state.isLoggedIn = true;
             state.isAdmin = (u === 'yishuyangguang');
-            document.getElementById('theme-widget').style.display = 'none'; // 登录后隐藏主题切换，交由阶段主题控制
+            document.getElementById('theme-widget').style.display = 'none';
             initStageScreen();
         } else {
             alert('账号或密码错误。');
@@ -687,7 +680,6 @@
         const p = document.getElementById('ipt-pwd').value.trim();
         if(!u || !p) return alert('请输入账号和密码');
         
-        // 正则校验：仅允许大小写英文字母和数字
         const nameRegex = /^[a-zA-Z0-9]+$/;
         if (!nameRegex.test(u)) {
             return alert('注册失败：用户名仅支持使用英文、数字或英文数字的组合，不允许出现特殊字符或空格。');
@@ -708,7 +700,7 @@
         document.getElementById('top-admin-controls').style.display = 'none';
         document.getElementById('theme-widget').style.display = 'flex';
         navigateTo('screen-login');
-        document.body.classList.remove('light-theme'); state.isLightTheme = false; // 退出恢复深色
+        document.body.classList.remove('light-theme'); state.isLightTheme = false; 
         document.getElementById('btn-theme').innerText = '🌙';
     }
 
@@ -722,27 +714,7 @@
     function showQRModal() { document.getElementById('qr-modal').style.display = 'flex'; }
     function hideQRModal() { document.getElementById('qr-modal').style.display = 'none'; }
     
-    function openSystemIconModal() { document.getElementById('sys-icon-modal').style.display = 'flex'; }
-
-    // 通用文件上传处理 (针对系统全局图标)
-    function triggerSysIconUpload(type) {
-        const input = document.createElement('input');
-        input.type = 'file'; input.accept = 'image/*';
-        input.onchange = e => {
-            const file = e.target.files[0];
-            if (!file) return;
-            if (file.size > 1.5 * 1024 * 1024) return alert('图片须小于 1.5MB');
-            const reader = new FileReader();
-            reader.onload = ev => {
-                db.globalIcons[type] = ev.target.result;
-                saveDB(); applyGlobalIcons();
-            };
-            reader.readAsDataURL(file);
-        };
-        input.click();
-    }
-
-    /* ================= 6. 核心路由与主题 ================= */
+    /* ================= 5. 核心路由与主题 ================= */
     function navigateTo(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
@@ -752,7 +724,6 @@
     function applyStageTheme(stageName) {
         const t = db.stages[stageName].themeParams;
         const root = document.documentElement;
-        // 如果处于浅色模式且非管理员，强制恢复为深色系以保证沉浸感（也可随系统变化）
         if (state.isLightTheme) {
             document.body.classList.remove('light-theme');
             state.isLightTheme = false;
@@ -762,7 +733,7 @@
         root.style.setProperty('--theme-secondary', t.s);
     }
 
-    /* ================= 7. 阶段选择 (含拖拽) ================= */
+    /* ================= 6. 阶段网格卡片 (双列、上传图标) ================= */
     function initStageScreen() {
         document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none';
         
@@ -777,38 +748,46 @@
 
         stagesList.forEach(sName => {
             const iconB64 = db.stages[sName].icon;
-            const wrap = document.createElement('div');
-            wrap.style.display = 'flex'; wrap.style.flexDirection = 'column'; wrap.style.alignItems = 'center'; wrap.style.marginBottom = '10px';
+            
+            // 构建网格卡片
+            const card = document.createElement('div');
+            card.className = 'stage-card';
+            card.onclick = (e) => {
+                if(!state.isEditMode) selectStage(sName);
+            };
 
             const iconDiv = document.createElement('div');
             iconDiv.className = 'stage-icon-dropzone';
             if (iconB64) {
                 iconDiv.style.backgroundImage = `url(${iconB64})`;
             } else {
-                iconDiv.innerHTML = `<span style="font-size:24px;color:rgba(255,255,255,0.8);">${sName.charAt(0)}</span>`;
+                iconDiv.innerHTML = `<span style="font-size:24px;color:rgba(255,255,255,0.8); font-family: var(--font-title);">${sName.charAt(0)}</span>`;
                 iconDiv.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.1), transparent)';
             }
 
             if (state.isEditMode) {
+                iconDiv.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+                    input.onchange = ev => processStageIcon(ev.target.files[0], sName);
+                    input.click();
+                });
                 iconDiv.addEventListener('dragover', (e) => { e.preventDefault(); iconDiv.style.borderColor = 'var(--theme-primary)'; });
                 iconDiv.addEventListener('dragleave', () => { iconDiv.style.borderColor = 'transparent'; });
                 iconDiv.addEventListener('drop', (e) => {
-                    e.preventDefault(); iconDiv.style.borderColor = 'transparent';
+                    e.preventDefault(); e.stopPropagation(); iconDiv.style.borderColor = 'transparent';
                     const file = e.dataTransfer.files[0];
                     processStageIcon(file, sName);
                 });
-                iconDiv.addEventListener('click', () => {
-                    const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
-                    input.onchange = e => processStageIcon(e.target.files[0], sName);
-                    input.click();
-                });
             }
 
-            const btn = document.createElement('button');
-            btn.className = 'btn-glass'; btn.innerText = sName; btn.style.margin = '0';
-            btn.onclick = () => selectStage(sName);
+            const title = document.createElement('div');
+            title.className = 'stage-card-title';
+            title.innerText = sName;
 
-            wrap.appendChild(iconDiv); wrap.appendChild(btn); container.appendChild(wrap);
+            card.appendChild(iconDiv);
+            card.appendChild(title);
+            container.appendChild(card);
         });
         navigateTo('screen-stage');
     }
@@ -821,7 +800,7 @@
         reader.readAsDataURL(file);
     }
 
-    /* ================= 8. 卡片列表与编辑 ================= */
+    /* ================= 7. 卡片列表与编辑 ================= */
     function selectStage(sName) {
         if(state.isEditMode) return;
         state.stage = sName;
@@ -928,7 +907,7 @@
         saveDB(); closeEditModal(); renderCardList();
     }
 
-    /* ================= 9. 用户流程 ================= */
+    /* ================= 8. 用户操作流转 ================= */
     function selectCard(card) {
         state.currentCard = card;
         document.getElementById('prep-text').innerText = db.stages[state.stage].prepText;
@@ -957,7 +936,6 @@
         if(state.currentCard.bgm) {
             audioPlayer.src = state.currentCard.bgm;
             audioPlayer.play().then(() => {
-                // 成功播放后展示苹果风音乐图标
                 document.getElementById('apple-music-box').classList.add('playing');
             }).catch(e => console.log("需用户进一步交互才能播放", e));
         }
@@ -998,7 +976,7 @@
         }
     }
 
-    /* ================= 10. 长按宣告 ================= */
+    /* ================= 9. 长按同心宣告 ================= */
     const longPressBtn = document.getElementById('btn-long-press');
     const pressFill = document.getElementById('press-fill');
     let progress = 0; let pressAnimationFrame = null; let isPressing = false;
