@@ -6,7 +6,7 @@ export async function onRequestPost(context) {
         const { username, password } = body;
 
         // 与 Cloudflare 后台设置的环境变量进行严格比对
-        // 这样您的密码永远只会存在于 CF 服务器的加密内存中
+
         if (username === env.ADMIN_USER && password === env.ADMIN_PASS) {
             
             // 签发管理员 Token，并设置 HttpOnly Cookie 防止 XSS 攻击
