@@ -3,51 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>印记 - Seal of Love</title>
+    <!-- 动态可替换的图标预留 -->
+    <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Q0YWYzNyIvPjwvc3ZnPg==">
+    <link id="dynamic-apple-touch-icon" rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Q0YWYzNyIvPjwvc3ZnPg==">
+    <title>恒久印记</title>
     <style>
-        /* ================= 全局重置与变量 ================= */
+        /* ================= 全局重置与双轨变量 ================= */
         :root {
-            --theme-bg: #fdfbf7;
-            --theme-text: #2c2c2c;
-            --theme-primary: #d4af37; /* 默认金 */
-            --theme-shadow-light: #ffffff;
-            --theme-shadow-dark: #e6e4d9;
-            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-            --font-title: "Songti SC", "SimSun", serif; /* 衬线体增加神圣感 */
+            /* 默认深色：柔和黑金 */
+            --theme-bg-color: #1a1b20;
+            --theme-primary: #d4af37;
+            --theme-secondary: #ebd373;
+            --theme-text: #ffffff;
+            --theme-glass-bg: rgba(255, 255, 255, 0.05);
+            --theme-glass-border: rgba(255, 255, 255, 0.1);
+            --theme-glass-shadow: rgba(0, 0, 0, 0.4);
+            --theme-input-bg: rgba(0, 0, 0, 0.3);
+            
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-title: "Songti SC", "SimSun", serif;
+        }
+
+        /* 浅色：柔和太阳光 */
+        body.light-theme {
+            --theme-bg-color: #fdfaf3;
+            --theme-primary: #d99a29;
+            --theme-secondary: #f4c453;
+            --theme-text: #333333;
+            --theme-glass-bg: rgba(255, 255, 255, 0.7);
+            --theme-glass-border: rgba(200, 180, 150, 0.3);
+            --theme-glass-shadow: rgba(200, 180, 150, 0.2);
+            --theme-input-bg: rgba(255, 255, 255, 0.8);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none; /* 防止长按选中文本 */
+            user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
 
         body, html {
             width: 100%;
             height: 100%;
-            overflow: hidden; /* 绝对禁止屏幕外溢 */
-            background-color: var(--theme-bg);
+            overflow: hidden;
+            background-color: var(--theme-bg-color);
             color: var(--theme-text);
             font-family: var(--font-main);
             transition: background-color 0.8s ease, color 0.8s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        }
+
+        /* 背景渐变与 Canvas */
+        #bg-gradient {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, var(--theme-secondary) 0%, var(--theme-bg-color) 70%);
+            opacity: 0.15;
+            z-index: 1;
+            transition: background 1s ease;
+        }
+        
+        #particle-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            pointer-events: none;
         }
 
         /* ================= 核心容器 ================= */
         #app-container {
-            width: 100%;
-            max-width: 500px;
-            height: 100%;
-            max-height: 900px;
             position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 600px;
+            height: 100%;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            padding: 2rem 1.5rem;
-            text-align: center;
             overflow: hidden;
         }
 
@@ -61,58 +94,51 @@
             align-items: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.6s ease, transform 0.6s ease;
-            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0.95);
+            overflow-y: auto;
+            overflow-x: hidden;
         }
+        
+        .screen::-webkit-scrollbar { display: none; }
+        .screen { -ms-overflow-style: none; scrollbar-width: none; }
 
         .screen.active {
             opacity: 1;
             pointer-events: auto;
-            transform: translateY(0);
-            z-index: 10;
+            transform: scale(1);
+            z-index: 20;
         }
 
-        /* ================= 排版与字体 ================= */
-        h1 {
-            font-family: var(--font-title);
-            font-size: clamp(1.8rem, 6vw, 2.5rem);
-            margin-bottom: 1rem;
-            color: var(--theme-primary);
-            line-height: 1.3;
-            letter-spacing: 2px;
+        /* ================= 3D 玻璃态样式 (Glassmorphism) ================= */
+        .glass-panel {
+            background: var(--theme-glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--theme-glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 var(--theme-glass-shadow),
+                        inset 0 1px 1px rgba(255,255,255,0.2);
+            padding: 2rem;
+            width: 100%;
+            text-align: center;
+            transition: all 0.5s ease;
         }
 
-        p {
-            font-size: clamp(1rem, 4vw, 1.2rem);
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-            text-align: justify;
-            text-align-last: center; /* 保证对称美感 */
-        }
-
-        .bible-verse {
-            font-family: var(--font-title);
-            font-size: clamp(0.9rem, 3.5vw, 1.1rem);
-            color: #777;
-            margin-bottom: 2rem;
-            font-style: italic;
-        }
-
-        /* ================= 高级 3D 按钮 (新拟态) ================= */
-        .btn-3d {
-            background: var(--theme-bg);
+        .btn-glass {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--theme-glass-border);
+            box-shadow: 0 4px 15px var(--theme-glass-shadow), inset 0 1px 1px rgba(255,255,255,0.2);
             color: var(--theme-text);
-            border: none;
             padding: 1rem 2rem;
             font-size: 1.1rem;
             font-weight: 600;
             border-radius: 50px;
-            box-shadow: 6px 6px 12px var(--theme-shadow-dark),
-                       -6px -6px 12px var(--theme-shadow-light);
             cursor: pointer;
-            transition: all 0.2s ease;
-            width: 80%;
-            max-width: 300px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            width: 85%;
             margin: 0.8rem auto;
             display: flex;
             justify-content: center;
@@ -120,187 +146,300 @@
             letter-spacing: 1px;
         }
 
-        .btn-3d:active {
-            box-shadow: inset 6px 6px 12px var(--theme-shadow-dark),
-                        inset -6px -6px 12px var(--theme-shadow-light);
-            transform: scale(0.97);
-            color: var(--theme-primary);
+        .btn-glass:active {
+            transform: translateY(2px) scale(0.98);
+            box-shadow: 0 2px 5px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .btn-primary {
-            background: var(--theme-primary);
+            background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
+            border: none;
             color: #fff;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-        }
-        .btn-primary:active {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2), inset 0 2px 2px rgba(255,255,255,0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* ================= 进度指示器 ================= */
-        .progress-bar {
-            position: absolute;
-            top: 2rem;
-            display: flex;
-            gap: 10px;
-            width: 80%;
-            justify-content: center;
-        }
-        .progress-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: var(--theme-shadow-dark);
-            transition: all 0.4s ease;
-        }
-        .progress-dot.active {
-            background-color: var(--theme-primary);
-            transform: scale(1.3);
-        }
-
-        /* ================= 合并动画模块 ================= */
-        .sync-container {
+        input, textarea {
             width: 100%;
-            height: 250px;
-            position: relative;
-            margin-bottom: 2rem;
-            overflow: hidden;
-            border-radius: 20px;
-            box-shadow: inset 4px 4px 10px var(--theme-shadow-dark), inset -4px -4px 10px var(--theme-shadow-light);
-            background: #fff;
+            background: var(--theme-input-bg);
+            border: 1px solid var(--theme-glass-border);
+            color: var(--theme-text);
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            outline: none;
+            font-family: inherit;
+            transition: border 0.3s, background 0.5s, color 0.5s;
         }
-
-        .sync-half {
-            position: absolute;
-            top: 0;
-            width: 50%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            transition: transform 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Q弹的高级合并感 */
-        }
+        input:focus, textarea:focus { border-color: var(--theme-primary); }
+        textarea { resize: vertical; min-height: 80px; }
         
-        /* 男生手机显示左边，初始靠左外侧，合并时移到中心 */
-        .sync-half.boy {
-            left: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><rect width="200" height="400" fill="%23a8c0ff"/><text x="100" y="200" font-size="24" text-anchor="middle" fill="white">男方印记</text></svg>');
-            transform: translateX(-50px);
-            opacity: 0.5;
-        }
-        
-        /* 女生手机显示右边，初始靠右外侧，合并时移到中心 */
-        .sync-half.girl {
-            right: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><rect width="200" height="400" fill="%23ffafbd"/><text x="100" y="200" font-size="24" text-anchor="middle" fill="white">女方印记</text></svg>');
-            transform: translateX(50px);
+        /* 占位符颜色适配 */
+        input::placeholder, textarea::placeholder {
+            color: var(--theme-text);
             opacity: 0.5;
         }
 
-        .sync-container.merged .boy { transform: translateX(0); opacity: 1; }
-        .sync-container.merged .girl { transform: translateX(0); opacity: 1; }
+        /* ================= 排版 ================= */
+        h1, h2, h3 { font-family: var(--font-title); letter-spacing: 2px; }
+        h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 1rem; color: var(--theme-text); transition: color 0.5s; }
+        p { font-size: clamp(0.95rem, 4vw, 1.1rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
+        .slogan-verse { font-family: var(--font-title); font-size: 1.05rem; opacity: 0.9; margin-bottom: 2rem; }
 
-        /* ================= 长按进度条 (同心宣告) ================= */
-        .long-press-area {
+        /* ================= 小挂件 (悬浮控制/主题/音乐/微信二维码) ================= */
+        .widget-controls {
+            position: absolute; top: 20px; left: 20px; z-index: 100;
+            display: flex; gap: 10px;
+        }
+        
+        .theme-toggle-btn {
+            background: var(--theme-glass-bg);
+            border: 1px solid var(--theme-glass-border);
+            color: var(--theme-text);
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; box-shadow: 0 4px 10px var(--theme-glass-shadow);
+            font-size: 1.2rem; backdrop-filter: blur(10px);
+        }
+
+        /* 苹果风黑色音乐播放框 */
+        .apple-music-player {
+            position: absolute; top: 20px; right: 20px; z-index: 100;
+            background: #111111; /* 始终保持黑色以符合苹果风格 */
+            border-radius: 14px;
+            padding: 8px 12px;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            opacity: 0; pointer-events: none; transition: opacity 0.5s;
+        }
+        .apple-music-player.playing { opacity: 1; pointer-events: auto; }
+        
+        .music-icon {
+            width: 20px; height: 20px;
+            background-size: contain; background-position: center; background-repeat: no-repeat;
+            /* 默认音符SVG */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>');
+        }
+        .music-bars {
+            display: flex; gap: 3px; align-items: flex-end; height: 15px;
+        }
+        .bar { width: 3px; background: #fff; border-radius: 2px; animation: bounce 1s infinite alternate; }
+        .bar:nth-child(2) { animation-delay: 0.2s; }
+        .bar:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0% { height: 4px; } 100% { height: 14px; } }
+
+        .link-text {
+            color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block;
+        }
+
+        /* ================= 管理员控件 & 卡片列表 ================= */
+        .admin-controls {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100;
+            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 90%;
+        }
+        .btn-small { padding: 8px 15px; font-size: 0.85rem; border-radius: 20px; width: auto; margin: 0; }
+        
+        .card-list { width: 100%; display: flex; flex-direction: column; gap: 15px; margin-top: 20px; padding-bottom: 100px; }
+        
+        .day-card {
             position: relative;
-            width: 120px;
-            height: 120px;
+            background: linear-gradient(135deg, var(--theme-glass-bg), transparent);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--theme-glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--theme-glass-shadow);
+        }
+        .day-card:active { transform: scale(0.98); }
+        .day-card.draggable { cursor: grab; }
+        
+        .card-info { text-align: left; pointer-events: none; }
+        .card-info h3 { margin-bottom: 5px; font-size: 1.1rem; }
+        .card-info span { font-size: 0.8rem; opacity: 0.7; background: rgba(128,128,128,0.2); padding: 3px 8px; border-radius: 10px; }
+        
+        .admin-card-actions { display: none; gap: 5px; }
+        .edit-mode .admin-card-actions { display: flex; }
+        .edit-mode .day-card { border: 1px dashed var(--theme-primary); }
+
+        .stage-icon-dropzone {
+            width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%;
+            background-size: cover; background-position: center; background-color: var(--theme-input-bg);
+            border: 2px solid transparent; transition: all 0.3s; position: relative;
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
+            box-shadow: 0 4px 10px var(--theme-glass-shadow);
+        }
+        .edit-mode .stage-icon-dropzone { border: 2px dashed var(--theme-primary); cursor: pointer; }
+
+        /* ================= 合并动画 ================= */
+        .progress-bar { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .progress-dot { width: 10px; height: 10px; border-radius: 50%; background-color: var(--theme-glass-border); transition: all 0.4s; }
+        .progress-dot.active { background-color: var(--theme-primary); transform: scale(1.3); box-shadow: 0 0 8px var(--theme-primary); }
+
+        .sync-container {
+            width: 240px; height: 240px; position: relative; margin: 2rem auto;
             border-radius: 50%;
-            background: var(--theme-bg);
-            box-shadow: 8px 8px 16px var(--theme-shadow-dark),
-                       -8px -8px 16px var(--theme-shadow-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 2rem auto;
-            cursor: pointer;
-            overflow: hidden;
+            box-shadow: 0 10px 30px var(--theme-glass-shadow), inset 0 2px 10px rgba(255,255,255,0.2);
+            background: var(--theme-input-bg); overflow: hidden;
+            backdrop-filter: blur(10px);
         }
-        
-        .press-text {
-            font-weight: bold;
-            color: var(--theme-primary);
-            z-index: 2;
-            font-size: 0.9rem;
+        .sync-half {
+            position: absolute; top: 0; width: 50%; height: 100%;
+            background-size: cover; background-repeat: no-repeat;
+            transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .sync-half.boy { left: 0; background-position: left center; transform: translateX(-120%); opacity: 0.3; border-right: 1px solid var(--theme-glass-border); }
+        .sync-half.girl { right: 0; background-position: right center; transform: translateX(120%); opacity: 0.3; border-left: 1px solid var(--theme-glass-border); }
+        .sync-container.merged .boy { transform: translateX(0); opacity: 1; border-right: transparent; }
+        .sync-container.merged .girl { transform: translateX(0); opacity: 1; border-left: transparent; }
+
+        /* ================= 长按进度 ================= */
+        .long-press-area {
+            position: relative; width: 130px; height: 130px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--theme-glass-bg), transparent);
+            box-shadow: 0 8px 32px var(--theme-glass-shadow), inset 0 1px 2px rgba(255,255,255,0.3);
+            display: flex; justify-content: center; align-items: center; margin: 2rem auto;
+            cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border);
+        }
+        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1rem; }
+        .press-fill {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
+            background: var(--theme-primary); opacity: 0.6; transition: height 0.1s linear; z-index: 1;
         }
 
-        .press-fill {
-            position: absolute;
-            bottom: 0; left: 0;
-            width: 100%; height: 0%;
-            background: var(--theme-primary);
-            opacity: 0.2;
-            transition: height 0.1s linear;
-            z-index: 1;
+        /* ================= 模态框 (后台编辑/微信二维码) ================= */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 999;
+            display: none; justify-content: center; align-items: center; padding: 20px;
         }
+        .modal-content {
+            background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border);
+            border-radius: 20px; padding: 20px; width: 100%; max-height: 90%; overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        
+        /* 微信二维码图 */
+        .qr-image { width: 200px; height: auto; border-radius: 12px; margin: 15px auto; display: block; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
     </style>
 </head>
 <body>
 
+<!-- 对称粒子背景 -->
+<div id="bg-gradient"></div>
+<canvas id="particle-canvas"></canvas>
+
+<!-- 预加载音频 -->
+<audio id="bgm-player" loop preload="auto"></audio>
+
+<!-- 顶部挂件：主题切换 -->
+<div class="widget-controls" id="theme-widget">
+    <div class="theme-toggle-btn" onclick="toggleTheme()" id="btn-theme">🌙</div>
+</div>
+
+<!-- 顶部挂件：苹果风音乐播放框 -->
+<div class="apple-music-player" id="apple-music-box">
+    <div class="music-icon" id="dynamic-music-icon"></div>
+    <div class="music-bars">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+</div>
+
 <div id="app-container">
+    
+    <!-- 全局管理控件 -->
+    <div class="admin-controls" id="top-admin-controls" style="display: none;">
+        <button class="btn-glass btn-small" onclick="toggleEditMode()" id="btn-edit-toggle">开启卡片编辑</button>
+        <button class="btn-glass btn-small" onclick="openSystemIconModal()">系统图标管理</button>
+        <button class="btn-glass btn-small" onclick="logout()">退出</button>
+    </div>
 
-    <!-- 预加载音频 (指向您的 R2 存储桶直链) -->
-    <audio id="bgm-player" loop preload="auto">
-        <!-- 示例静音/白噪音链接，请替换为真实R2链接 -->
-        <source src="https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3" type="audio/mpeg">
-    </audio>
-
-    <!-- 1. 欢迎与阶段选择屏 -->
-    <div class="screen active" id="screen-stage">
-        <h1>爱情如死之坚强</h1>
-        <p class="bible-verse">“求你将我放在心上如印记，带在你臂上如戳记...<br>爱情，众水不能熄灭。”<br>— 雅歌 8:6-7</p>
-        <p>请选择你们当前所处的时期</p>
-        <div style="display: flex; flex-direction: column; width: 100%; gap: 10px;">
-            <button class="btn-3d" onclick="selectStage('恋爱期')">恋爱期 (Dating)</button>
-            <button class="btn-3d" onclick="selectStage('定婚期')">定婚期 (Engagement)</button>
-            <button class="btn-3d" onclick="selectStage('结婚')">结婚 (Marriage)</button>
-            <button class="btn-3d" onclick="selectStage('备孕期')">备孕期 (Pre-pregnancy)</button>
-            <button class="btn-3d" onclick="selectStage('孕后初期')">孕后初期 (Early Pregnancy)</button>
-            <button class="btn-3d" onclick="selectStage('婚后进阶')">婚后进阶 (Advanced)</button>
+    <!-- 0. 登录/注册屏 -->
+    <div class="screen active" id="screen-login">
+        <div class="glass-panel">
+            <h1>恒久印记</h1>
+            <p class="slogan-verse">爱情，众水不能熄灭，大水也不能淹没</p>
+            <input type="text" id="ipt-username" placeholder="账号 (限英文/数字组合)" autocomplete="off">
+            <input type="password" id="ipt-pwd" placeholder="密码" autocomplete="off">
+            <button class="btn-glass btn-primary" onclick="handleLogin()">登 录</button>
+            <button class="btn-glass" onclick="handleRegister()">注 册</button>
+            <span class="link-text" onclick="showQRModal()">联系站长</span>
         </div>
     </div>
 
-    <!-- 2. 角色选择屏 -->
-    <div class="screen" id="screen-role">
-        <h1 id="role-stage-title">阶段</h1>
-        <p>请选择你的身份<br>双方选择后，请将手机放置在一起</p>
-        <button class="btn-3d" style="color: #4a90e2;" onclick="selectRole('boy')">我是男生 ♂</button>
-        <button class="btn-3d" style="color: #ff6b81;" onclick="selectRole('girl')">我是女生 ♀</button>
+    <!-- 1. 阶段选择屏 -->
+    <div class="screen" id="screen-stage">
+        <h1>恒久印记</h1>
+        <p class="slogan-verse">选择生命当前的季节，开始今日的操练</p>
+        <div class="glass-panel" style="padding: 1rem; background: transparent; border: none; box-shadow: none;">
+            <div id="stage-buttons-container" style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- 动态渲染阶段 -->
+            </div>
+        </div>
     </div>
 
-    <!-- 3. 合并动画屏 -->
+    <!-- 2. 内容卡片列表屏 -->
+    <div class="screen" id="screen-card-list">
+        <h1 id="list-stage-title">阶段卡片</h1>
+        <p>选择今日的操练内容</p>
+        
+        <div class="admin-card-actions" style="width: 100%; margin-bottom: 10px; justify-content: center; gap: 10px;">
+            <button class="btn-glass btn-small btn-primary" onclick="openEditModal(null)">+ 添加新卡片</button>
+            <button class="btn-glass btn-small" onclick="editPrepText()">修改预备提示</button>
+        </div>
+
+        <div class="card-list" id="card-list-container">
+            <!-- 动态渲染玻璃卡片 -->
+        </div>
+        <button class="btn-glass" style="margin-bottom: 30px;" onclick="navigateTo('screen-stage')">返回上一步</button>
+    </div>
+
+    <!-- 3. 预备提醒屏 -->
+    <div class="screen" id="screen-prep">
+        <div class="glass-panel">
+            <h1 style="color: var(--theme-primary);">操练预备</h1>
+            <p id="prep-text" style="font-size: 1.1rem; margin: 2rem 0;">...</p>
+            <button class="btn-glass btn-primary" onclick="navigateTo('screen-role')">我们已预备好</button>
+        </div>
+    </div>
+
+    <!-- 4. 角色选择屏 -->
+    <div class="screen" id="screen-role">
+        <h1 id="role-stage-title">角色</h1>
+        <p>请选择你的身份<br>选择后，请将两台手机并排平放</p>
+        <button class="btn-glass" style="border-color: #4a90e2; color: #4a90e2;" onclick="selectRole('boy')">我是男生 ♂</button>
+        <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81;" onclick="selectRole('girl')">我是女生 ♀</button>
+    </div>
+
+    <!-- 5. 合并动画屏 -->
     <div class="screen" id="screen-sync">
         <h1>双向奔赴</h1>
-        <p>将两台手机靠近<br>点击下方按钮完成印记合并</p>
-        
+        <p>确认手机贴合后，点击合并印记</p>
         <div class="sync-container" id="sync-animation-box">
-            <!-- 动态注入男女半图 -->
+            <!-- 动态注入切割的上传图片 -->
         </div>
-
-        <button class="btn-3d btn-primary" onclick="triggerSync()">确认合并印记</button>
+        <button class="btn-glass btn-primary" onclick="triggerSync()">确认合并印记</button>
     </div>
 
-    <!-- 4. 内容步骤屏 (1:释义 2:操练 3:宣告) -->
+    <!-- 6. 核心内容屏 -->
     <div class="screen" id="screen-content">
         <div class="progress-bar" id="content-progress">
             <div class="progress-dot" id="dot-1"></div>
             <div class="progress-dot" id="dot-2"></div>
             <div class="progress-dot" id="dot-3"></div>
         </div>
-
-        <!-- 标题(脑心手) -->
-        <h1 id="content-type-title" style="margin-top: 2rem;">【心】的连接</h1>
-        
-        <!-- 动态内容区 -->
-        <div id="content-box" style="flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%;">
-            <h3 id="step-title" style="margin-bottom: 1rem; color: var(--theme-primary);">1. 行动真谛</h3>
-            <p id="step-text">内容加载中...</p>
+        <div class="glass-panel" style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px;">
+            <h2 id="content-type-title" style="margin-bottom: 1rem; font-size: 1.2rem; opacity: 0.8;">【心】的连接</h2>
+            <h1 id="step-title" style="color: var(--theme-primary); font-size: 1.5rem; margin-bottom: 1.5rem;">标题</h1>
+            <p id="step-text" style="font-size: 1.1rem; text-align: left; text-align-last: left;">内容...</p>
         </div>
-
-        <!-- 操作区 -->
-        <div id="action-area" style="width: 100%; min-height: 120px;">
-            <button class="btn-3d btn-primary" id="btn-next-step" onclick="nextContentStep()">下一步</button>
-            
-            <!-- 长按按钮 (仅在最后一步显示) -->
+        
+        <div id="action-area" style="width: 100%; min-height: 140px;">
+            <button class="btn-glass btn-primary" id="btn-next-step" onclick="nextContentStep()">下一步</button>
             <div class="long-press-area" id="btn-long-press" style="display: none;">
                 <div class="press-text">同心宣告<br>(长按)</div>
                 <div class="press-fill" id="press-fill"></div>
@@ -308,241 +447,595 @@
         </div>
     </div>
 
-    <!-- 5. 完成屏 -->
+    <!-- 7. 完成屏 -->
     <div class="screen" id="screen-finish">
-        <h1>今日印记已完成</h1>
-        <p>众水不能熄灭爱情，<br>大水也不能淹没。</p>
-        <p style="font-size: 0.9rem; color: #888;">背景音乐将持续播放，愿你们彼此相爱。</p>
-        <button class="btn-3d" onclick="resetApp()">返回首页</button>
+        <div class="glass-panel">
+            <h1 style="color: var(--theme-primary);">印记已成</h1>
+            <p>众水不能熄灭爱情，大水也不能淹没。</p>
+            <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 2rem;">静谧的旋律将伴随你们，享受此刻的宁静。</p>
+            <button class="btn-glass" onclick="resetToStage()">返回主页</button>
+        </div>
     </div>
 
 </div>
 
+<!-- ================= 弹窗模块 ================= -->
+
+<!-- 联系微信二维码弹窗 -->
+<div class="modal-overlay" id="qr-modal">
+    <div class="modal-content" style="text-align: center; max-width: 320px;">
+        <h2 style="color: var(--theme-primary);">联系站长</h2>
+        <!-- 调用本地微信图片 -->
+        <img src="微信二维码.jpg" alt="微信二维码" class="qr-image" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23ddd\'/><text x=\'50\' y=\'50\' text-anchor=\'middle\' dominant-baseline=\'middle\' fill=\'%23666\'>二维码图片丢失</text></svg>'">
+        <p style="font-size: 0.9rem; opacity: 0.8;">扫一扫上面的二维码图案，加我微信</p>
+        <button class="btn-glass" style="margin-top: 15px;" onclick="hideQRModal()">关 闭</button>
+    </div>
+</div>
+
+<!-- 管理员：系统图标设置弹窗 -->
+<div class="modal-overlay" id="sys-icon-modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <h2 style="margin-bottom: 15px; color: var(--theme-primary);">系统图标管理</h2>
+        <p style="font-size: 0.85rem; margin-bottom: 15px; opacity: 0.8;">点击下方框体上传对应的系统图标。建议上传正方形 PNG/JPG 图片。</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>浏览器标签图标 (Favicon)</span>
+                <div class="stage-icon-dropzone" id="prev-favicon" onclick="triggerSysIconUpload('favicon')" style="width: 50px; height: 50px; border-radius: 8px;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>添加桌面图标 (Apple Touch)</span>
+                <div class="stage-icon-dropzone" id="prev-apple" onclick="triggerSysIconUpload('appleTouch')" style="width: 50px; height: 50px; border-radius: 12px;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>播放器内图标 (Music Box)</span>
+                <div class="stage-icon-dropzone" id="prev-music" onclick="triggerSysIconUpload('music')" style="width: 50px; height: 50px; border-radius: 50%;"></div>
+            </div>
+        </div>
+        
+        <button class="btn-glass btn-primary" style="margin-top: 25px;" onclick="document.getElementById('sys-icon-modal').style.display='none'">完 成</button>
+    </div>
+</div>
+
+<!-- 管理员：编辑卡片模态框 -->
+<div class="modal-overlay" id="edit-modal">
+    <div class="modal-content">
+        <h2 style="margin-bottom: 15px; color: var(--theme-primary);" id="modal-title">编辑卡片</h2>
+        <input type="hidden" id="edit-card-id">
+        <input type="text" id="edit-card-title" placeholder="卡片名称 (如: Day 1: 倾听的心)">
+        <input type="text" id="edit-card-type" placeholder="类型 (脑/心/手)">
+        <input type="text" id="edit-card-bgm" placeholder="背景音乐 URL (R2 存储桶直链)">
+        
+        <h4 style="margin: 10px 0;">步骤 1: 行为解释</h4>
+        <input type="text" id="edit-s1-title" placeholder="标题">
+        <textarea id="edit-s1-text" placeholder="解释内容..."></textarea>
+        
+        <h4 style="margin: 10px 0;">步骤 2: 具体操练</h4>
+        <input type="text" id="edit-s2-title" placeholder="标题">
+        <textarea id="edit-s2-text" placeholder="操练指引..."></textarea>
+
+        <h4 style="margin: 10px 0;">步骤 3: 同心宣告</h4>
+        <input type="text" id="edit-s3-title" placeholder="标题">
+        <textarea id="edit-s3-text" placeholder="宣读词..."></textarea>
+
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="btn-glass btn-primary" style="margin:0;" onclick="saveCard()">保 存</button>
+            <button class="btn-glass" style="margin:0;" onclick="closeEditModal()">取 消</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    /* ================= 核心数据结构与配置 ================= */
+    /* ================= 1. 数据结构与初始化 ================= */
     
-    // 阶段主题颜色字典
-    const themeConfig = {
-        '恋爱期': { bg: '#fff2f5', text: '#3d2b2f', primary: '#ff6b81', shadowL: '#ffffff', shadowD: '#f0e1e4' },
-        '定婚期': { bg: '#fdf7f2', text: '#3d3028', primary: '#f39c12', shadowL: '#ffffff', shadowD: '#ebe1d8' },
-        '结婚':   { bg: '#fbf4f5', text: '#2c1e20', primary: '#e74c3c', shadowL: '#ffffff', shadowD: '#e8dcde' },
-        '备孕期': { bg: '#f4fbf7', text: '#243329', primary: '#2ecc71', shadowL: '#ffffff', shadowD: '#d9ebd1' },
-        '孕后初期': { bg: '#f4f8fb', text: '#212d36', primary: '#3498db', shadowL: '#ffffff', shadowD: '#dce5ed' },
-        '婚后进阶': { bg: '#f8f5fb', text: '#282330', primary: '#9b59b6', shadowL: '#ffffff', shadowD: '#e6e0ef' }
-    };
-
-    // 脑心手内容数据库 (示例: 恋爱期)
-    // 实际项目中，这里可以通过 Fetch API 从 R2 存储桶获取 JSON 文件
-    const contentDB = {
-        '恋爱期': {
-            type: '心', 
-            bgm: 'https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3',
-            steps: [
-                {
-                    title: "一、 行为背后的意义",
-                    text: "为什么我们要互相倾听？因为真正的爱不仅是身体的陪伴，更是灵魂的交融。倾听代表着“我愿意放下我的自我，去进入你的世界”。正如神倾听我们的祷告一般。"
-                },
-                {
-                    title: "二、 今日具体操练",
-                    text: "在接下来的相处中，当对方说话时，请放下手机，眼睛注视对方的眼睛。如果对方感到疲惫，请为对方倒一杯温水，并温和地说：“我在这里陪你。”"
-                },
-                {
-                    title: "三、 同心宣读",
-                    text: "（请牵起对方的手，一起读出：）\n\n我愿意将你放在心上如印记，我的耐心、我的温柔都愿为你存留。愿我们的爱在基督里得着坚固，不被琐事消磨，不被骄傲阻挡。"
-                }
-            ]
+    const defaultDB = {
+        users: { 'yishuyangguang': 'caoheng199410' }, 
+        globalIcons: { favicon: '', appleTouch: '', music: '' },
+        stages: {
+            '恋爱期': {
+                themeParams: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' },
+                icon: '',
+                prepText: '请找一个安静且不受打扰的地方。相对而坐，保持适当的距离，深呼吸两次，放下外界的喧嚣，预备心灵进入这一刻的交流。',
+                cards: [
+                    {
+                        id: 'c_date_1', title: 'Day 1: 倾听的艺术', type: '心', bgm: 'https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3',
+                        steps: [
+                            { title: '一、 行为背后的意义', text: '为什么我们要互相倾听？因为真正的爱不仅是表面的陪伴，更是灵魂深处的交融。倾听代表着“我愿意放下自我的成见，去进入你的内心世界”，正如倾听内心最深处的呼唤一般。' },
+                            { title: '二、 今日具体操练', text: '在接下来的相处中，当对方说话时，请放下手机，眼神柔和地注视对方。如果对方感到疲惫，请为对方倒一杯温水，并温和地说：“我在这里陪你。”' },
+                            { title: '三、 同心宣读', text: '（请牵起对方的手，一起读出：）\n\n我愿意将你放在心上如印记，我的耐心、我的温柔都愿为你存留。愿我们的爱情得着坚固，不被琐事消磨，不被骄傲阻挡。' }
+                        ]
+                    }
+                ]
+            },
+            '定婚期': { themeParams: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, icon: '', prepText: '即将步入婚姻的殿堂，请彼此手牵手，回想决定携手一生的初心与感动。', cards: [] },
+            '结婚': { themeParams: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, icon: '', prepText: '在众人与岁月面前的誓言，如今要在日常点滴中活出。请温柔地拥抱彼此。', cards: [] },
+            '备孕期': { themeParams: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, icon: '', prepText: '迎接新生命前，先滋养你们二人的爱情。请把手放在对方的肩上，感受彼此的温度。', cards: [] },
+            '孕后初期': { themeParams: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, icon: '', prepText: '身体的疲惫需要更多的温柔承托。请男生为女生轻揉肩膀，女生深呼吸放松。', cards: [] },
+            '婚后进阶': { themeParams: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, icon: '', prepText: '平淡岁月里的坚守最为可贵。请放下对彼此一切的预设与要求，全然接纳此刻真实的对方。', cards: [] }
         }
-        // ... 其他时期数据可在此无限扩展
     };
 
-    /* ================= 状态管理 ================= */
+    for(let k in defaultDB.stages) {
+        if(defaultDB.stages[k].cards.length === 0) {
+            defaultDB.stages[k].cards.push(JSON.parse(JSON.stringify(defaultDB.stages['恋爱期'].cards[0])));
+            defaultDB.stages[k].cards[0].id = 'c_' + Date.now() + Math.random();
+            defaultDB.stages[k].cards[0].title = '示例操练卡 - 请在后台修改';
+        }
+    }
+
+    let db = JSON.parse(localStorage.getItem('sealOfLoveDB_v2'));
+    if (!db) {
+        db = defaultDB;
+        saveDB();
+    } else {
+        // 兼容数据结构升级
+        if(!db.globalIcons) db.globalIcons = { favicon: '', appleTouch: '', music: '' };
+        if(!db.users['yishuyangguang']) db.users['yishuyangguang'] = 'caoheng199410'; 
+    }
+
+    function saveDB() {
+        localStorage.setItem('sealOfLoveDB_v2', JSON.stringify(db));
+    }
+
+    /* ================= 2. 状态与主题切换 ================= */
     let state = {
-        stage: '',
-        role: '',
-        currentStep: 0,
-        contentData: null
+        isLoggedIn: false, isAdmin: false, isEditMode: false,
+        stage: '', currentCard: null, role: '', currentStep: 0,
+        isLightTheme: false
     };
+
+    function toggleTheme() {
+        state.isLightTheme = !state.isLightTheme;
+        if (state.isLightTheme) {
+            document.body.classList.add('light-theme');
+            document.getElementById('btn-theme').innerText = '☀️';
+        } else {
+            document.body.classList.remove('light-theme');
+            document.getElementById('btn-theme').innerText = '🌙';
+        }
+    }
 
     let audioPlayer = document.getElementById('bgm-player');
+    const stagesList = ['恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
-    /* ================= 核心流程函数 ================= */
+    /* ================= 3. 系统全局图标注入 ================= */
+    function applyGlobalIcons() {
+        if (db.globalIcons.favicon) document.getElementById('dynamic-favicon').href = db.globalIcons.favicon;
+        if (db.globalIcons.appleTouch) document.getElementById('dynamic-apple-touch-icon').href = db.globalIcons.appleTouch;
+        if (db.globalIcons.music) document.getElementById('dynamic-music-icon').style.backgroundImage = `url(${db.globalIcons.music})`;
+        
+        // 更新预览面板
+        document.getElementById('prev-favicon').style.backgroundImage = db.globalIcons.favicon ? `url(${db.globalIcons.favicon})` : '';
+        document.getElementById('prev-apple').style.backgroundImage = db.globalIcons.appleTouch ? `url(${db.globalIcons.appleTouch})` : '';
+        document.getElementById('prev-music').style.backgroundImage = db.globalIcons.music ? `url(${db.globalIcons.music})` : '';
+    }
+    applyGlobalIcons();
 
-    // 切换屏幕
+    /* ================= 4. 对称粒子系统 ================= */
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationId;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * (canvas.width / 2);
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 1.5 + 0.5;
+            this.speedY = Math.random() * 0.4 - 0.2;
+            this.speedX = Math.random() * 0.2 - 0.1;
+            this.baseAlpha = Math.random() * 0.5 + 0.1;
+            this.pulse = Math.random() * Math.PI;
+        }
+        update() {
+            this.y += this.speedY; this.x += this.speedX;
+            if (this.y < 0) this.y = canvas.height;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.x < 0) this.x = canvas.width / 2;
+            if (this.x > canvas.width / 2) this.x = 0;
+            this.pulse += 0.02;
+        }
+        draw(colorStr) {
+            const alpha = this.baseAlpha + Math.sin(this.pulse) * 0.2;
+            ctx.fillStyle = colorStr.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(canvas.width - this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+
+    function initParticles() {
+        particles = [];
+        const count = window.innerWidth < 600 ? 25 : 50;
+        for (let i = 0; i < count; i++) particles.push(new Particle());
+    }
+
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim();
+        const hexToRgb = hex => {
+            let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+            return isNaN(r) ? 'rgb(212,175,55)' : `rgb(${r},${g},${b})`;
+        };
+        const colorStr = primaryColor.startsWith('#') ? hexToRgb(primaryColor) : 'rgb(212,175,55)';
+        particles.forEach(p => { p.update(); p.draw(colorStr); });
+        animationId = requestAnimationFrame(animateParticles);
+    }
+    initParticles(); animateParticles();
+
+    /* ================= 5. 鉴权与后台逻辑 ================= */
+    function handleLogin() {
+        const u = document.getElementById('ipt-username').value.trim();
+        const p = document.getElementById('ipt-pwd').value.trim();
+        if(db.users[u] && db.users[u] === p) {
+            state.isLoggedIn = true;
+            state.isAdmin = (u === 'yishuyangguang');
+            document.getElementById('theme-widget').style.display = 'none'; // 登录后隐藏主题切换，交由阶段主题控制
+            initStageScreen();
+        } else {
+            alert('账号或密码错误。');
+        }
+    }
+
+    function handleRegister() {
+        const u = document.getElementById('ipt-username').value.trim();
+        const p = document.getElementById('ipt-pwd').value.trim();
+        if(!u || !p) return alert('请输入账号和密码');
+        
+        // 正则校验：仅允许大小写英文字母和数字
+        const nameRegex = /^[a-zA-Z0-9]+$/;
+        if (!nameRegex.test(u)) {
+            return alert('注册失败：用户名仅支持使用英文、数字或英文数字的组合，不允许出现特殊字符或空格。');
+        }
+
+        if(db.users[u]) return alert('账号已存在');
+        db.users[u] = p;
+        saveDB();
+        alert('注册成功，已自动登录。');
+        state.isLoggedIn = true;
+        state.isAdmin = false;
+        document.getElementById('theme-widget').style.display = 'none';
+        initStageScreen();
+    }
+
+    function logout() {
+        state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false;
+        document.getElementById('top-admin-controls').style.display = 'none';
+        document.getElementById('theme-widget').style.display = 'flex';
+        navigateTo('screen-login');
+        document.body.classList.remove('light-theme'); state.isLightTheme = false; // 退出恢复深色
+        document.getElementById('btn-theme').innerText = '🌙';
+    }
+
+    function toggleEditMode() {
+        state.isEditMode = !state.isEditMode;
+        document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭编辑' : '开启卡片编辑';
+        if (document.getElementById('screen-stage').classList.contains('active')) initStageScreen();
+        else if (document.getElementById('screen-card-list').classList.contains('active')) renderCardList();
+    }
+
+    function showQRModal() { document.getElementById('qr-modal').style.display = 'flex'; }
+    function hideQRModal() { document.getElementById('qr-modal').style.display = 'none'; }
+    
+    function openSystemIconModal() { document.getElementById('sys-icon-modal').style.display = 'flex'; }
+
+    // 通用文件上传处理 (针对系统全局图标)
+    function triggerSysIconUpload(type) {
+        const input = document.createElement('input');
+        input.type = 'file'; input.accept = 'image/*';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 1.5 * 1024 * 1024) return alert('图片须小于 1.5MB');
+            const reader = new FileReader();
+            reader.onload = ev => {
+                db.globalIcons[type] = ev.target.result;
+                saveDB(); applyGlobalIcons();
+            };
+            reader.readAsDataURL(file);
+        };
+        input.click();
+    }
+
+    /* ================= 6. 核心路由与主题 ================= */
     function navigateTo(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
+        document.getElementById(screenId).scrollTop = 0;
     }
 
-    // 1. 选择阶段
-    function selectStage(stageName) {
-        state.stage = stageName;
-        
-        // 动态切换全局主题
-        const theme = themeConfig[stageName];
-        if(theme) {
-            document.documentElement.style.setProperty('--theme-bg', theme.bg);
-            document.documentElement.style.setProperty('--theme-text', theme.text);
-            document.documentElement.style.setProperty('--theme-primary', theme.primary);
-            document.documentElement.style.setProperty('--theme-shadow-light', theme.shadowL);
-            document.documentElement.style.setProperty('--theme-shadow-dark', theme.shadowD);
+    function applyStageTheme(stageName) {
+        const t = db.stages[stageName].themeParams;
+        const root = document.documentElement;
+        // 如果处于浅色模式且非管理员，强制恢复为深色系以保证沉浸感（也可随系统变化）
+        if (state.isLightTheme) {
+            document.body.classList.remove('light-theme');
+            state.isLightTheme = false;
         }
-
-        document.getElementById('role-stage-title').innerText = `【${stageName}】`;
-        navigateTo('screen-role');
+        root.style.setProperty('--theme-bg-color', t.bg);
+        root.style.setProperty('--theme-primary', t.p);
+        root.style.setProperty('--theme-secondary', t.s);
     }
 
-    // 2. 选择角色 (展示割裂图)
+    /* ================= 7. 阶段选择 (含拖拽) ================= */
+    function initStageScreen() {
+        document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none';
+        
+        document.documentElement.style.setProperty('--theme-bg-color', '#1a1b20');
+        document.documentElement.style.setProperty('--theme-primary', '#d4af37');
+        document.documentElement.style.setProperty('--theme-secondary', '#ebd373');
+
+        const container = document.getElementById('stage-buttons-container');
+        container.innerHTML = '';
+        if(state.isEditMode) container.classList.add('edit-mode');
+        else container.classList.remove('edit-mode');
+
+        stagesList.forEach(sName => {
+            const iconB64 = db.stages[sName].icon;
+            const wrap = document.createElement('div');
+            wrap.style.display = 'flex'; wrap.style.flexDirection = 'column'; wrap.style.alignItems = 'center'; wrap.style.marginBottom = '10px';
+
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'stage-icon-dropzone';
+            if (iconB64) {
+                iconDiv.style.backgroundImage = `url(${iconB64})`;
+            } else {
+                iconDiv.innerHTML = `<span style="font-size:24px;color:rgba(255,255,255,0.8);">${sName.charAt(0)}</span>`;
+                iconDiv.style.background = 'linear-gradient(135deg, rgba(255,255,255,0.1), transparent)';
+            }
+
+            if (state.isEditMode) {
+                iconDiv.addEventListener('dragover', (e) => { e.preventDefault(); iconDiv.style.borderColor = 'var(--theme-primary)'; });
+                iconDiv.addEventListener('dragleave', () => { iconDiv.style.borderColor = 'transparent'; });
+                iconDiv.addEventListener('drop', (e) => {
+                    e.preventDefault(); iconDiv.style.borderColor = 'transparent';
+                    const file = e.dataTransfer.files[0];
+                    processStageIcon(file, sName);
+                });
+                iconDiv.addEventListener('click', () => {
+                    const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+                    input.onchange = e => processStageIcon(e.target.files[0], sName);
+                    input.click();
+                });
+            }
+
+            const btn = document.createElement('button');
+            btn.className = 'btn-glass'; btn.innerText = sName; btn.style.margin = '0';
+            btn.onclick = () => selectStage(sName);
+
+            wrap.appendChild(iconDiv); wrap.appendChild(btn); container.appendChild(wrap);
+        });
+        navigateTo('screen-stage');
+    }
+
+    function processStageIcon(file, stageName) {
+        if (!file || !file.type.startsWith('image/')) return;
+        if (file.size > 2 * 1024 * 1024) return alert('图片不能超过 2MB');
+        const reader = new FileReader();
+        reader.onload = ev => { db.stages[stageName].icon = ev.target.result; saveDB(); initStageScreen(); };
+        reader.readAsDataURL(file);
+    }
+
+    /* ================= 8. 卡片列表与编辑 ================= */
+    function selectStage(sName) {
+        if(state.isEditMode) return;
+        state.stage = sName;
+        applyStageTheme(sName);
+        document.getElementById('list-stage-title').innerText = `${sName} 操练`;
+        
+        if (state.isEditMode) document.getElementById('screen-card-list').classList.add('edit-mode');
+        else document.getElementById('screen-card-list').classList.remove('edit-mode');
+
+        renderCardList(); navigateTo('screen-card-list');
+    }
+
+    function renderCardList() {
+        const container = document.getElementById('card-list-container');
+        container.innerHTML = '';
+        const cards = db.stages[state.stage].cards;
+
+        if (state.isEditMode) document.getElementById('screen-card-list').classList.add('edit-mode');
+        else document.getElementById('screen-card-list').classList.remove('edit-mode');
+
+        if(cards.length === 0) container.innerHTML = '<p style="opacity:0.5">暂无内容，请管理员添加。</p>';
+
+        cards.forEach((card, index) => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'day-card';
+            if(state.isEditMode) cardDiv.classList.add('draggable');
+            cardDiv.draggable = state.isEditMode;
+
+            if (state.isEditMode) {
+                cardDiv.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', index); setTimeout(() => cardDiv.style.opacity = '0.5', 0); });
+                cardDiv.addEventListener('dragend', () => cardDiv.style.opacity = '1');
+                cardDiv.addEventListener('dragover', e => e.preventDefault());
+                cardDiv.addEventListener('drop', e => {
+                    e.preventDefault();
+                    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                    if(fromIndex !== index) {
+                        const movedCard = cards.splice(fromIndex, 1)[0];
+                        cards.splice(index, 0, movedCard);
+                        saveDB(); renderCardList();
+                    }
+                });
+            }
+
+            cardDiv.innerHTML = `<div class="card-info" style="flex:1"><h3>${card.title}</h3><span>【${card.type}】模块</span></div>`;
+
+            if (state.isEditMode) {
+                const actDiv = document.createElement('div');
+                actDiv.style.display = 'flex'; actDiv.style.gap = '5px';
+                actDiv.innerHTML = `
+                    <button class="btn-glass btn-small" onclick="event.stopPropagation(); openEditModal(${index})">✎</button>
+                    <button class="btn-glass btn-small" style="color:#ff6b81;" onclick="event.stopPropagation(); deleteCard(${index})">✖</button>
+                `;
+                cardDiv.appendChild(actDiv);
+            }
+            cardDiv.onclick = () => { if(!state.isEditMode) selectCard(card); };
+            container.appendChild(cardDiv);
+        });
+    }
+
+    function editPrepText() {
+        const t = prompt("修改该阶段的预备提醒文本：", db.stages[state.stage].prepText);
+        if (t !== null) { db.stages[state.stage].prepText = t; saveDB(); }
+    }
+
+    function deleteCard(index) {
+        if(confirm('确认删除此卡片吗？')) { db.stages[state.stage].cards.splice(index, 1); saveDB(); renderCardList(); }
+    }
+
+    function openEditModal(index) {
+        const modal = document.getElementById('edit-modal');
+        const isNew = (index === null);
+        document.getElementById('modal-title').innerText = isNew ? '添加新卡片' : '编辑卡片';
+        
+        let c = isNew ? { id: 'c_'+Date.now(), title:'', type:'心', bgm:'', steps:[{title:'', text:''},{title:'', text:''},{title:'', text:''}] } : db.stages[state.stage].cards[index];
+
+        document.getElementById('edit-card-id').value = index === null ? 'new' : index;
+        document.getElementById('edit-card-title').value = c.title;
+        document.getElementById('edit-card-type').value = c.type;
+        document.getElementById('edit-card-bgm').value = c.bgm || '';
+        
+        for(let i=1; i<=3; i++) {
+            document.getElementById(`edit-s${i}-title`).value = c.steps[i-1] ? c.steps[i-1].title : '';
+            document.getElementById(`edit-s${i}-text`).value = c.steps[i-1] ? c.steps[i-1].text : '';
+        }
+        modal.style.display = 'flex';
+    }
+
+    function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+
+    function saveCard() {
+        const idxStr = document.getElementById('edit-card-id').value;
+        const c = {
+            id: 'c_' + Date.now(),
+            title: document.getElementById('edit-card-title').value || '未命名卡片',
+            type: document.getElementById('edit-card-type').value || '心',
+            bgm: document.getElementById('edit-card-bgm').value,
+            steps: []
+        };
+        for(let i=1; i<=3; i++) c.steps.push({ title: document.getElementById(`edit-s${i}-title`).value, text: document.getElementById(`edit-s${i}-text`).value });
+
+        if(idxStr === 'new') db.stages[state.stage].cards.push(c);
+        else { c.id = db.stages[state.stage].cards[parseInt(idxStr)].id; db.stages[state.stage].cards[parseInt(idxStr)] = c; }
+        
+        saveDB(); closeEditModal(); renderCardList();
+    }
+
+    /* ================= 9. 用户流程 ================= */
+    function selectCard(card) {
+        state.currentCard = card;
+        document.getElementById('prep-text').innerText = db.stages[state.stage].prepText;
+        navigateTo('screen-prep');
+    }
+
     function selectRole(role) {
         state.role = role;
-        
-        // 构建割裂拼合 UI
         const syncBox = document.getElementById('sync-animation-box');
         syncBox.classList.remove('merged');
         
-        if (role === 'boy') {
-            syncBox.innerHTML = `<div class="sync-half boy"></div>`;
-        } else {
-            syncBox.innerHTML = `<div class="sync-half girl"></div>`;
-        }
-
+        const iconB64 = db.stages[state.stage].icon;
+        const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`;
+        
+        if (role === 'boy') syncBox.innerHTML = `<div class="sync-half boy" style="${bgStyle} background-size: cover;"></div>`;
+        else syncBox.innerHTML = `<div class="sync-half girl" style="${bgStyle} background-size: cover;"></div>`;
+        
         navigateTo('screen-sync');
     }
 
-    // 3. 触发合并动画并准备进入内容
     function triggerSync() {
-        // 播放合并动画
         const syncBox = document.getElementById('sync-animation-box');
         syncBox.classList.add('merged');
-
-        // 加载内容数据
-        // 如果当前阶段没有 Mock 数据，默认使用恋爱期数据进行演示
-        state.contentData = contentDB[state.stage] || contentDB['恋爱期'];
         state.currentStep = 0;
 
-        // 设置专属 BGM
-        if(state.contentData.bgm) {
-            audioPlayer.src = state.contentData.bgm;
-            // 处理移动端自动播放限制：在用户点击事件的调用栈中立刻执行 play()
-            audioPlayer.play().catch(e => console.log("等待交互后播放音频", e));
+        if(state.currentCard.bgm) {
+            audioPlayer.src = state.currentCard.bgm;
+            audioPlayer.play().then(() => {
+                // 成功播放后展示苹果风音乐图标
+                document.getElementById('apple-music-box').classList.add('playing');
+            }).catch(e => console.log("需用户进一步交互才能播放", e));
         }
 
-        // 动画停留 1.5 秒后进入内容引导
-        setTimeout(() => {
-            renderContentStep();
-            navigateTo('screen-content');
-        }, 1500);
+        setTimeout(() => { renderContentStep(); navigateTo('screen-content'); }, 1500);
     }
 
-    // 4. 渲染对应的脑心手内容步骤
     function renderContentStep() {
-        const stepData = state.contentData.steps[state.currentStep];
-        
-        document.getElementById('content-type-title').innerText = `今日操练：【${state.contentData.type}】`;
+        const stepData = state.currentCard.steps[state.currentStep];
+        document.getElementById('content-type-title').innerText = `【${state.currentCard.type}】的连接`;
         document.getElementById('step-title').innerText = stepData.title;
-        // 支持换行显示
-        document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br>');
+        document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>');
 
-        // 更新进度点
         for(let i=1; i<=3; i++) {
             const dot = document.getElementById(`dot-${i}`);
             if (i - 1 === state.currentStep) dot.classList.add('active');
             else dot.classList.remove('active');
         }
 
-        // 按钮显示逻辑控制
         const nextBtn = document.getElementById('btn-next-step');
         const longPressBtn = document.getElementById('btn-long-press');
 
-        if (state.currentStep < 2) {
-            // 步骤 1 和 2，显示下一步按钮
-            nextBtn.style.display = 'flex';
-            longPressBtn.style.display = 'none';
-        } else {
-            // 步骤 3，隐藏下一步，显示长按宣告按钮
-            nextBtn.style.display = 'none';
-            longPressBtn.style.display = 'flex';
-        }
+        if (state.currentStep < 2) { nextBtn.style.display = 'flex'; longPressBtn.style.display = 'none'; } 
+        else { nextBtn.style.display = 'none'; longPressBtn.style.display = 'flex'; }
     }
 
-    // 点击下一步
     function nextContentStep() {
         if (state.currentStep < 2) {
             state.currentStep++;
-            // 添加文本淡入淡出动效
-            const contentBox = document.getElementById('content-box');
-            contentBox.style.opacity = 0;
+            const stepTitle = document.getElementById('step-title');
+            const stepText = document.getElementById('step-text');
+            stepTitle.style.opacity = 0; stepText.style.opacity = 0;
             setTimeout(() => {
                 renderContentStep();
-                contentBox.style.transition = 'opacity 0.5s';
-                contentBox.style.opacity = 1;
+                stepTitle.style.transition = 'opacity 0.5s'; stepText.style.transition = 'opacity 0.5s';
+                stepTitle.style.opacity = 1; stepText.style.opacity = 1;
             }, 300);
         }
     }
 
-    /* ================= 长按宣告逻辑 ================= */
+    /* ================= 10. 长按宣告 ================= */
     const longPressBtn = document.getElementById('btn-long-press');
     const pressFill = document.getElementById('press-fill');
-    let pressTimer = null;
-    let progress = 0;
-    let animationFrame = null;
+    let progress = 0; let pressAnimationFrame = null; let isPressing = false;
 
     function startPress(e) {
-        if(e.type === 'touchstart') e.preventDefault(); // 防止双击放大和默认事件
-        progress = 0;
-        cancelAnimationFrame(animationFrame);
+        if(e.type === 'touchstart') e.preventDefault(); 
+        if(isPressing) return;
+        isPressing = true; progress = 0; cancelAnimationFrame(pressAnimationFrame);
         
-        // 每 16ms 增加进度，总共需要约 1.5 秒 (1500ms -> 约 90 帧)
         function updateProgress() {
+            if(!isPressing) return;
             progress += (100 / 90); 
             pressFill.style.height = `${Math.min(progress, 100)}%`;
-            
-            if (progress >= 100) {
-                completeAction();
-            } else {
-                animationFrame = requestAnimationFrame(updateProgress);
-            }
+            if (progress >= 100) { isPressing = false; completeAction(); } 
+            else pressAnimationFrame = requestAnimationFrame(updateProgress);
         }
-        animationFrame = requestAnimationFrame(updateProgress);
+        pressAnimationFrame = requestAnimationFrame(updateProgress);
     }
 
     function endPress(e) {
         if(e.type === 'touchend') e.preventDefault();
-        cancelAnimationFrame(animationFrame);
-        if (progress < 100) {
-            // 未完成，回退进度
-            progress = 0;
-            pressFill.style.height = `0%`;
-        }
+        isPressing = false; cancelAnimationFrame(pressAnimationFrame);
+        if (progress < 100) { progress = 0; pressFill.style.height = `0%`; }
     }
 
     function completeAction() {
-        cancelAnimationFrame(animationFrame);
-        navigateTo('screen-finish');
+        cancelAnimationFrame(pressAnimationFrame); navigateTo('screen-finish');
     }
 
-    // 绑定鼠标与触摸事件，确保跨端兼容
-    longPressBtn.addEventListener('mousedown', startPress);
-    longPressBtn.addEventListener('mouseup', endPress);
-    longPressBtn.addEventListener('mouseleave', endPress);
-    longPressBtn.addEventListener('touchstart', startPress, {passive: false});
-    longPressBtn.addEventListener('touchend', endPress, {passive: false});
-    longPressBtn.addEventListener('touchcancel', endPress, {passive: false});
+    longPressBtn.addEventListener('mousedown', startPress); longPressBtn.addEventListener('mouseup', endPress); longPressBtn.addEventListener('mouseleave', endPress);
+    longPressBtn.addEventListener('touchstart', startPress, {passive: false}); longPressBtn.addEventListener('touchend', endPress, {passive: false}); longPressBtn.addEventListener('touchcancel', endPress, {passive: false});
 
-    // 重置应用
-    function resetApp() {
-        state = { stage: '', role: '', currentStep: 0, contentData: null };
-        audioPlayer.pause();
-        audioPlayer.currentTime = 0;
-        pressFill.style.height = `0%`;
-        
-        // 恢复默认主题
-        document.documentElement.style.setProperty('--theme-bg', '#fdfbf7');
-        document.documentElement.style.setProperty('--theme-text', '#2c2c2c');
-        document.documentElement.style.setProperty('--theme-primary', '#d4af37');
-        document.documentElement.style.setProperty('--theme-shadow-light', '#ffffff');
-        document.documentElement.style.setProperty('--theme-shadow-dark', '#e6e4d9');
-        
-        navigateTo('screen-stage');
+    function resetToStage() {
+        document.getElementById('apple-music-box').classList.remove('playing');
+        audioPlayer.pause(); audioPlayer.currentTime = 0;
+        pressFill.style.height = `0%`; state.currentCard = null; state.role = ''; state.currentStep = 0;
+        initStageScreen();
     }
 
 </script>
