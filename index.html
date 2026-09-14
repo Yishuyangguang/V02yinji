@@ -236,7 +236,7 @@
         .playlist-item.active { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; font-weight: bold; }
         .music-mode-text { font-size: 0.85rem; opacity: 0.7; margin-bottom: 15px; color: var(--theme-text); }
 
-        /* ================= 个人中心头像编辑区 ================= */
+        /* 个人中心头像编辑区 */
         .profile-avatar-zone { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px auto; background-color: var(--theme-input-bg); border: 2px dashed var(--theme-primary); display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; position: relative; box-shadow: 0 8px 20px var(--theme-glass-shadow); }
         .profile-avatar-zone img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .profile-avatar-zone::after { content: '修改头像'; position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; padding: 4px 0; text-align: center; opacity: 0; transition: opacity 0.3s; }
@@ -379,7 +379,7 @@
 
 <!-- ================= 弹窗群 ================= -->
 
-<!-- 0. 个人中心弹窗 (头像与昵称) -->
+<!-- 0. 个人中心弹窗 (头像、昵称、找回密码) -->
 <div class="modal-overlay" id="user-profile-modal">
     <div class="modal-content" style="text-align: center; max-width: 350px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px;">个人中心</h2>
@@ -397,6 +397,11 @@
         <div style="display: flex; gap: 15px; margin-top: 25px;">
             <button class="btn-glass btn-blue-gradient" style="margin:0; flex:1;" onclick="saveUserProfile()">保存资料</button>
             <button class="btn-glass" style="margin:0; flex:1;" onclick="hideModal('user-profile-modal')">取 消</button>
+        </div>
+
+        <!-- 权限隔离暗堡：普通用户不可见，仅管理员可见 -->
+        <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 20px;">
+            <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; padding: 0.8rem;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
         </div>
     </div>
 </div>
@@ -472,6 +477,7 @@
     <div class="modal-content" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary);">联系站长</h2>
         <img src="微信二维码.jpg" alt="微信二维码" class="qr-image" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23ddd\'/><text x=\'50\' y=\'50\' text-anchor=\'middle\' dominant-baseline=\'middle\' fill=\'%23666\'>无图片</text></svg>'">
+        <p style="font-size: 0.95rem; opacity: 0.8;">扫一扫二维码，与我联系</p>
         <button class="btn-glass" style="margin-top: 20px;" onclick="hideModal('qr-modal')">关 闭</button>
     </div>
 </div>
@@ -519,7 +525,7 @@
     const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
     const defaultDB = {
-        users: {}, // 数据结构: { username: { password: "xxx", nickname: "xxx", avatar: "base64" } }
+        users: {}, 
         musicLibrary: {
             instrumental: [{ name: "宁静钢琴曲", url: "https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3" }],
             vocal: []
@@ -537,7 +543,6 @@
 
     let db = defaultDB;
     let toastTimeout;
-    
     let currentUserAccount = null; 
 
     function showGlobalToast(text, type = 'loading') {
@@ -563,7 +568,7 @@
     }
 
     async function saveDB() {
-        try { localStorage.setItem('sealOfLoveDB_v10', JSON.stringify(db)); } catch (e) { if(e.name === 'QuotaExceededError') { showGlobalToast('本地存储空间不足，请清理', 'error'); return; } }
+        try { localStorage.setItem('sealOfLoveDB_v11', JSON.stringify(db)); } catch (e) { if(e.name === 'QuotaExceededError') { showGlobalToast('本地存储空间不足，请清理', 'error'); return; } }
         try {
             showGlobalToast('正在同步至云端...', 'loading');
             const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
@@ -590,11 +595,11 @@
                     db = remoteDb; 
                     if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary;
                     db.users = upgradeUserStructure(db.users);
-                    try { localStorage.setItem('sealOfLoveDB_v10', JSON.stringify(db)); } catch(e){} return;
+                    try { localStorage.setItem('sealOfLoveDB_v11', JSON.stringify(db)); } catch(e){} return;
                 }
             }
         } catch (e) {}
-        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v10'));
+        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v11'));
         if (local && local.stages) { 
             db = local; 
             if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary; 
@@ -688,7 +693,7 @@
         document.documentElement.style.setProperty('--theme-bg-color', '#1a1b20'); document.documentElement.style.setProperty('--theme-primary', '#d4af37');
     }
 
-    /* ================= 个人中心逻辑 ================= */
+    /* ================= 个人中心逻辑 (含管理员找回密码注入) ================= */
     function openUserProfile() {
         const userData = db.users[currentUserAccount];
         const imgEl = document.getElementById('profile-avatar-img');
@@ -699,6 +704,15 @@
             imgEl.style.display = 'none'; svgEl.style.display = 'block';
         }
         document.getElementById('profile-nickname-input').value = userData.nickname || '';
+        
+        // 动态渲染管理员专属按钮
+        const recoveryWrap = document.getElementById('admin-recovery-btn-wrap');
+        if (state.isAdmin) {
+            recoveryWrap.style.display = 'block';
+        } else {
+            recoveryWrap.style.display = 'none';
+        }
+
         showModal('user-profile-modal');
     }
 
