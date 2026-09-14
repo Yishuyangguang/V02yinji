@@ -477,7 +477,6 @@
     <div class="modal-content" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary);">联系站长</h2>
         <img src="微信二维码.jpg" alt="微信二维码" class="qr-image" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23ddd\'/><text x=\'50\' y=\'50\' text-anchor=\'middle\' dominant-baseline=\'middle\' fill=\'%23666\'>无图片</text></svg>'">
-        <p style="font-size: 0.95rem; opacity: 0.8;">扫一扫二维码，与我联系</p>
         <button class="btn-glass" style="margin-top: 20px;" onclick="hideModal('qr-modal')">关 闭</button>
     </div>
 </div>
@@ -595,6 +594,12 @@
                     db = remoteDb; 
                     if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary;
                     db.users = upgradeUserStructure(db.users);
+                    
+                    // 防御性数据惰性初始化，修复管理员通过后端直接登录导致的空指针异常
+                    if (currentUserAccount && !db.users[currentUserAccount]) {
+                        db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
+                    }
+                    
                     try { localStorage.setItem('sealOfLoveDB_v11', JSON.stringify(db)); } catch(e){} return;
                 }
             }
@@ -693,19 +698,26 @@
         document.documentElement.style.setProperty('--theme-bg-color', '#1a1b20'); document.documentElement.style.setProperty('--theme-primary', '#d4af37');
     }
 
-    /* ================= 个人中心逻辑 (含管理员找回密码注入) ================= */
+    /* ================= 个人中心逻辑 (含管理员找回密码注入与防御性初始化) ================= */
     function openUserProfile() {
+        if(!currentUserAccount) return;
+        
+        // 防御性数据初始化：如果是云端验证通过但本地没数据的管理员，帮其初始化档案
+        if (!db.users[currentUserAccount]) {
+            db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
+        }
+        
         const userData = db.users[currentUserAccount];
         const imgEl = document.getElementById('profile-avatar-img');
         const svgEl = document.getElementById('profile-svg-placeholder');
-        if(userData.avatar) {
+        
+        if(userData && userData.avatar) {
             imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none';
         } else {
             imgEl.style.display = 'none'; svgEl.style.display = 'block';
         }
         document.getElementById('profile-nickname-input').value = userData.nickname || '';
         
-        // 动态渲染管理员专属按钮
         const recoveryWrap = document.getElementById('admin-recovery-btn-wrap');
         if (state.isAdmin) {
             recoveryWrap.style.display = 'block';
@@ -727,6 +739,7 @@
     }
 
     async function saveUserProfile() {
+        if(!currentUserAccount) return;
         const nick = document.getElementById('profile-nickname-input').value.trim();
         const imgEl = document.getElementById('profile-avatar-img');
         
@@ -734,6 +747,10 @@
             if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) {
                 return alert('该昵称已被使用');
             }
+        }
+
+        if (!db.users[currentUserAccount]) {
+            db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
         }
 
         db.users[currentUserAccount].nickname = nick;
@@ -747,6 +764,11 @@
 
     function updateUserWidgetIcon() {
         if(!currentUserAccount) return;
+        
+        if (!db.users[currentUserAccount]) {
+            db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
+        }
+        
         const userData = db.users[currentUserAccount];
         const imgEl = document.getElementById('user-widget-avatar');
         const svgEl = document.getElementById('user-widget-svg');
