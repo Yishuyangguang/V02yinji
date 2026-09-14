@@ -133,7 +133,6 @@
         p { font-size: clamp(1rem, 4vw, 1.15rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
         .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; }
 
-        /* 渐变标题 */
         .text-gradient {
             background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -174,7 +173,7 @@
         .stage-row-bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(8px, 2vw, 14px); width: 100%; }
         
         .stage-card {
-            background: rgba(45, 45, 48, 0.5); /* 深空灰质感 */
+            background: rgba(45, 45, 48, 0.5); 
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--theme-glass-border); border-radius: 18px;
             padding: clamp(15px, 4vw, 25px) 5px; 
@@ -196,7 +195,7 @@
         .stage-icon-dropzone {
             width: clamp(55px, 15vw, 80px); height: clamp(55px, 15vw, 80px); border-radius: 50%;
             background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05);
-            border: 2px dashed var(--theme-primary); /* 常驻高级虚线边框 */
+            border: 2px dashed var(--theme-primary); 
             transition: all 0.3s; position: relative;
             display: flex; justify-content: center; align-items: center; overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
@@ -230,7 +229,7 @@
         .data-card {
             position: relative;
             background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px dashed var(--theme-glass-border); border-radius: 24px; /* 虚线框 */
+            border: 1px dashed var(--theme-glass-border); border-radius: 24px; 
             padding: 1.8rem 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center;
             cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
@@ -264,7 +263,6 @@
         .sync-container.merged .boy { transform: translateX(0); opacity: 1; border-right: transparent; }
         .sync-container.merged .girl { transform: translateX(0); opacity: 1; border-left: transparent; }
 
-        /* 单身期向上合并专属动画 */
         .sync-half.single-up { width: 100%; height: 100%; left: 0; top: 0; background-position: center; transform: translateY(120%); opacity: 0; border: none; transition: all 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .sync-container.merged .single-up { transform: translateY(0); opacity: 1; }
 
@@ -326,9 +324,7 @@
     <div class="screen center-content" id="screen-stage">
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
-        <div class="stage-array-wrapper" id="stage-buttons-container">
-            <!-- JS 动态注入 .stage-row-top 和 .stage-row-bottom -->
-        </div>
+        <div class="stage-array-wrapper" id="stage-buttons-container"></div>
     </div>
 
     <!-- 2. 分类与卡片列表屏 -->
@@ -468,7 +464,7 @@
     const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
     const defaultDB = {
-        users: {}, // 全站用户密码资料池，全站一键备份
+        users: {}, 
         stages: {
             '单身期': {
                 themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } },
@@ -509,21 +505,43 @@
         if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); }
     }
 
+    // Canvas 极速前端图片压缩引擎 (避免存储越界)
+    function compressImageFile(file, callback) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_SIZE = 300; 
+                let width = img.width; let height = img.height;
+                if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                // 压缩为 webp，若不支持则降级，极大幅度降低体积
+                const dataUrl = canvas.toDataURL('image/webp', 0.85); 
+                callback(dataUrl);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
     // 阻塞强同步 R2 引擎
     async function saveDB() {
-        localStorage.setItem('sealOfLoveDB_v6', JSON.stringify(db));
+        try { localStorage.setItem('sealOfLoveDB_v6', JSON.stringify(db)); } 
+        catch (e) {
+            if(e.name === 'QuotaExceededError') {
+                showGlobalToast('本地存储空间不足，请清理', 'error'); return;
+            }
+        }
         try {
             showGlobalToast('正在同步至云端...', 'loading');
             const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
-            if(res.ok) {
-                showGlobalToast('已极速同步至 R2 储存桶', 'success');
-            } else {
-                showGlobalToast('云端同步异常，已存本地', 'error');
-            }
-        } catch(e) {
-            console.log(e);
-            showGlobalToast('网络异常，暂存本地', 'error');
-        }
+            if(res.ok) { showGlobalToast('已极速同步至 R2 储存桶', 'success'); } 
+            else { showGlobalToast('云端同步异常，已存本地', 'error'); }
+        } catch(e) { showGlobalToast('网络异常，暂存本地', 'error'); }
     }
 
     async function initDB() {
@@ -533,7 +551,7 @@
                 const remoteDb = await res.json();
                 if (remoteDb && remoteDb.stages) {
                     db = remoteDb; 
-                    localStorage.setItem('sealOfLoveDB_v6', JSON.stringify(db));
+                    try { localStorage.setItem('sealOfLoveDB_v6', JSON.stringify(db)); } catch(e){}
                     return;
                 }
             }
@@ -616,7 +634,7 @@
         const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim();
         if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('仅限英文数字组合');
         if(db.users[u]) return alert('账号已存在'); 
-        db.users[u] = p; await saveDB(); // 等待同步完成
+        db.users[u] = p; await saveDB(); 
         state.isLoggedIn = true; state.isAdmin = false; initStageScreen();
     }
 
@@ -682,7 +700,7 @@
             titleInput.value = displayName;
 
             if (state.isEditMode) {
-                iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) processIcon(ev.target.files[0], sKey)}; input.click(); });
+                iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) handleIconUpload(ev.target.files[0], sKey)}; input.click(); });
                 titleInput.addEventListener('click', (e) => { e.stopPropagation(); });
                 titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; saveDB(); });
             }
@@ -695,11 +713,12 @@
         navigateTo('screen-stage');
     }
     
-    async function processIcon(file, stageKey) {
-        if (file.size > 2 * 1024 * 1024) return alert('图片限制 2MB');
-        const reader = new FileReader(); 
-        reader.onload = async (ev) => { db.stages[stageKey].icon = ev.target.result; await saveDB(); initStageScreen(); }; 
-        reader.readAsDataURL(file);
+    function handleIconUpload(file, stageKey) {
+        compressImageFile(file, async (base64Str) => {
+            db.stages[stageKey].icon = base64Str;
+            await saveDB();
+            initStageScreen();
+        });
     }
 
     /* ================= 6. 分类大选项与瀑布流虚线卡片 ================= */
@@ -842,7 +861,6 @@
         state.currentCard = card;
         document.getElementById('prep-text').innerText = db.stages[state.stage].prepText;
         
-        // 单身期专属文案适配
         const prepBtn = document.getElementById('btn-prep-confirm');
         if (state.stage === '单身期') { prepBtn.innerText = '我已准备好'; } 
         else { prepBtn.innerText = '我们已预备好'; }
@@ -865,7 +883,6 @@
             }).catch(e => console.log("需交互", e));
         }
 
-        // [核心架构] 单身期分流与动态慰藉文案
         if (state.stage === '单身期') {
             const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged');
             const iconB64 = db.stages[state.stage].icon;
@@ -873,7 +890,6 @@
             
             document.getElementById('sync-title').innerText = "抬头仰望";
             
-            // 动态读取单身期的大选项，给予不同的慰藉语
             const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || '';
             let subText = "愿你在静谧中得着内心的力量与安宁。";
             if (catName.includes('不想') || catName.includes('单身')) {
