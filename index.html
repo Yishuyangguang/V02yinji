@@ -131,7 +131,9 @@
         h1, h2, h3 { font-family: var(--font-title); letter-spacing: 1px; }
         h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 1rem; color: var(--theme-text); transition: color 0.5s; font-weight: 700; }
         p { font-size: clamp(1rem, 4vw, 1.15rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
-        .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; }
+        
+        /* 统一副标题样式 */
+        .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; letter-spacing: 2px; }
 
         .text-gradient {
             background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
@@ -182,7 +184,7 @@
             cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative;
         }
-        .light-theme .stage-card { background: rgba(255,255,255,0.8); }
+        .light-theme .stage-card { background: rgba(255,255,255,0.8); box-shadow: 0 8px 25px rgba(150, 160, 180, 0.2); }
         .stage-card:active { transform: translateY(2px) scale(0.96); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
         .stage-card-title {
@@ -203,9 +205,17 @@
         .stage-icon-dropzone img { width: 100%; height: 100%; object-fit: cover; }
         .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
-        /* ================= 详情内容网格与虚线卡片 ================= */
+        /* ================= 详情编辑顶部栏 ================= */
+        .stage-admin-bar {
+            width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; 
+            justify-content: center; gap: 12px; margin-bottom: 25px; display: none;
+        }
+        .edit-mode .stage-admin-bar { display: flex; }
+
+        /* ================= 分类大选项容器 ================= */
         .cat-tabs-container {
-            display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 10px 5px 25px 5px; scrollbar-width: none;
+            display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 5px 5px 25px 5px; 
+            scrollbar-width: none; flex-shrink: 0;
         }
         .cat-tabs-container::-webkit-scrollbar { display: none; }
         
@@ -217,19 +227,24 @@
         }
         .cat-tab.active { opacity: 1; background: var(--theme-primary); color: #111; border-color: transparent; box-shadow: 0 8px 20px rgba(212,175,55,0.4); }
 
+        /* ================= 模块网格与虚线卡片 ================= */
+        #card-list-container {
+            width: 100%; display: flex; flex-direction: column; flex: 1;
+        }
+        
         .module-section { width: 100%; text-align: left; margin-bottom: 35px; }
-        .module-title { font-size: 1.2rem; margin-bottom: 18px; color: #f59e0b; font-family: var(--font-title); display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        .module-title { font-size: 1.2rem; margin-top: 20px; margin-bottom: 18px; color: #f59e0b; font-family: var(--font-title); display: flex; align-items: center; gap: 10px; font-weight: bold; }
         .light-theme .module-title { color: #d97706; }
         .module-title::before { content: ''; width: 5px; height: 18px; background: currentColor; border-radius: 4px; }
 
         .content-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; width: 100%;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; padding: 5px;
         }
 
         .data-card {
             position: relative;
             background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px dashed var(--theme-glass-border); border-radius: 24px; 
+            border: 1px solid var(--theme-glass-border); border-radius: 24px; 
             padding: 1.8rem 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center;
             cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
@@ -240,15 +255,18 @@
         .card-inner-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; text-align: center; line-height: 1.5; color: var(--theme-text); font-family: var(--font-title); }
         .card-tag { font-size: 0.85rem; background: rgba(128,128,128,0.2); padding: 5px 15px; border-radius: 15px; opacity: 0.9; color: var(--theme-text); }
 
-        .admin-controls { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 15px); left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 95%; }
-        .btn-small { padding: 8px 18px; font-size: 0.9rem; border-radius: 20px; width: auto; margin: 0; }
-        
-        .admin-card-actions { position: absolute; top: -10px; right: -10px; display: none; gap: 8px; flex-direction: column; z-index: 5; }
-        .edit-mode .admin-card-actions { display: flex; }
+        /* 编辑模式下的虚线边框与分离的悬浮角标 */
         .edit-mode .data-card { border: 2px dashed #f59e0b; background: rgba(255,255,255,0.05); }
+        .card-edit-badge { position: absolute; top: -10px; right: -10px; display: none; gap: 8px; flex-direction: column; z-index: 5; }
+        .edit-mode .card-edit-badge { display: flex; }
+        
         .action-icon { width: 34px; height: 34px; border-radius: 50%; background: #4b5563; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid var(--theme-bg-color); transition: transform 0.2s; cursor: pointer; }
         .action-icon.del { background: #ef4444; }
         .action-icon:active { transform: scale(0.85); }
+
+        /* ================= 底部管理大按钮 ================= */
+        .admin-controls { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 15px); left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 95%; }
+        .btn-small { padding: 8px 18px; font-size: 0.9rem; border-radius: 20px; width: auto; margin: 0; }
 
         /* ================= 动画引擎 ================= */
         .progress-bar { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
@@ -294,7 +312,6 @@
     <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
 </div>
 
-<!-- 全局极速 Toast 反馈 -->
 <div class="global-toast" id="global-toast">
     <span id="toast-icon">⏳</span>
     <span id="toast-text">正在同步至云端...</span>
@@ -311,7 +328,7 @@
     <div class="screen active center-content" id="screen-login">
         <div class="glass-panel">
             <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">恒久印记</h1>
-            <p class="slogan-verse">爱情，众水不能熄灭，大水也不能淹没</p>
+            <p class="slogan-verse">常常操练，感悟成长</p>
             <input type="text" id="ipt-username" placeholder="账号 (限英文/数字组合)" autocomplete="off">
             <input type="password" id="ipt-pwd" placeholder="密码" autocomplete="off">
             <button class="btn-glass btn-primary" style="margin-top: 25px;" onclick="handleLogin()">登 录</button>
@@ -320,7 +337,7 @@
         </div>
     </div>
 
-    <!-- 1. 阶段选择屏 (3/4 精确不对称阵列) -->
+    <!-- 1. 阶段选择屏 -->
     <div class="screen center-content" id="screen-stage">
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
@@ -328,23 +345,24 @@
     </div>
 
     <!-- 2. 分类与卡片列表屏 -->
-    <div class="screen" id="screen-card-list" style="padding-top: calc(env(safe-area-inset-top) + 70px);">
+    <div class="screen" id="screen-card-list" style="padding-top: calc(env(safe-area-inset-top) + 60px); justify-content: flex-start;">
         <h1 id="list-stage-title" style="margin-bottom: 5px;">阶段卡片</h1>
-        <p style="opacity: 0.8; margin-bottom: 25px;">顺服引导，感悟成长</p>
+        <p class="slogan-verse" style="margin-bottom: 25px;">常常操练，感悟成长</p>
         
-        <div class="admin-card-actions edit-mode-only" style="width: 100%; flex-direction: row; flex-wrap:wrap; justify-content: center; gap: 12px; margin-bottom: 20px; display: none; position: static;">
+        <!-- 新版独立的编辑控制栏 -->
+        <div class="stage-admin-bar">
             <button class="btn-glass btn-small btn-primary" onclick="openEditModal(null)">+ 新增卡片</button>
             <button class="btn-glass btn-small" onclick="manageCategories()">管理大选项</button>
             <button class="btn-glass btn-small" onclick="editPrepText()">预备提示语</button>
         </div>
 
         <div class="cat-tabs-container" id="cat-tabs-container"></div>
-        <div id="card-list-container" style="width: 100%; flex: 1;"></div>
+        <div id="card-list-container"></div>
         
         <button class="btn-glass" style="margin: 30px auto;" onclick="navigateTo('screen-stage')">返回首页</button>
     </div>
 
-    <!-- 3. 预备提醒屏 (淡入音乐) -->
+    <!-- 3. 预备提醒屏 -->
     <div class="screen center-content" id="screen-prep">
         <div class="glass-panel" style="padding: 3.5rem 2rem;">
             <h1 class="text-gradient" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
@@ -473,7 +491,7 @@
                 cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', type: '心', bgm: '', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }]
             },
             '恋爱期': {
-                themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fdf7f9', p: '#d97706', s: '#f472b6' } },
+                themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } },
                 icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。',
                 categories: [{ id: 'cat_l1', name: '核心操练' }],
                 cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', type: '脑', bgm: '', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }]
@@ -488,7 +506,6 @@
 
     let db = defaultDB;
 
-    // Toast 极速反馈引擎
     let toastTimeout;
     function showGlobalToast(text, type = 'loading') {
         const toast = document.getElementById('global-toast');
@@ -505,7 +522,6 @@
         if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); }
     }
 
-    // Canvas 极速前端图片压缩引擎 (避免存储越界)
     function compressImageFile(file, callback) {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -519,7 +535,6 @@
                 canvas.width = width; canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                // 压缩为 webp，若不支持则降级，极大幅度降低体积
                 const dataUrl = canvas.toDataURL('image/webp', 0.85); 
                 callback(dataUrl);
             };
@@ -528,7 +543,6 @@
         reader.readAsDataURL(file);
     }
 
-    // 阻塞强同步 R2 引擎
     async function saveDB() {
         try { localStorage.setItem('sealOfLoveDB_v6', JSON.stringify(db)); } 
         catch (e) {
@@ -648,8 +662,14 @@
     function toggleEditMode() {
         state.isEditMode = !state.isEditMode;
         document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑';
-        const actDisplays = document.querySelectorAll('.edit-mode-only');
-        actDisplays.forEach(el => el.style.display = state.isEditMode ? 'flex' : 'none');
+        
+        // 使用明确的选择器控制所有需要展现的编辑UI
+        if(state.isEditMode) {
+            document.body.classList.add('edit-mode');
+        } else {
+            document.body.classList.remove('edit-mode');
+        }
+
         if (document.getElementById('screen-stage').classList.contains('active')) initStageScreen();
         else if (document.getElementById('screen-card-list').classList.contains('active')) renderCardList();
     }
@@ -678,7 +698,6 @@
         document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
 
         const container = document.getElementById('stage-buttons-container'); container.innerHTML = '';
-        if(state.isEditMode) container.classList.add('edit-mode'); else container.classList.remove('edit-mode');
 
         const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top';
         const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom';
@@ -734,9 +753,6 @@
     }
 
     function renderCardList() {
-        if (state.isEditMode) document.getElementById('screen-card-list').classList.add('edit-mode');
-        else document.getElementById('screen-card-list').classList.remove('edit-mode');
-
         const cats = db.stages[state.stage].categories || [];
         const tabContainer = document.getElementById('cat-tabs-container'); tabContainer.innerHTML = '';
         
@@ -766,7 +782,7 @@
                     
                     if (state.isEditMode) {
                         const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id);
-                        const actDiv = document.createElement('div'); actDiv.className = 'admin-card-actions';
+                        const actDiv = document.createElement('div'); actDiv.className = 'card-edit-badge';
                         actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); deleteCard(${globalIndex})">✖</div>`;
                         cardDiv.appendChild(actDiv);
                     }
