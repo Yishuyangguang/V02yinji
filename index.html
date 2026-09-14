@@ -106,8 +106,9 @@
 
         input, textarea, select {
             width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text);
-            padding: 16px 20px; border-radius: 18px; margin-bottom: 18px; font-size: 1.05rem; outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box;
+            padding: 14px 20px; border-radius: 18px; margin-bottom: 18px; font-size: 1.05rem; outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box;
         }
+        input[type="search"] { padding: 12px 20px; border-radius: 20px; margin-bottom: 15px; }
         input:focus, textarea:focus, select:focus { border-color: #6366f1; }
         textarea { resize: vertical; min-height: 90px; }
         input::placeholder, textarea::placeholder { color: var(--theme-text); opacity: 0.5; }
@@ -118,6 +119,19 @@
         p { font-size: clamp(1rem, 4vw, 1.15rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
         .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; letter-spacing: 2px; }
         .text-gradient-blue { background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: bold; }
+
+        /* ================= 主页胶囊按钮 (高定视觉) ================= */
+        .brand-capsule {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--theme-glass-border); border-radius: 50px;
+            padding: 8px 20px 8px 8px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            margin: 0 auto 1.5rem auto; color: var(--theme-text);
+        }
+        .brand-capsule:active { transform: scale(0.95); box-shadow: 0 4px 12px var(--theme-glass-shadow); }
+        .brand-capsule img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); }
+        .brand-capsule span { font-weight: 600; font-size: 1rem; letter-spacing: 1px; font-family: var(--font-title); }
 
         /* ================= 悬浮挂件系统 ================= */
         .widget-controls { position: absolute; top: calc(env(safe-area-inset-top) + 15px); left: 15px; z-index: 100; display: flex; gap: 10px; }
@@ -141,7 +155,7 @@
 
         .link-text { color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block; }
 
-        /* ================= 主屏：上3下4 深空灰高定阵列排版 ================= */
+        /* ================= 主屏：上3下4 深空灰阵列 ================= */
         .stage-array-wrapper { display: flex; flex-direction: column; gap: clamp(10px, 2.5vw, 18px); width: 100%; align-items: center; padding: 10px 0; }
         .stage-row-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(10px, 2.5vw, 18px); width: 100%; }
         .stage-row-bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(8px, 2vw, 14px); width: 100%; }
@@ -157,17 +171,15 @@
         .stage-icon-dropzone img { width: 100%; height: 100%; object-fit: cover; }
         .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
-        /* ================= 详情编辑顶部栏 ================= */
+        /* ================= 详情与卡片管理 ================= */
         .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
 
-        /* ================= 分类大选项容器 ================= */
         .cat-tabs-container { display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 5px 5px 20px 5px; scrollbar-width: none; flex-shrink: 0; justify-content: flex-start; }
         .cat-tabs-container::-webkit-scrollbar { display: none; }
         .cat-tab { padding: 10px 24px; border-radius: 25px; font-size: 1.05rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); opacity: 0.8; transition: all 0.3s; cursor: pointer; box-shadow: 0 4px 12px var(--theme-glass-shadow); }
         .cat-tab.active { opacity: 1; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border-color: transparent; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4); }
 
-        /* ================= 模块网格与虚线卡片 ================= */
         #card-list-container { width: 100%; display: flex; flex-direction: column; flex: 1; }
         .module-section { width: 100%; text-align: left; margin-bottom: 35px; }
         .module-title { font-size: 1.25rem; margin-top: 20px; margin-bottom: 20px; color: #f59e0b; font-family: var(--font-title); display: flex; align-items: center; gap: 10px; font-weight: bold; }
@@ -187,7 +199,6 @@
         .action-icon.del { background: #ef4444; }
         .action-icon:active { transform: scale(0.85); }
 
-        /* ================= 底部管理大按钮 ================= */
         .admin-controls { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 15px); left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 95%; }
         .btn-small { padding: 8px 18px; font-size: 0.9rem; border-radius: 20px; width: auto; margin: 0; }
 
@@ -214,10 +225,9 @@
         .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
         .modal-content::-webkit-scrollbar { display: none; }
         .light-theme .modal-content { background: #fdfdfd; box-shadow: 0 30px 60px rgba(0,0,0,0.15); }
-        
         .qr-image { width: 200px; height: auto; border-radius: 16px; margin: 20px auto; display: block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
 
-        /* ================= 黑胶唱片播放器 UI ================= */
+        /* ================= 网易云风格黑胶唱片与列表 (NetEase Style) ================= */
         .vinyl-player-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
         .vinyl-disc { width: 220px; height: 220px; border-radius: 50%; background: repeating-radial-gradient(circle, #111 0%, #000 5%, #111 10%); border: 6px solid rgba(255,255,255,0.1); box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; position: relative; animation: spin 12s linear infinite; animation-play-state: paused; margin: 10px auto 25px auto; }
         .vinyl-disc.playing { animation-play-state: running; }
@@ -225,18 +235,28 @@
         .vinyl-center::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: #111; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         
-        .player-controls { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
+        .player-controls { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
         .ctrl-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 4px 10px var(--theme-glass-shadow); }
         .ctrl-btn:active { transform: scale(0.9); }
         .ctrl-btn.play-pause { width: 55px; height: 55px; font-size: 1.5rem; background: var(--theme-primary); color: #111; border: none; }
         
-        .playlist-box { width: 100%; max-height: 200px; overflow-y: auto; background: var(--theme-input-bg); border-radius: 16px; padding: 10px; border: 1px solid var(--theme-glass-border); text-align: left; }
-        .playlist-item { padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; transition: background 0.2s; color: var(--theme-text); }
-        .playlist-item:hover { background: rgba(128,128,128,0.1); }
-        .playlist-item.active { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; font-weight: bold; }
-        .music-mode-text { font-size: 0.85rem; opacity: 0.7; margin-bottom: 15px; color: var(--theme-text); }
+        /* 网易云风格列表 */
+        .playlist-box { width: 100%; max-height: 220px; overflow-y: auto; background: var(--theme-input-bg); border-radius: 16px; padding: 5px; border: 1px solid var(--theme-glass-border); text-align: left; scroll-behavior: smooth; }
+        .netease-item { display: flex; align-items: center; padding: 12px 10px; border-radius: 12px; cursor: pointer; transition: background 0.3s; margin-bottom: 5px; }
+        .netease-item:hover { background: rgba(255,255,255,0.08); }
+        .netease-item.active { background: rgba(99, 102, 241, 0.15); }
+        .netease-index { width: 30px; font-size: 1rem; color: var(--theme-text); opacity: 0.5; font-weight: bold; text-align: center; }
+        .netease-item.active .netease-index { color: #6366f1; opacity: 1; }
+        .netease-info { flex: 1; margin-left: 10px; display: flex; flex-direction: column; overflow: hidden; }
+        .netease-title { font-size: 1.05rem; color: var(--theme-text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .netease-item.active .netease-title { color: #6366f1; font-weight: bold; }
+        .netease-action { width: 20px; display: none; justify-content: flex-end; }
+        .netease-item.active .netease-action { display: flex; }
+        
+        .music-mode-bar { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; margin-bottom: 10px; }
+        .music-mode-text { font-size: 0.9rem; opacity: 0.8; color: var(--theme-text); cursor: pointer; transition: opacity 0.2s; padding: 5px; border-radius: 8px; }
+        .music-mode-text:active { opacity: 0.5; background: rgba(255,255,255,0.1); }
 
-        /* 个人中心头像编辑区 */
         .profile-avatar-zone { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px auto; background-color: var(--theme-input-bg); border: 2px dashed var(--theme-primary); display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; position: relative; box-shadow: 0 8px 20px var(--theme-glass-shadow); }
         .profile-avatar-zone img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .profile-avatar-zone::after { content: '修改头像'; position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; padding: 4px 0; text-align: center; opacity: 0; transition: opacity 0.3s; }
@@ -248,25 +268,22 @@
 
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
+<!-- 纯净 Audio 引擎 -->
 <audio id="bgm-player"></audio>
 
-<!-- 左上角主题控制 -->
 <div class="widget-controls" id="theme-widget">
     <div class="theme-toggle-btn" onclick="toggleTheme()" id="btn-theme">🌙</div>
 </div>
 
-<!-- 右上角音乐播放器与极简用户图标 -->
 <div class="widget-controls-right">
     <div class="apple-music-player" id="apple-music-box" onclick="showPlayerFromFloat()">
         <div class="music-icon"></div>
         <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
     </div>
-    
     <div class="user-profile-btn" id="user-widget" onclick="openUserProfile()">
         <img id="user-widget-avatar" class="user-avatar-preview" src="">
         <svg id="user-widget-svg" class="user-svg-icon" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="5"></circle>
-            <path d="M20 21a8 8 0 0 0-16 0"></path>
+            <circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path>
         </svg>
     </div>
 </div>
@@ -299,6 +316,13 @@
     <div class="screen center-content" id="screen-stage">
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
+        
+        <!-- 高定胶囊按钮：印记音律 -->
+        <div class="brand-capsule" onclick="showModal('music-type-modal')">
+            <img src="apple-touch-icon.png" alt="印记" onerror="this.src='favicon-32x32.png'">
+            <span>印记音律</span>
+        </div>
+
         <div class="stage-array-wrapper" id="stage-buttons-container"></div>
     </div>
 
@@ -379,11 +403,10 @@
 
 <!-- ================= 弹窗群 ================= -->
 
-<!-- 0. 个人中心弹窗 (头像、昵称、找回密码) -->
+<!-- 0. 个人中心弹窗 -->
 <div class="modal-overlay" id="user-profile-modal">
     <div class="modal-content" style="text-align: center; max-width: 350px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px;">个人中心</h2>
-        
         <div class="profile-avatar-zone" onclick="document.getElementById('profile-avatar-upload').click()">
             <img id="profile-avatar-img" src="">
             <svg id="profile-svg-placeholder" class="user-svg-icon" style="width:40px; height:40px; opacity:0.5;" viewBox="0 0 24 24">
@@ -391,22 +414,18 @@
             </svg>
         </div>
         <input type="file" id="profile-avatar-upload" accept="image/*" style="display:none;" onchange="handleProfileAvatar(this)">
-
-        <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称 (用于登录与展示)" style="text-align:center;">
-        
+        <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称" style="text-align:center;">
         <div style="display: flex; gap: 15px; margin-top: 25px;">
             <button class="btn-glass btn-blue-gradient" style="margin:0; flex:1;" onclick="saveUserProfile()">保存资料</button>
             <button class="btn-glass" style="margin:0; flex:1;" onclick="hideModal('user-profile-modal')">取 消</button>
         </div>
-
-        <!-- 权限隔离暗堡：仅管理员可见，跳转安全路由 recovery.html -->
         <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 20px;">
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; padding: 0.8rem;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
         </div>
     </div>
 </div>
 
-<!-- 1. 音乐大类选择弹窗 -->
+<!-- 1. 音乐大类选择 -->
 <div class="modal-overlay" id="music-type-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 25px; font-size: 1.8rem;">选择背景音律</h2>
@@ -418,23 +437,28 @@
     </div>
 </div>
 
-<!-- 2. 黑胶唱片播放器弹窗 -->
+<!-- 2. 网易云风格：黑胶唱片播放器弹窗 -->
 <div class="modal-overlay" id="vinyl-player-modal">
     <div class="modal-content vinyl-player-container">
-        <h2 style="color: var(--theme-primary); margin-bottom: 5px; font-size:1.3rem;" id="player-track-name">曲目加载中...</h2>
-        <div class="music-mode-text" id="player-mode-text">播放模式: 列表顺序播放</div>
+        <h2 style="color: var(--theme-primary); margin-bottom: 10px; font-size:1.3rem;" id="player-track-name">曲目加载中...</h2>
+        
+        <div class="music-mode-bar">
+            <div class="music-mode-text" id="player-mode-text" onclick="changePlayMode()">🔁 列表循环</div>
+            <div class="music-mode-text" id="player-limit-text" onclick="setTrackLimit()">⏳ 定时/定量</div>
+        </div>
         
         <div class="vinyl-disc" id="vinyl-disc-ui">
             <div class="vinyl-center"></div>
         </div>
         
         <div class="player-controls">
-            <div class="ctrl-btn" onclick="changePlayMode()" id="btn-play-mode">🔁</div>
             <div class="ctrl-btn" onclick="prevTrack()">⏮</div>
             <div class="ctrl-btn play-pause" onclick="togglePlayPause()" id="btn-play-pause">▶️</div>
             <div class="ctrl-btn" onclick="nextTrack()">⏭</div>
         </div>
 
+        <input type="search" id="vinyl-search" placeholder="🔍 搜索歌曲名称..." oninput="filterVinylPlaylist()">
+        
         <div class="playlist-box" id="playlist-ui"></div>
 
         <div style="display: flex; gap: 15px; width: 100%; margin-top: 20px;">
@@ -444,21 +468,23 @@
     </div>
 </div>
 
-<!-- 3. 高定音乐库管理弹窗 -->
+<!-- 3. 高定音乐库管理弹窗 (含编辑功能) -->
 <div class="modal-overlay" id="music-admin-modal">
     <div class="modal-content" style="background: var(--theme-bg-color);">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px; text-align:left;">音乐库全局管理</h2>
-        
-        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom:8px; text-align:left;">选择分类进行管理</p>
         <select id="admin-music-cat" onchange="renderAdminMusicList()" style="margin-bottom: 20px; background:var(--theme-glass-bg);">
             <option value="instrumental">纯音乐库</option>
             <option value="vocal">歌曲库</option>
         </select>
+        
+        <!-- 管理端搜索框 -->
+        <input type="search" id="admin-music-search" placeholder="🔍 模糊搜索音乐库..." oninput="filterAdminMusicList()">
 
-        <div id="admin-music-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; max-height: 35vh; overflow-y:auto; padding-right:5px;"></div>
+        <div id="admin-music-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; max-height: 30vh; overflow-y:auto; padding-right:5px;"></div>
         
         <div style="background: rgba(255,255,255,0.02); padding:20px; border-radius:18px; border: 1.5px dashed #6366f1;">
-            <h4 style="margin-bottom: 15px; color:#6366f1; text-align:left;">+ 新增曲目</h4>
+            <h4 id="admin-music-action-title" style="margin-bottom: 15px; color:#6366f1; text-align:left;">+ 新增曲目</h4>
+            <input type="hidden" id="edit-music-idx" value="">
             <input type="text" id="new-music-name" placeholder="曲目名称" style="margin-bottom:15px; background:var(--theme-glass-bg);">
             <div id="music-upload-zone" style="width:100%; padding:20px; border: 2px dashed #818cf8; border-radius: 14px; text-align: center; cursor: pointer; margin-bottom: 15px; transition: all 0.3s;">
                 <span id="music-upload-text" style="color: #6366f1; font-weight:500;">点击或拖拽音频文件 (直传云端)</span>
@@ -466,13 +492,16 @@
             </div>
             <div style="text-align: center; margin-bottom: 15px; opacity: 0.5; font-size: 0.85rem;">或输入云端直链 URL (可选)</div>
             <input type="text" id="new-music-url" placeholder="云端直链 URL" style="margin-bottom:15px; background:var(--theme-glass-bg);">
-            <button class="btn-glass btn-blue-gradient" style="width:100%; border-radius:14px; margin:0;" onclick="addMusicToLibrary()">添 加 到 库</button>
+            
+            <div style="display:flex; gap:10px;">
+                <button class="btn-glass btn-blue-gradient" id="btn-admin-music-save" style="flex:1; border-radius:14px; margin:0;" onclick="saveMusicToLibrary()">添 加 到 库</button>
+                <button class="btn-glass" id="btn-admin-music-cancel" style="flex:1; border-radius:14px; margin:0; display:none;" onclick="resetMusicEdit()">取 消 修 改</button>
+            </div>
         </div>
         <button class="btn-glass" style="margin-top: 25px; width: 100%;" onclick="hideModal('music-admin-modal')">关闭</button>
     </div>
 </div>
 
-<!-- 其它模态框 -->
 <div class="modal-overlay" id="qr-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary);">联系站长</h2>
@@ -520,7 +549,7 @@
 </div>
 
 <script>
-    /* ================= 1. 高级垃圾回收与全栈同步架构 ================= */
+    /* ================= 1. 高级数据中枢与全栈同步架构 ================= */
     const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
     const defaultDB = {
@@ -544,9 +573,8 @@
     let toastTimeout;
     let currentUserAccount = null; 
 
-    // 自研前端垃圾回收器：清除过往历代 localStorage 废弃快照，防止 5MB 限额溢出
     function cleanupOldLocalStorage() {
-        const currentVersion = 'sealOfLoveDB_v12';
+        const currentVersion = 'sealOfLoveDB_v13';
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
@@ -563,7 +591,6 @@
         if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); }
     }
 
-    // Canvas 图片极度压缩：缩小尺寸与画质，彻底杜绝图标挤爆数据库
     function compressImageFile(file, callback) {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -578,33 +605,21 @@
         }; reader.readAsDataURL(file);
     }
 
-    // 强云端同步机制：即使 LocalStorage 报错，也不阻断网络同步
     async function saveDB() {
         let localSaved = false;
-        try { 
-            cleanupOldLocalStorage(); 
-            localStorage.setItem('sealOfLoveDB_v12', JSON.stringify(db)); 
-            localSaved = true;
-        } catch (e) {
-            console.warn('本地存储溢出，降级为纯云端模式');
-        }
-        
+        try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v13', JSON.stringify(db)); localSaved = true; } catch (e) {}
         try {
             showGlobalToast('正在同步至云端...', 'loading');
             const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
-            if(res.ok) { showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功 (本地存储满)', 'success'); } 
-            else { showGlobalToast('云端同步异常' + (localSaved ? '，已存本地' : ''), 'error'); }
-        } catch(e) { 
-            showGlobalToast('网络异常' + (localSaved ? '，暂存本地' : '，数据未保存'), 'error'); 
-        }
+            if(res.ok) { showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功(本地满)', 'success'); } 
+            else { showGlobalToast('云端同步异常', 'error'); }
+        } catch(e) { showGlobalToast('网络异常，数据未保存至云端', 'error'); }
     }
 
     function upgradeUserStructure(usersObj) {
         if (!usersObj) return {};
         for (let key in usersObj) {
-            if (typeof usersObj[key] === 'string') {
-                usersObj[key] = { password: usersObj[key], nickname: '', avatar: '' };
-            }
+            if (typeof usersObj[key] === 'string') { usersObj[key] = { password: usersObj[key], nickname: '', avatar: '' }; }
         }
         return usersObj;
     }
@@ -618,21 +633,13 @@
                     db = remoteDb; 
                     if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary;
                     db.users = upgradeUserStructure(db.users);
-                    
-                    if (currentUserAccount && !db.users[currentUserAccount]) {
-                        db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
-                    }
-                    
-                    try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v12', JSON.stringify(db)); } catch(e){} return;
+                    if (currentUserAccount && !db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
+                    try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v13', JSON.stringify(db)); } catch(e){} return;
                 }
             }
         } catch (e) {}
-        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v12'));
-        if (local && local.stages) { 
-            db = local; 
-            if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary; 
-            db.users = upgradeUserStructure(db.users);
-        }
+        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v13'));
+        if (local && local.stages) { db = local; if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary; db.users = upgradeUserStructure(db.users); }
         else saveDB();
     }
     initDB();
@@ -667,86 +674,54 @@
 
     /* ================= 4. 安全鉴权引擎与多态登录映射 ================= */
     async function handleLogin() {
-        const inputU = document.getElementById('ipt-username').value.trim(); 
-        const p = document.getElementById('ipt-pwd').value.trim();
+        const inputU = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim();
         if(!inputU || !p) return alert('请输入账号/昵称和密码');
 
         let baseUsername = inputU; 
-        if (!db.users[inputU]) {
-            for (let key in db.users) {
-                if (db.users[key].nickname === inputU) {
-                    baseUsername = key; break;
-                }
-            }
-        }
+        if (!db.users[inputU]) { for (let key in db.users) { if (db.users[key].nickname === inputU) { baseUsername = key; break; } } }
 
         try {
             const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: baseUsername, password: p }) });
-            if (response.ok) { 
-                const result = await response.json(); 
-                if(result.success) { 
-                    loginSuccess(baseUsername, true); return; 
-                } 
-            }
-        } catch (error) { console.log("后端鉴权降级至本地"); }
+            if (response.ok) { const result = await response.json(); if(result.success) { loginSuccess(baseUsername, true); return; } }
+        } catch (error) {}
 
-        if(db.users[baseUsername] && db.users[baseUsername].password === p) { 
-            loginSuccess(baseUsername, false); 
-        } else alert('账号或密码错误。');
+        if(db.users[baseUsername] && db.users[baseUsername].password === p) { loginSuccess(baseUsername, false); } else alert('账号或密码错误。');
     }
 
     function loginSuccess(baseUser, isAdmin) {
-        state.isLoggedIn = true; state.isAdmin = isAdmin;
-        currentUserAccount = baseUser;
-        document.getElementById('user-widget').style.display = 'flex'; 
-        updateUserWidgetIcon();
-        initStageScreen();
+        state.isLoggedIn = true; state.isAdmin = isAdmin; currentUserAccount = baseUser;
+        document.getElementById('user-widget').style.display = 'flex'; updateUserWidgetIcon(); initStageScreen();
     }
 
     async function handleRegister() {
         const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim();
         if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('原生账号仅限英文数字组合');
         if(db.users[u]) return alert('账号已存在'); 
-        db.users[u] = { password: p, nickname: '', avatar: '' }; 
-        await saveDB(); 
-        loginSuccess(u, false);
+        db.users[u] = { password: p, nickname: '', avatar: '' }; await saveDB(); loginSuccess(u, false);
     }
 
     function logout() {
         state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null;
-        document.getElementById('top-admin-controls').style.display = 'none'; 
-        document.getElementById('user-widget').style.display = 'none'; 
+        document.getElementById('top-admin-controls').style.display = 'none'; document.getElementById('user-widget').style.display = 'none'; 
         navigateTo('screen-login');
         document.body.classList.remove('light-theme'); state.isLightTheme = false; document.getElementById('btn-theme').innerText = '🌙';
         document.documentElement.style.setProperty('--theme-bg-color', '#1a1b20'); document.documentElement.style.setProperty('--theme-primary', '#d4af37');
     }
 
-    /* ================= 个人中心逻辑 (含管理员找回密码注入与防御性初始化) ================= */
     function openUserProfile() {
         if(!currentUserAccount) return;
-        
-        if (!db.users[currentUserAccount]) {
-            db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
-        }
+        if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
         
         const userData = db.users[currentUserAccount];
-        const imgEl = document.getElementById('profile-avatar-img');
-        const svgEl = document.getElementById('profile-svg-placeholder');
+        const imgEl = document.getElementById('profile-avatar-img'); const svgEl = document.getElementById('profile-svg-placeholder');
         
-        if(userData && userData.avatar) {
-            imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none';
-        } else {
-            imgEl.style.display = 'none'; svgEl.style.display = 'block';
-        }
+        if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } 
+        else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; }
+        
         document.getElementById('profile-nickname-input').value = userData.nickname || '';
         
         const recoveryWrap = document.getElementById('admin-recovery-btn-wrap');
-        if (state.isAdmin) {
-            recoveryWrap.style.display = 'block';
-        } else {
-            recoveryWrap.style.display = 'none';
-        }
-
+        if (state.isAdmin) recoveryWrap.style.display = 'block'; else recoveryWrap.style.display = 'none';
         showModal('user-profile-modal');
     }
 
@@ -754,8 +729,7 @@
         if(inputEl.files.length > 0) {
             compressImageFile(inputEl.files[0], (base64) => {
                 const imgEl = document.getElementById('profile-avatar-img');
-                imgEl.src = base64; imgEl.style.display = 'block'; 
-                document.getElementById('profile-svg-placeholder').style.display = 'none';
+                imgEl.src = base64; imgEl.style.display = 'block'; document.getElementById('profile-svg-placeholder').style.display = 'none';
             });
         }
     }
@@ -765,40 +739,22 @@
         const nick = document.getElementById('profile-nickname-input').value.trim();
         const imgEl = document.getElementById('profile-avatar-img');
         
-        for(let key in db.users) {
-            if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) {
-                return alert('该昵称已被使用');
-            }
-        }
+        for(let key in db.users) { if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) { return alert('该昵称已被使用'); } }
 
-        if (!db.users[currentUserAccount]) {
-            db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
-        }
-
+        if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
         db.users[currentUserAccount].nickname = nick;
-        if(imgEl.style.display === 'block') {
-            db.users[currentUserAccount].avatar = imgEl.src;
-        }
-        await saveDB();
-        updateUserWidgetIcon();
-        hideModal('user-profile-modal');
+        if(imgEl.style.display === 'block') db.users[currentUserAccount].avatar = imgEl.src;
+        
+        await saveDB(); updateUserWidgetIcon(); hideModal('user-profile-modal');
     }
 
     function updateUserWidgetIcon() {
         if(!currentUserAccount) return;
-        
-        if (!db.users[currentUserAccount]) {
-            db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
-        }
-        
+        if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
         const userData = db.users[currentUserAccount];
-        const imgEl = document.getElementById('user-widget-avatar');
-        const svgEl = document.getElementById('user-widget-svg');
-        if(userData && userData.avatar) {
-            imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none';
-        } else {
-            imgEl.style.display = 'none'; svgEl.style.display = 'block';
-        }
+        const imgEl = document.getElementById('user-widget-avatar'); const svgEl = document.getElementById('user-widget-svg');
+        if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } 
+        else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; }
     }
 
     function toggleEditMode() {
@@ -950,36 +906,74 @@
         await saveDB(); hideModal('edit-modal'); renderCardList();
     }
 
-    /* ================= 7. R2 音频管理与流媒体直传 ================= */
+    /* ================= 7. R2 音乐库全局接管与高级搜索控制引擎 ================= */
     let audioPlayer = document.getElementById('bgm-player');
-    let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence' }; 
+    let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; 
 
+    // 全局防竞态单例化
     audioPlayer.removeEventListener('ended', handleAudioEnded);
     audioPlayer.addEventListener('ended', handleAudioEnded);
+
     function handleAudioEnded() {
         if(musicState.playlist.length === 0) return;
+        
+        // 倒数计数器拦截机制
+        if (musicState.tracksLimit > 0) {
+            musicState.tracksLimit--;
+            const limitTextEl = document.getElementById('player-limit-text');
+            if(limitTextEl) limitTextEl.innerText = `⏳ 定时关闭 (剩 ${musicState.tracksLimit} 首)`;
+            if (musicState.tracksLimit === 0) {
+                pauseTrack();
+                musicState.tracksLimit = -1;
+                if(limitTextEl) limitTextEl.innerText = `⏳ 定时/定量`;
+                return; // 倒数结束，彻底打断接下来的播放动作
+            }
+        }
+
+        // 常规流转
         if(musicState.mode === 'single') { audioPlayer.currentTime = 0; audioPlayer.play(); }
         else if(musicState.mode === 'random') { musicState.currentIndex = Math.floor(Math.random() * musicState.playlist.length); playCurrentTrack(); }
         else { musicState.currentIndex = (musicState.currentIndex + 1) % musicState.playlist.length; playCurrentTrack(); }
     }
 
-    function manageMusicLibrary() { renderAdminMusicList(); showModal('music-admin-modal'); bindAudioDragDrop(); }
+    // A. 音乐后台管理：带编辑与搜索功能
+    function manageMusicLibrary() { 
+        document.getElementById('admin-music-search').value = '';
+        renderAdminMusicList(); 
+        showModal('music-admin-modal'); 
+        bindAudioDragDrop(); 
+    }
     
+    function filterAdminMusicList() { renderAdminMusicList(); }
+
     function renderAdminMusicList() {
         const type = document.getElementById('admin-music-cat').value;
+        const query = document.getElementById('admin-music-search').value.trim().toLowerCase();
         const listDiv = document.getElementById('admin-music-list'); listDiv.innerHTML = '';
         const list = db.musicLibrary[type] || [];
+        
+        let matchCount = 0;
         list.forEach((m, idx) => {
+            if (query && !m.name.toLowerCase().includes(query)) return; // 模糊过滤
+            
+            matchCount++;
             const div = document.createElement('div'); 
             div.style.display='flex'; div.style.background='var(--theme-glass-bg)'; div.style.padding='15px'; div.style.borderRadius='16px'; div.style.alignItems='center'; div.style.justifyContent='space-between'; div.style.border='1px solid var(--theme-glass-border)'; div.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)';
             div.innerHTML = `
-                <div style="display:flex; flex-direction:column; width:80%;">
-                    <span style="font-weight:bold; color:var(--theme-text); font-size:1.05rem; margin-bottom:5px;">${m.name}</span>
-                    <span style="font-size:0.75rem; opacity:0.6; word-break:break-all; color:var(--theme-text);">${m.url}</span>
+                <div style="display:flex; flex-direction:column; width:65%; overflow:hidden;">
+                    <span style="font-weight:bold; color:var(--theme-text); font-size:1.05rem; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</span>
+                    <span style="font-size:0.75rem; opacity:0.6; word-break:break-all; color:var(--theme-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.url}</span>
                 </div>
-                <div class="action-icon del" onclick="deleteAdminMusic('${type}', ${idx})">✖</div>
+                <div style="display:flex; gap:8px;">
+                    <div class="action-icon" style="background:#4f46e5;" onclick="editAdminMusic('${type}', ${idx})">✎</div>
+                    <div class="action-icon del" onclick="deleteAdminMusic('${type}', ${idx})">✖</div>
+                </div>
             `; listDiv.appendChild(div);
         });
+
+        if (matchCount === 0) {
+            listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">暂无匹配曲目</div>`;
+        }
     }
 
     let selectedAudioFile = null;
@@ -1001,10 +995,33 @@
         }
     }
 
-    async function addMusicToLibrary() {
+    function editAdminMusic(type, idx) {
+        const m = db.musicLibrary[type][idx];
+        document.getElementById('new-music-name').value = m.name;
+        document.getElementById('new-music-url').value = m.url;
+        document.getElementById('edit-music-idx').value = idx;
+        
+        document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目";
+        document.getElementById('btn-admin-music-save').innerText = "保 存 修 改";
+        document.getElementById('btn-admin-music-cancel').style.display = "block";
+    }
+
+    function resetMusicEdit() {
+        document.getElementById('new-music-name').value = '';
+        document.getElementById('new-music-url').value = '';
+        document.getElementById('edit-music-idx').value = '';
+        document.getElementById('admin-music-action-title').innerText = "+ 新增曲目";
+        document.getElementById('btn-admin-music-save').innerText = "添 加 到 库";
+        document.getElementById('btn-admin-music-cancel').style.display = "none";
+        selectedAudioFile = null;
+        document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (直传云端)';
+    }
+
+    async function saveMusicToLibrary() {
         const name = document.getElementById('new-music-name').value.trim();
         let url = document.getElementById('new-music-url').value.trim();
         const type = document.getElementById('admin-music-cat').value;
+        const editIdx = document.getElementById('edit-music-idx').value;
 
         if(!name) return alert('请输入曲目名称');
         if(!url && !selectedAudioFile) return alert('请拖入音频或填写链接');
@@ -1021,15 +1038,24 @@
         }
 
         if(!db.musicLibrary[type]) db.musicLibrary[type] = [];
-        db.musicLibrary[type].push({name, url}); await saveDB();
         
-        document.getElementById('new-music-name').value = ''; document.getElementById('new-music-url').value = '';
-        selectedAudioFile = null; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (直传云端)';
+        if (editIdx !== '') {
+            // 修改模式
+            db.musicLibrary[type][parseInt(editIdx)] = { name, url };
+        } else {
+            // 新增模式
+            db.musicLibrary[type].push({name, url});
+        }
+        
+        await saveDB();
+        resetMusicEdit();
         renderAdminMusicList();
     }
+    
     async function deleteAdminMusic(type, idx) { if(confirm('确认删除此曲？')) { db.musicLibrary[type].splice(idx, 1); await saveDB(); renderAdminMusicList(); } }
 
-    /* ================= 8. 用户卡片交互与播放引擎 ================= */
+
+    // B. 用户侧网易云风格播放器
     function startCardFlow(card) {
         state.currentCard = card; document.getElementById('prep-text').innerText = db.stages[state.stage].prepText;
         showModal('music-type-modal');
@@ -1039,19 +1065,46 @@
         hideModal('music-type-modal'); musicState.type = type;
         musicState.playlist = db.musicLibrary[type] || [];
         musicState.currentIndex = 0; musicState.mode = 'sequence';
-        document.getElementById('player-mode-text').innerText = '播放模式: 列表顺序播放';
+        musicState.tracksLimit = -1; // 重置定时
+        
+        document.getElementById('player-mode-text').innerText = '🔁 列表循环';
+        document.getElementById('player-limit-text').innerText = '⏳ 定时/定量';
+        document.getElementById('vinyl-search').value = ''; // 清空搜索框
+        
         renderVinylPlaylist(); showModal('vinyl-player-modal');
         if(musicState.playlist.length > 0) playCurrentTrack(); else pauseTrack();
     }
 
+    function filterVinylPlaylist() { renderVinylPlaylist(); }
+
     function renderVinylPlaylist() {
         const box = document.getElementById('playlist-ui'); box.innerHTML = '';
-        if(musicState.playlist.length === 0) { box.innerHTML = '<p style="padding:10px; opacity:0.5;">暂无音乐，请管理员添加</p>'; return; }
+        if(musicState.playlist.length === 0) { box.innerHTML = '<p style="padding:15px; opacity:0.5; text-align:center;">暂无音乐</p>'; return; }
+        
+        const query = document.getElementById('vinyl-search').value.toLowerCase().trim();
+        
         musicState.playlist.forEach((track, idx) => {
             const item = document.createElement('div');
-            item.className = `playlist-item ${idx === musicState.currentIndex ? 'active' : ''}`;
-            item.innerHTML = `<span>${track.name}</span>`;
-            item.onclick = () => { musicState.currentIndex = idx; playCurrentTrack(); };
+            item.className = `netease-item ${idx === musicState.currentIndex ? 'active' : ''}`;
+            item.id = `track-item-${idx}`; // 挂载锚点用于滚动
+            
+            // CSS Display 防索引错乱法：根据关键词仅隐藏 UI，绝对不能改变真实数组与 Index
+            if(query && !track.name.toLowerCase().includes(query)) {
+                item.style.display = 'none';
+            }
+            
+            const numPad = (idx + 1).toString().padStart(2, '0');
+            item.innerHTML = `
+                <div class="netease-index">${numPad}</div>
+                <div class="netease-info">
+                    <div class="netease-title">${track.name}</div>
+                </div>
+                <div class="netease-action">▶</div>
+            `;
+            item.onclick = () => { 
+                musicState.currentIndex = idx; 
+                playCurrentTrack(); 
+            };
             box.appendChild(item);
         });
     }
@@ -1060,11 +1113,20 @@
         if(musicState.playlist.length === 0) return;
         const track = musicState.playlist[musicState.currentIndex];
         document.getElementById('player-track-name').innerText = track.name;
+        
         if(audioPlayer.src !== track.url) audioPlayer.src = track.url;
         audioPlayer.volume = 1; audioPlayer.play().then(() => {
-            document.getElementById('vinyl-disc-ui').classList.add('playing'); document.getElementById('btn-play-pause').innerText = '⏸️';
+            document.getElementById('vinyl-disc-ui').classList.add('playing'); 
+            document.getElementById('btn-play-pause').innerText = '⏸️';
         }).catch(e=>{});
+        
         renderVinylPlaylist();
+
+        // 丝滑滚动到激活曲目
+        const activeItem = document.getElementById(`track-item-${musicState.currentIndex}`);
+        if(activeItem) {
+            activeItem.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
     }
 
     function pauseTrack() { audioPlayer.pause(); document.getElementById('vinyl-disc-ui').classList.remove('playing'); document.getElementById('btn-play-pause').innerText = '▶️'; }
@@ -1074,9 +1136,23 @@
     
     function changePlayMode() {
         const btn = document.getElementById('btn-play-mode'); const text = document.getElementById('player-mode-text');
-        if(musicState.mode === 'sequence') { musicState.mode = 'random'; btn.innerText = '🔀'; text.innerText = '播放模式: 随机播放'; }
-        else if(musicState.mode === 'random') { musicState.mode = 'single'; btn.innerText = '🔂'; text.innerText = '播放模式: 单曲循环'; }
-        else { musicState.mode = 'sequence'; btn.innerText = '🔁'; text.innerText = '播放模式: 列表顺序播放'; }
+        if(musicState.mode === 'sequence') { musicState.mode = 'random'; btn.innerText = '🔀'; text.innerText = '🔀 随机播放'; }
+        else if(musicState.mode === 'random') { musicState.mode = 'single'; btn.innerText = '🔂'; text.innerText = '🔂 单曲循环'; }
+        else { musicState.mode = 'sequence'; btn.innerText = '🔁'; text.innerText = '🔁 列表循环'; }
+    }
+
+    function setTrackLimit() {
+        let val = prompt("请输入播放几首歌曲后自动暂停？\n(输入数字，留空或0表示无限播放)：", "");
+        if (val === null) return;
+        val = parseInt(val);
+        const limitTextEl = document.getElementById('player-limit-text');
+        if (isNaN(val) || val <= 0) {
+            musicState.tracksLimit = -1;
+            limitTextEl.innerText = "⏳ 定时/定量";
+        } else {
+            musicState.tracksLimit = val;
+            limitTextEl.innerText = `⏳ 定时关闭 (剩 ${musicState.tracksLimit} 首)`;
+        }
     }
 
     function closeVinylPlayer() { pauseTrack(); hideModal('vinyl-player-modal'); }
