@@ -102,14 +102,7 @@
         .btn-glass:active { transform: translateY(3px) scale(0.97); box-shadow: 0 2px 10px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1); }
 
         .btn-primary { background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); border: none; color: #111 !important; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5); }
-        
-        /* 针对操作台的蓝紫高亮色 */
-        .btn-blue-gradient {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            border: none !important; color: #fff !important; font-weight: bold;
-            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4), inset 0 1px 2px rgba(255,255,255,0.3);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
+        .btn-blue-gradient { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none !important; color: #fff !important; font-weight: bold; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4), inset 0 1px 2px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
 
         input, textarea, select {
             width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text);
@@ -124,104 +117,84 @@
         h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 1rem; color: var(--theme-text); transition: color 0.5s; font-weight: 700; }
         p { font-size: clamp(1rem, 4vw, 1.15rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
         .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; letter-spacing: 2px; }
-
         .text-gradient-blue { background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: bold; }
 
-        /* ================= 悬浮挂件 ================= */
+        /* ================= 悬浮挂件系统 (左上角 + 右上角弹性容器) ================= */
         .widget-controls { position: absolute; top: calc(env(safe-area-inset-top) + 15px); left: 15px; z-index: 100; display: flex; gap: 10px; }
+        
+        .widget-controls-right {
+            position: absolute; top: calc(env(safe-area-inset-top) + 15px); right: 15px; z-index: 100;
+            display: flex; gap: 10px; align-items: center;
+        }
+
         .theme-toggle-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); font-size: 1.2rem; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: all 0.3s; }
         .theme-toggle-btn:active { transform: scale(0.9); }
 
-        .apple-music-player { position: absolute; top: calc(env(safe-area-inset-top) + 15px); right: 15px; z-index: 100; background: rgba(15,15,18,0.9); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); opacity: 0; pointer-events: none; transition: opacity 0.5s; }
-        .apple-music-player.playing { opacity: 1; pointer-events: auto; cursor: pointer; }
+        .apple-music-player { background: rgba(15,15,18,0.9); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); opacity: 0; pointer-events: none; transition: opacity 0.5s; cursor: pointer; height: 44px; }
+        .apple-music-player.playing { opacity: 1; pointer-events: auto; }
         .music-icon { width: 22px; height: 22px; border-radius: 6px; background-size: cover; background-position: center; background-image: url('music-artwork.png'); }
         .music-bars { display: flex; gap: 3px; align-items: flex-end; height: 16px; }
         .bar { width: 3px; background: #fff; border-radius: 2px; animation: bounce 1s infinite alternate; }
         .bar:nth-child(2) { animation-delay: 0.2s; } .bar:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0% { height: 4px; } 100% { height: 16px; } }
+
+        /* 极简用户图标按钮 */
+        .user-profile-btn {
+            background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text);
+            width: 44px; height: 44px; border-radius: 50%; display: none; justify-content: center; align-items: center;
+            cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: all 0.3s;
+            overflow: hidden; padding: 0;
+        }
+        .user-profile-btn:active { transform: scale(0.9); }
+        .user-avatar-preview { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
+        .user-svg-icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
         .link-text { color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block; }
 
-        /* ================= 主屏：上3下4 深空灰阵列排版 ================= */
+        /* ================= 主屏：上3下4 深空灰高定阵列排版 ================= */
         .stage-array-wrapper { display: flex; flex-direction: column; gap: clamp(10px, 2.5vw, 18px); width: 100%; align-items: center; padding: 10px 0; }
         .stage-row-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(10px, 2.5vw, 18px); width: 100%; }
         .stage-row-bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(8px, 2vw, 14px); width: 100%; }
         
-        .stage-card {
-            background: rgba(45, 45, 48, 0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--theme-glass-border); border-radius: 18px; padding: clamp(15px, 4vw, 25px) 5px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.05);
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative;
-        }
+        .stage-card { background: rgba(45, 45, 48, 0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--theme-glass-border); border-radius: 18px; padding: clamp(15px, 4vw, 25px) 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.05); cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; }
         .light-theme .stage-card { background: rgba(255,255,255,0.9); box-shadow: 0 8px 25px rgba(150, 160, 180, 0.15); }
         .stage-card:active { transform: translateY(2px) scale(0.96); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
-        .stage-card-title {
-            margin-top: 15px; font-weight: bold; font-size: clamp(0.85rem, 3vw, 1.05rem); color: var(--theme-text); letter-spacing: 1px; text-align: center; width: 90%; background: transparent; border: none; outline: none; pointer-events: none;
-        }
+        .stage-card-title { margin-top: 15px; font-weight: bold; font-size: clamp(0.85rem, 3vw, 1.05rem); color: var(--theme-text); letter-spacing: 1px; text-align: center; width: 90%; background: transparent; border: none; outline: none; pointer-events: none; }
         .edit-mode .stage-card-title { pointer-events: auto; border-bottom: 1px dashed var(--theme-primary); }
 
-        .stage-icon-dropzone {
-            width: clamp(55px, 15vw, 80px); height: clamp(55px, 15vw, 80px); border-radius: 50%;
-            background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05);
-            border: 2px dashed var(--theme-primary); transition: all 0.3s; position: relative;
-            display: flex; justify-content: center; align-items: center; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        }
+        .stage-icon-dropzone { width: clamp(55px, 15vw, 80px); height: clamp(55px, 15vw, 80px); border-radius: 50%; background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05); border: 2px dashed var(--theme-primary); transition: all 0.3s; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
         .stage-icon-dropzone img { width: 100%; height: 100%; object-fit: cover; }
         .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
         /* ================= 详情编辑顶部栏 ================= */
-        .stage-admin-bar { 
-            width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; 
-            justify-content: center; gap: 12px; margin-bottom: 25px; display: none; 
-            position: relative; z-index: 10;
-        }
+        .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
 
         /* ================= 分类大选项容器 ================= */
-        .cat-tabs-container { 
-            display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 5px 5px 20px 5px; 
-            scrollbar-width: none; flex-shrink: 0; justify-content: flex-start;
-        }
+        .cat-tabs-container { display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 5px 5px 20px 5px; scrollbar-width: none; flex-shrink: 0; justify-content: flex-start; }
         .cat-tabs-container::-webkit-scrollbar { display: none; }
-        
-        .cat-tab {
-            padding: 10px 24px; border-radius: 25px; font-size: 1.05rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;
-            background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border);
-            color: var(--theme-text); opacity: 0.8; transition: all 0.3s; cursor: pointer; box-shadow: 0 4px 12px var(--theme-glass-shadow);
-        }
-        /* 激活时的独立高亮 */
+        .cat-tab { padding: 10px 24px; border-radius: 25px; font-size: 1.05rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); opacity: 0.8; transition: all 0.3s; cursor: pointer; box-shadow: 0 4px 12px var(--theme-glass-shadow); }
         .cat-tab.active { opacity: 1; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border-color: transparent; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4); }
 
         /* ================= 模块网格与虚线卡片 ================= */
         #card-list-container { width: 100%; display: flex; flex-direction: column; flex: 1; }
         .module-section { width: 100%; text-align: left; margin-bottom: 35px; }
-        /* 标题增加橙色边线匹配参考图 */
         .module-title { font-size: 1.25rem; margin-top: 20px; margin-bottom: 20px; color: #f59e0b; font-family: var(--font-title); display: flex; align-items: center; gap: 10px; font-weight: bold; }
         .light-theme .module-title { color: #d97706; }
         .module-title::before { content: ''; width: 5px; height: 18px; background: currentColor; border-radius: 4px; }
 
         .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; padding: 5px; }
-
-        .data-card {
-            position: relative;
-            background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--theme-glass-border); border-radius: 24px; 
-            padding: 1.8rem 1.2rem; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); aspect-ratio: 1 / 1.05; 
-        }
+        .data-card { position: relative; background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--theme-glass-border); border-radius: 24px; padding: 1.8rem 1.2rem; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); aspect-ratio: 1 / 1.05; }
         .data-card:active { transform: scale(0.95); box-shadow: 0 4px 12px var(--theme-glass-shadow); }
-        
         .card-inner-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 18px; text-align: center; line-height: 1.5; color: var(--theme-text); font-family: var(--font-title); }
         .card-tag { font-size: 0.85rem; background: rgba(128,128,128,0.15); padding: 5px 15px; border-radius: 15px; opacity: 0.9; color: var(--theme-text); font-weight: 500; }
 
-        /* 编辑模式下的虚线边框与贴边悬浮角标 */
         .edit-mode .data-card { border: 2px dashed #f59e0b; background: rgba(255,255,255,0.05); }
         .card-edit-badge { position: absolute; top: -8px; right: -8px; display: none; gap: 8px; flex-direction: column; z-index: 5; }
         .edit-mode .card-edit-badge { display: flex; }
-        
-        .action-icon { width: 32px; height: 32px; border-radius: 50%; background: #4b5563; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid var(--theme-bg-color); transition: transform 0.2s; cursor: pointer; }
+        .action-icon { width: 34px; height: 34px; border-radius: 50%; background: #4b5563; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid var(--theme-bg-color); transition: transform 0.2s; cursor: pointer; }
         .action-icon.del { background: #ef4444; }
         .action-icon:active { transform: scale(0.85); }
 
@@ -240,7 +213,6 @@
         .sync-half.girl { right: 0; background-position: right center; transform: translateX(120%); opacity: 0.3; border-left: 1px solid var(--theme-glass-border); }
         .sync-container.merged .boy { transform: translateX(0); opacity: 1; border-right: transparent; }
         .sync-container.merged .girl { transform: translateX(0); opacity: 1; border-left: transparent; }
-
         .sync-half.single-up { width: 100%; height: 100%; left: 0; top: 0; background-position: center; transform: translateY(120%); opacity: 0; border: none; transition: all 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .sync-container.merged .single-up { transform: translateY(0); opacity: 1; }
 
@@ -248,9 +220,9 @@
         .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .press-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: var(--theme-primary); opacity: 0.8; transition: height 0.1s linear; z-index: 1; }
 
-        /* ================= 模态框通用配置 (深度融合亮色设计) ================= */
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
+        /* ================= 模态框通用 ================= */
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
         .modal-content::-webkit-scrollbar { display: none; }
         .light-theme .modal-content { background: #fdfdfd; box-shadow: 0 30px 60px rgba(0,0,0,0.15); }
         
@@ -275,22 +247,40 @@
         .playlist-item.active { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; font-weight: bold; }
         .music-mode-text { font-size: 0.85rem; opacity: 0.7; margin-bottom: 15px; color: var(--theme-text); }
 
+        /* 个人中心头像编辑域 */
+        .profile-avatar-zone { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px auto; background-color: var(--theme-input-bg); border: 2px dashed var(--theme-primary); display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; position: relative; box-shadow: 0 8px 20px var(--theme-glass-shadow); }
+        .profile-avatar-zone img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .profile-avatar-zone::after { content: '修改头像'; position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; padding: 4px 0; text-align: center; opacity: 0; transition: opacity 0.3s; }
+        .profile-avatar-zone:hover::after { opacity: 1; }
+
     </style>
 </head>
 <body>
 
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
-<!-- 全局 Audio 引擎，由 JS 完全接管 -->
 <audio id="bgm-player"></audio>
 
+<!-- 左上角主题控制 -->
 <div class="widget-controls" id="theme-widget">
     <div class="theme-toggle-btn" onclick="toggleTheme()" id="btn-theme">🌙</div>
 </div>
 
-<div class="apple-music-player" id="apple-music-box" onclick="showPlayerFromFloat()">
-    <div class="music-icon"></div>
-    <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+<!-- 右上角音乐播放器与极简用户图标 -->
+<div class="widget-controls-right">
+    <div class="apple-music-player" id="apple-music-box" onclick="showPlayerFromFloat()">
+        <div class="music-icon"></div>
+        <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+    </div>
+    
+    <!-- 极简用户图标按钮 (由 SVG 绘制参考图) -->
+    <div class="user-profile-btn" id="user-widget" onclick="openUserProfile()">
+        <img id="user-widget-avatar" class="user-avatar-preview" src="">
+        <svg id="user-widget-svg" class="user-svg-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="5"></circle>
+            <path d="M20 21a8 8 0 0 0-16 0"></path>
+        </svg>
+    </div>
 </div>
 
 <div class="global-toast" id="global-toast">
@@ -301,7 +291,7 @@
     
     <div class="admin-controls" id="top-admin-controls" style="display: none;">
         <button class="btn-glass btn-small" onclick="toggleEditMode()" id="btn-edit-toggle">开启深度编辑</button>
-        <button class="btn-glass btn-small" onclick="logout()">退出管理</button>
+        <button class="btn-glass btn-small" onclick="logout()">安全退出</button>
     </div>
 
     <!-- 0. 登录屏 -->
@@ -309,7 +299,7 @@
         <div class="glass-panel">
             <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">恒久印记</h1>
             <p class="slogan-verse">常常操练，感悟成长</p>
-            <input type="text" id="ipt-username" placeholder="账号 (限英文/数字组合)" autocomplete="off">
+            <input type="text" id="ipt-username" placeholder="账号 或 昵称" autocomplete="off">
             <input type="password" id="ipt-pwd" placeholder="密码" autocomplete="off">
             <button class="btn-glass btn-primary" style="margin-top: 25px;" onclick="handleLogin()">登 录</button>
             <button class="btn-glass" onclick="handleRegister()">注 册</button>
@@ -329,7 +319,6 @@
         <h1 id="list-stage-title" style="margin-bottom: 5px;">阶段卡片</h1>
         <p class="slogan-verse" style="margin-bottom: 25px;">常常操练，感悟成长</p>
         
-        <!-- 还原高定版编辑控制栏 -->
         <div class="stage-admin-bar edit-mode-only">
             <button class="btn-glass btn-small btn-blue-gradient" onclick="openEditModal(null)">+ 新增卡片</button>
             <button class="btn-glass btn-small" onclick="manageCategories()">管理大选项</button>
@@ -402,6 +391,28 @@
 
 <!-- ================= 弹窗群 ================= -->
 
+<!-- 0. 个人中心弹窗 (头像与昵称) -->
+<div class="modal-overlay" id="user-profile-modal">
+    <div class="modal-content" style="text-align: center; max-width: 350px;">
+        <h2 class="text-gradient-blue" style="margin-bottom: 20px;">个人中心</h2>
+        
+        <div class="profile-avatar-zone" onclick="document.getElementById('profile-avatar-upload').click()">
+            <img id="profile-avatar-img" src="">
+            <svg id="profile-svg-placeholder" class="user-svg-icon" style="width:40px; height:40px; opacity:0.5;" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path>
+            </svg>
+        </div>
+        <input type="file" id="profile-avatar-upload" accept="image/*" style="display:none;" onchange="handleProfileAvatar(this)">
+
+        <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称 (用于登录与展示)" style="text-align:center;">
+        
+        <div style="display: flex; gap: 15px; margin-top: 25px;">
+            <button class="btn-glass btn-blue-gradient" style="margin:0; flex:1;" onclick="saveUserProfile()">保存资料</button>
+            <button class="btn-glass" style="margin:0; flex:1;" onclick="hideModal('user-profile-modal')">取 消</button>
+        </div>
+    </div>
+</div>
+
 <!-- 1. 音乐大类选择弹窗 -->
 <div class="modal-overlay" id="music-type-modal">
     <div class="modal-content" style="text-align: center; max-width: 400px;">
@@ -440,7 +451,7 @@
     </div>
 </div>
 
-<!-- 3. 高定音乐库管理弹窗 (还原设计图) -->
+<!-- 3. 高定音乐库管理弹窗 -->
 <div class="modal-overlay" id="music-admin-modal">
     <div class="modal-content" style="background: var(--theme-bg-color);">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px; text-align:left;">音乐库全局管理</h2>
@@ -453,23 +464,17 @@
 
         <div id="admin-music-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; max-height: 35vh; overflow-y:auto; padding-right:5px;"></div>
         
-        <!-- 还原虚线框拖拉上传区域 -->
         <div style="background: rgba(255,255,255,0.02); padding:20px; border-radius:18px; border: 1.5px dashed #6366f1;">
             <h4 style="margin-bottom: 15px; color:#6366f1; text-align:left;">+ 新增曲目</h4>
-            
             <input type="text" id="new-music-name" placeholder="曲目名称" style="margin-bottom:15px; background:var(--theme-glass-bg);">
-            
             <div id="music-upload-zone" style="width:100%; padding:20px; border: 2px dashed #818cf8; border-radius: 14px; text-align: center; cursor: pointer; margin-bottom: 15px; transition: all 0.3s;">
-                <span id="music-upload-text" style="color: #6366f1; font-weight:500;">点击或拖拽上传音频文件 (MP3/WAV)</span>
+                <span id="music-upload-text" style="color: #6366f1; font-weight:500;">点击或拖拽音频文件 (直传R2)</span>
                 <input type="file" id="new-music-file" accept="audio/*" style="display: none;">
             </div>
-
             <div style="text-align: center; margin-bottom: 15px; opacity: 0.5; font-size: 0.85rem;">或输入直链 URL (可选)</div>
             <input type="text" id="new-music-url" placeholder="R2 存储桶直链 URL" style="margin-bottom:15px; background:var(--theme-glass-bg);">
-
             <button class="btn-glass btn-blue-gradient" style="width:100%; border-radius:14px; margin:0;" onclick="addMusicToLibrary()">添 加 到 库</button>
         </div>
-
         <button class="btn-glass" style="margin-top: 25px; width: 100%;" onclick="hideModal('music-admin-modal')">关闭</button>
     </div>
 </div>
@@ -522,11 +527,11 @@
 </div>
 
 <script>
-    /* ================= 1. 高级数据中枢与 R2 同步 ================= */
+    /* ================= 1. 高级数据中枢与 R2 极速同步架构 ================= */
     const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
     const defaultDB = {
-        users: {}, 
+        users: {}, // 数据结构: { username: { password: "xxx", nickname: "xxx", avatar: "base64" } }
         musicLibrary: {
             instrumental: [{ name: "宁静钢琴曲", url: "https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3" }],
             vocal: []
@@ -544,6 +549,9 @@
 
     let db = defaultDB;
     let toastTimeout;
+    
+    // 当前登录的实际底层账号
+    let currentUserAccount = null; 
 
     function showGlobalToast(text, type = 'loading') {
         const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text');
@@ -568,12 +576,23 @@
     }
 
     async function saveDB() {
-        try { localStorage.setItem('sealOfLoveDB_v8', JSON.stringify(db)); } catch (e) { if(e.name === 'QuotaExceededError') { showGlobalToast('本地存储满，请清理', 'error'); return; } }
+        try { localStorage.setItem('sealOfLoveDB_v9', JSON.stringify(db)); } catch (e) { if(e.name === 'QuotaExceededError') { showGlobalToast('本地存储空间不足，请清理', 'error'); return; } }
         try {
             showGlobalToast('正在同步至云端...', 'loading');
             const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
             if(res.ok) { showGlobalToast('已极速同步至 R2 储存桶', 'success'); } else { showGlobalToast('云端同步异常，已存本地', 'error'); }
         } catch(e) { showGlobalToast('网络异常，暂存本地', 'error'); }
+    }
+
+    // 核心：无损热升级旧版 string 格式用户数据为 object 格式
+    function upgradeUserStructure(usersObj) {
+        if (!usersObj) return {};
+        for (let key in usersObj) {
+            if (typeof usersObj[key] === 'string') {
+                usersObj[key] = { password: usersObj[key], nickname: '', avatar: '' };
+            }
+        }
+        return usersObj;
     }
 
     async function initDB() {
@@ -584,17 +603,22 @@
                 if (remoteDb && remoteDb.stages) {
                     db = remoteDb; 
                     if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary;
-                    try { localStorage.setItem('sealOfLoveDB_v8', JSON.stringify(db)); } catch(e){} return;
+                    db.users = upgradeUserStructure(db.users);
+                    try { localStorage.setItem('sealOfLoveDB_v9', JSON.stringify(db)); } catch(e){} return;
                 }
             }
         } catch (e) {}
-        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v8'));
-        if (local && local.stages) { db = local; if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary; }
+        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v9'));
+        if (local && local.stages) { 
+            db = local; 
+            if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary; 
+            db.users = upgradeUserStructure(db.users);
+        }
         else saveDB();
     }
     initDB();
 
-    /* ================= 2. 状态机与双轨主题 ================= */
+    /* ================= 2. 状态机与双轨主题引擎 ================= */
     let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: false };
 
     function toggleTheme() {
@@ -622,32 +646,124 @@
     }
     initParticles(); animateParticles();
 
-    /* ================= 4. 安全鉴权引擎 ================= */
+    /* ================= 4. 安全鉴权引擎与多态登录映射 ================= */
     async function handleLogin() {
-        const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim();
-        if(!u || !p) return alert('请输入账号和密码');
+        const inputU = document.getElementById('ipt-username').value.trim(); 
+        const p = document.getElementById('ipt-pwd').value.trim();
+        if(!inputU || !p) return alert('请输入账号/昵称和密码');
+
+        // 核心：逆向解析映射 (支持用户使用昵称登录)
+        let baseUsername = inputU; 
+        if (!db.users[inputU]) {
+            // 输入的不是原生账号，尝试查找对应的昵称
+            for (let key in db.users) {
+                if (db.users[key].nickname === inputU) {
+                    baseUsername = key; break;
+                }
+            }
+        }
+
         try {
-            const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
-            if (response.ok) { const result = await response.json(); if(result.success) { state.isLoggedIn = true; state.isAdmin = true; initStageScreen(); return; } }
-        } catch (error) {}
-        if(db.users[u] && db.users[u] === p) { state.isLoggedIn = true; state.isAdmin = false; initStageScreen(); } else alert('账号或密码错误。');
+            // 向 CF 后端发起鉴权（必须传解析后的原始账号）
+            const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: baseUsername, password: p }) });
+            if (response.ok) { 
+                const result = await response.json(); 
+                if(result.success) { 
+                    loginSuccess(baseUsername, true); return; 
+                } 
+            }
+        } catch (error) { console.log("后端鉴权降级至本地"); }
+
+        // 本地降级比对
+        if(db.users[baseUsername] && db.users[baseUsername].password === p) { 
+            loginSuccess(baseUsername, false); 
+        } else alert('账号或密码错误。');
+    }
+
+    function loginSuccess(baseUser, isAdmin) {
+        state.isLoggedIn = true; state.isAdmin = isAdmin;
+        currentUserAccount = baseUser;
+        document.getElementById('user-widget').style.display = 'flex'; // 显示用户头像
+        updateUserWidgetIcon();
+        initStageScreen();
     }
 
     async function handleRegister() {
         const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim();
-        if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('仅限英文数字组合');
+        if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('原生账号仅限英文数字组合');
         if(db.users[u]) return alert('账号已存在'); 
-        db.users[u] = p; await saveDB(); 
-        state.isLoggedIn = true; state.isAdmin = false; initStageScreen();
+        db.users[u] = { password: p, nickname: '', avatar: '' }; 
+        await saveDB(); 
+        loginSuccess(u, false);
     }
 
     function logout() {
-        state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false;
-        document.getElementById('top-admin-controls').style.display = 'none'; navigateTo('screen-login');
+        state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null;
+        document.getElementById('top-admin-controls').style.display = 'none'; 
+        document.getElementById('user-widget').style.display = 'none'; 
+        navigateTo('screen-login');
         document.body.classList.remove('light-theme'); state.isLightTheme = false; document.getElementById('btn-theme').innerText = '🌙';
         document.documentElement.style.setProperty('--theme-bg-color', '#1a1b20'); document.documentElement.style.setProperty('--theme-primary', '#d4af37');
     }
 
+    /* ================= 个人中心逻辑 ================= */
+    function openUserProfile() {
+        const userData = db.users[currentUserAccount];
+        const imgEl = document.getElementById('profile-avatar-img');
+        const svgEl = document.getElementById('profile-svg-placeholder');
+        if(userData.avatar) {
+            imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none';
+        } else {
+            imgEl.style.display = 'none'; svgEl.style.display = 'block';
+        }
+        document.getElementById('profile-nickname-input').value = userData.nickname || '';
+        showModal('user-profile-modal');
+    }
+
+    function handleProfileAvatar(inputEl) {
+        if(inputEl.files.length > 0) {
+            compressImageFile(inputEl.files[0], (base64) => {
+                const imgEl = document.getElementById('profile-avatar-img');
+                imgEl.src = base64; imgEl.style.display = 'block'; 
+                document.getElementById('profile-svg-placeholder').style.display = 'none';
+            });
+        }
+    }
+
+    async function saveUserProfile() {
+        const nick = document.getElementById('profile-nickname-input').value.trim();
+        const imgEl = document.getElementById('profile-avatar-img');
+        
+        // 检查昵称冲突
+        for(let key in db.users) {
+            if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) {
+                return alert('该昵称已被其他用户使用，请更换一个');
+            }
+        }
+
+        db.users[currentUserAccount].nickname = nick;
+        if(imgEl.style.display === 'block') {
+            db.users[currentUserAccount].avatar = imgEl.src;
+        }
+        await saveDB();
+        updateUserWidgetIcon();
+        hideModal('user-profile-modal');
+    }
+
+    function updateUserWidgetIcon() {
+        if(!currentUserAccount) return;
+        const userData = db.users[currentUserAccount];
+        const imgEl = document.getElementById('user-widget-avatar');
+        const svgEl = document.getElementById('user-widget-svg');
+        if(userData && userData.avatar) {
+            imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none';
+        } else {
+            imgEl.style.display = 'none'; svgEl.style.display = 'block';
+        }
+    }
+
+
+    /* ================= 辅助 UI 方法 ================= */
     function toggleEditMode() {
         state.isEditMode = !state.isEditMode;
         document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑';
@@ -692,6 +808,7 @@
         });
         container.appendChild(rowTop); container.appendChild(rowBottom); navigateTo('screen-stage');
     }
+    
     function handleIconUpload(file, stageKey) { compressImageFile(file, async (base64Str) => { db.stages[stageKey].icon = base64Str; await saveDB(); initStageScreen(); }); }
 
     /* ================= 6. 分类大选项与瀑布流卡片 ================= */
@@ -796,11 +913,10 @@
         await saveDB(); hideModal('edit-modal'); renderCardList();
     }
 
-    /* ================= 7. R2 音频全局引擎 (拖拉直传 + 黑胶播放) ================= */
+    /* ================= 7. R2 音频管理与直传 ================= */
     let audioPlayer = document.getElementById('bgm-player');
     let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence' }; 
 
-    // 全局防竞态单例化结束事件
     audioPlayer.removeEventListener('ended', handleAudioEnded);
     audioPlayer.addEventListener('ended', handleAudioEnded);
     function handleAudioEnded() {
@@ -810,7 +926,6 @@
         else { musicState.currentIndex = (musicState.currentIndex + 1) % musicState.playlist.length; playCurrentTrack(); }
     }
 
-    // A. 音乐管理员后台 - 拖拽上传引擎
     function manageMusicLibrary() { renderAdminMusicList(); showModal('music-admin-modal'); bindAudioDragDrop(); }
     
     function renderAdminMusicList() {
@@ -872,12 +987,12 @@
         db.musicLibrary[type].push({name, url}); await saveDB();
         
         document.getElementById('new-music-name').value = ''; document.getElementById('new-music-url').value = '';
-        selectedAudioFile = null; document.getElementById('music-upload-text').innerText = '点击或拖拽上传音频文件 (MP3/WAV)';
+        selectedAudioFile = null; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (直传R2)';
         renderAdminMusicList();
     }
     async function deleteAdminMusic(type, idx) { if(confirm('确认删除此曲？')) { db.musicLibrary[type].splice(idx, 1); await saveDB(); renderAdminMusicList(); } }
 
-    // B. 用户侧黑胶流程
+    /* ================= 8. 用户卡片交互与播放引擎 ================= */
     function startCardFlow(card) {
         state.currentCard = card; document.getElementById('prep-text').innerText = db.stages[state.stage].prepText;
         showModal('music-type-modal');
@@ -937,7 +1052,6 @@
         navigateTo('screen-prep');
     }
 
-    // 唤醒音乐淡入与单身期分流
     function confirmPrepAndFadeInMusic() {
         if(musicState.playlist.length > 0) {
             audioPlayer.volume = 0; audioPlayer.play().then(() => {
@@ -999,10 +1113,8 @@
         }
     }
 
-    /* ================= 8. 长按宣告与完结 ================= */
     const longPressBtn = document.getElementById('btn-long-press'); const pressFill = document.getElementById('press-fill');
     let progress = 0; let pressFrame = null; let isPressing = false;
-
     function startPress(e) {
         if(e.type === 'touchstart') e.preventDefault(); if(isPressing) return;
         isPressing = true; progress = 0; cancelAnimationFrame(pressFrame);
