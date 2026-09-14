@@ -119,13 +119,9 @@
         .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; letter-spacing: 2px; }
         .text-gradient-blue { background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: bold; }
 
-        /* ================= 悬浮挂件系统 (左上角 + 右上角弹性容器) ================= */
+        /* ================= 悬浮挂件系统 ================= */
         .widget-controls { position: absolute; top: calc(env(safe-area-inset-top) + 15px); left: 15px; z-index: 100; display: flex; gap: 10px; }
-        
-        .widget-controls-right {
-            position: absolute; top: calc(env(safe-area-inset-top) + 15px); right: 15px; z-index: 100;
-            display: flex; gap: 10px; align-items: center;
-        }
+        .widget-controls-right { position: absolute; top: calc(env(safe-area-inset-top) + 15px); right: 15px; z-index: 100; display: flex; gap: 10px; align-items: center; }
 
         .theme-toggle-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); font-size: 1.2rem; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: all 0.3s; }
         .theme-toggle-btn:active { transform: scale(0.9); }
@@ -138,14 +134,7 @@
         .bar:nth-child(2) { animation-delay: 0.2s; } .bar:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0% { height: 4px; } 100% { height: 16px; } }
 
-        /* 极简用户图标按钮 */
-        .user-profile-btn {
-            background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text);
-            width: 44px; height: 44px; border-radius: 50%; display: none; justify-content: center; align-items: center;
-            cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: all 0.3s;
-            overflow: hidden; padding: 0;
-        }
+        .user-profile-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 44px; height: 44px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: all 0.3s; overflow: hidden; padding: 0; }
         .user-profile-btn:active { transform: scale(0.9); }
         .user-avatar-preview { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
         .user-svg-icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -247,7 +236,7 @@
         .playlist-item.active { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; font-weight: bold; }
         .music-mode-text { font-size: 0.85rem; opacity: 0.7; margin-bottom: 15px; color: var(--theme-text); }
 
-        /* 个人中心头像编辑域 */
+        /* ================= 个人中心头像编辑区 ================= */
         .profile-avatar-zone { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px auto; background-color: var(--theme-input-bg); border: 2px dashed var(--theme-primary); display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; position: relative; box-shadow: 0 8px 20px var(--theme-glass-shadow); }
         .profile-avatar-zone img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .profile-avatar-zone::after { content: '修改头像'; position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; padding: 4px 0; text-align: center; opacity: 0; transition: opacity 0.3s; }
@@ -273,7 +262,6 @@
         <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
     </div>
     
-    <!-- 极简用户图标按钮 (由 SVG 绘制参考图) -->
     <div class="user-profile-btn" id="user-widget" onclick="openUserProfile()">
         <img id="user-widget-avatar" class="user-avatar-preview" src="">
         <svg id="user-widget-svg" class="user-svg-icon" viewBox="0 0 24 24">
@@ -468,11 +456,11 @@
             <h4 style="margin-bottom: 15px; color:#6366f1; text-align:left;">+ 新增曲目</h4>
             <input type="text" id="new-music-name" placeholder="曲目名称" style="margin-bottom:15px; background:var(--theme-glass-bg);">
             <div id="music-upload-zone" style="width:100%; padding:20px; border: 2px dashed #818cf8; border-radius: 14px; text-align: center; cursor: pointer; margin-bottom: 15px; transition: all 0.3s;">
-                <span id="music-upload-text" style="color: #6366f1; font-weight:500;">点击或拖拽音频文件 (直传R2)</span>
+                <span id="music-upload-text" style="color: #6366f1; font-weight:500;">点击或拖拽音频文件 (直传云端)</span>
                 <input type="file" id="new-music-file" accept="audio/*" style="display: none;">
             </div>
-            <div style="text-align: center; margin-bottom: 15px; opacity: 0.5; font-size: 0.85rem;">或输入直链 URL (可选)</div>
-            <input type="text" id="new-music-url" placeholder="R2 存储桶直链 URL" style="margin-bottom:15px; background:var(--theme-glass-bg);">
+            <div style="text-align: center; margin-bottom: 15px; opacity: 0.5; font-size: 0.85rem;">或输入云端直链 URL (可选)</div>
+            <input type="text" id="new-music-url" placeholder="云端直链 URL" style="margin-bottom:15px; background:var(--theme-glass-bg);">
             <button class="btn-glass btn-blue-gradient" style="width:100%; border-radius:14px; margin:0;" onclick="addMusicToLibrary()">添 加 到 库</button>
         </div>
         <button class="btn-glass" style="margin-top: 25px; width: 100%;" onclick="hideModal('music-admin-modal')">关闭</button>
@@ -527,7 +515,7 @@
 </div>
 
 <script>
-    /* ================= 1. 高级数据中枢与 R2 极速同步架构 ================= */
+    /* ================= 1. 高级数据中枢与全栈同步架构 ================= */
     const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
     const defaultDB = {
@@ -550,7 +538,6 @@
     let db = defaultDB;
     let toastTimeout;
     
-    // 当前登录的实际底层账号
     let currentUserAccount = null; 
 
     function showGlobalToast(text, type = 'loading') {
@@ -576,15 +563,14 @@
     }
 
     async function saveDB() {
-        try { localStorage.setItem('sealOfLoveDB_v9', JSON.stringify(db)); } catch (e) { if(e.name === 'QuotaExceededError') { showGlobalToast('本地存储空间不足，请清理', 'error'); return; } }
+        try { localStorage.setItem('sealOfLoveDB_v10', JSON.stringify(db)); } catch (e) { if(e.name === 'QuotaExceededError') { showGlobalToast('本地存储空间不足，请清理', 'error'); return; } }
         try {
             showGlobalToast('正在同步至云端...', 'loading');
             const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
-            if(res.ok) { showGlobalToast('已极速同步至 R2 储存桶', 'success'); } else { showGlobalToast('云端同步异常，已存本地', 'error'); }
+            if(res.ok) { showGlobalToast('已极速同步至云端', 'success'); } else { showGlobalToast('云端同步异常，已存本地', 'error'); }
         } catch(e) { showGlobalToast('网络异常，暂存本地', 'error'); }
     }
 
-    // 核心：无损热升级旧版 string 格式用户数据为 object 格式
     function upgradeUserStructure(usersObj) {
         if (!usersObj) return {};
         for (let key in usersObj) {
@@ -604,11 +590,11 @@
                     db = remoteDb; 
                     if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary;
                     db.users = upgradeUserStructure(db.users);
-                    try { localStorage.setItem('sealOfLoveDB_v9', JSON.stringify(db)); } catch(e){} return;
+                    try { localStorage.setItem('sealOfLoveDB_v10', JSON.stringify(db)); } catch(e){} return;
                 }
             }
         } catch (e) {}
-        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v9'));
+        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v10'));
         if (local && local.stages) { 
             db = local; 
             if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary; 
@@ -652,10 +638,8 @@
         const p = document.getElementById('ipt-pwd').value.trim();
         if(!inputU || !p) return alert('请输入账号/昵称和密码');
 
-        // 核心：逆向解析映射 (支持用户使用昵称登录)
         let baseUsername = inputU; 
         if (!db.users[inputU]) {
-            // 输入的不是原生账号，尝试查找对应的昵称
             for (let key in db.users) {
                 if (db.users[key].nickname === inputU) {
                     baseUsername = key; break;
@@ -664,7 +648,6 @@
         }
 
         try {
-            // 向 CF 后端发起鉴权（必须传解析后的原始账号）
             const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: baseUsername, password: p }) });
             if (response.ok) { 
                 const result = await response.json(); 
@@ -674,7 +657,6 @@
             }
         } catch (error) { console.log("后端鉴权降级至本地"); }
 
-        // 本地降级比对
         if(db.users[baseUsername] && db.users[baseUsername].password === p) { 
             loginSuccess(baseUsername, false); 
         } else alert('账号或密码错误。');
@@ -683,7 +665,7 @@
     function loginSuccess(baseUser, isAdmin) {
         state.isLoggedIn = true; state.isAdmin = isAdmin;
         currentUserAccount = baseUser;
-        document.getElementById('user-widget').style.display = 'flex'; // 显示用户头像
+        document.getElementById('user-widget').style.display = 'flex'; 
         updateUserWidgetIcon();
         initStageScreen();
     }
@@ -734,10 +716,9 @@
         const nick = document.getElementById('profile-nickname-input').value.trim();
         const imgEl = document.getElementById('profile-avatar-img');
         
-        // 检查昵称冲突
         for(let key in db.users) {
             if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) {
-                return alert('该昵称已被其他用户使用，请更换一个');
+                return alert('该昵称已被使用');
             }
         }
 
@@ -762,8 +743,6 @@
         }
     }
 
-
-    /* ================= 辅助 UI 方法 ================= */
     function toggleEditMode() {
         state.isEditMode = !state.isEditMode;
         document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑';
@@ -913,7 +892,7 @@
         await saveDB(); hideModal('edit-modal'); renderCardList();
     }
 
-    /* ================= 7. R2 音频管理与直传 ================= */
+    /* ================= 7. 音频管理与云端直传 ================= */
     let audioPlayer = document.getElementById('bgm-player');
     let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence' }; 
 
@@ -973,7 +952,7 @@
         if(!url && !selectedAudioFile) return alert('请拖入音频或填写链接');
 
         if(selectedAudioFile) {
-            showGlobalToast('正在极速推流至 R2...', 'loading');
+            showGlobalToast('正在极速推流至云端...', 'loading');
             const formData = new FormData(); formData.append('file', selectedAudioFile);
             try {
                 const res = await fetch('/api/upload', { method: 'POST', body: formData });
@@ -987,7 +966,7 @@
         db.musicLibrary[type].push({name, url}); await saveDB();
         
         document.getElementById('new-music-name').value = ''; document.getElementById('new-music-url').value = '';
-        selectedAudioFile = null; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (直传R2)';
+        selectedAudioFile = null; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (直传云端)';
         renderAdminMusicList();
     }
     async function deleteAdminMusic(type, idx) { if(confirm('确认删除此曲？')) { db.musicLibrary[type].splice(idx, 1); await saveDB(); renderAdminMusicList(); } }
@@ -1115,6 +1094,7 @@
 
     const longPressBtn = document.getElementById('btn-long-press'); const pressFill = document.getElementById('press-fill');
     let progress = 0; let pressFrame = null; let isPressing = false;
+
     function startPress(e) {
         if(e.type === 'touchstart') e.preventDefault(); if(isPressing) return;
         isPressing = true; progress = 0; cancelAnimationFrame(pressFrame);
