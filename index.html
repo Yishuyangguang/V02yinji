@@ -399,7 +399,7 @@
             <button class="btn-glass" style="margin:0; flex:1;" onclick="hideModal('user-profile-modal')">取 消</button>
         </div>
 
-        <!-- 权限隔离暗堡：普通用户不可见，仅管理员可见 -->
+        <!-- 权限隔离暗堡：仅管理员可见，跳转安全路由 recovery.html -->
         <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 20px;">
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; padding: 0.8rem;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
         </div>
@@ -520,7 +520,7 @@
 </div>
 
 <script>
-    /* ================= 1. 高级数据中枢与全栈同步架构 ================= */
+    /* ================= 1. 高级垃圾回收与全栈同步架构 ================= */
     const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
     const defaultDB = {
@@ -544,6 +544,17 @@
     let toastTimeout;
     let currentUserAccount = null; 
 
+    // 自研前端垃圾回收器：清除过往历代 localStorage 废弃快照，防止 5MB 限额溢出
+    function cleanupOldLocalStorage() {
+        const currentVersion = 'sealOfLoveDB_v12';
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
+                localStorage.removeItem(key);
+            }
+        }
+    }
+
     function showGlobalToast(text, type = 'loading') {
         const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text');
         toast.className = `global-toast show ${type}`; msg.innerText = text;
@@ -552,27 +563,40 @@
         if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); }
     }
 
+    // Canvas 图片极度压缩：缩小尺寸与画质，彻底杜绝图标挤爆数据库
     function compressImageFile(file, callback) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = new Image();
             img.onload = function() {
-                const canvas = document.createElement('canvas'); const MAX_SIZE = 300; 
+                const canvas = document.createElement('canvas'); const MAX_SIZE = 240; 
                 let width = img.width; let height = img.height;
                 if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
                 canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                callback(canvas.toDataURL('image/webp', 0.85));
+                callback(canvas.toDataURL('image/webp', 0.75));
             }; img.src = e.target.result;
         }; reader.readAsDataURL(file);
     }
 
+    // 强云端同步机制：即使 LocalStorage 报错，也不阻断网络同步
     async function saveDB() {
-        try { localStorage.setItem('sealOfLoveDB_v11', JSON.stringify(db)); } catch (e) { if(e.name === 'QuotaExceededError') { showGlobalToast('本地存储空间不足，请清理', 'error'); return; } }
+        let localSaved = false;
+        try { 
+            cleanupOldLocalStorage(); 
+            localStorage.setItem('sealOfLoveDB_v12', JSON.stringify(db)); 
+            localSaved = true;
+        } catch (e) {
+            console.warn('本地存储溢出，降级为纯云端模式');
+        }
+        
         try {
             showGlobalToast('正在同步至云端...', 'loading');
             const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
-            if(res.ok) { showGlobalToast('已极速同步至云端', 'success'); } else { showGlobalToast('云端同步异常，已存本地', 'error'); }
-        } catch(e) { showGlobalToast('网络异常，暂存本地', 'error'); }
+            if(res.ok) { showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功 (本地存储满)', 'success'); } 
+            else { showGlobalToast('云端同步异常' + (localSaved ? '，已存本地' : ''), 'error'); }
+        } catch(e) { 
+            showGlobalToast('网络异常' + (localSaved ? '，暂存本地' : '，数据未保存'), 'error'); 
+        }
     }
 
     function upgradeUserStructure(usersObj) {
@@ -595,16 +619,15 @@
                     if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary;
                     db.users = upgradeUserStructure(db.users);
                     
-                    // 防御性数据惰性初始化，修复管理员通过后端直接登录导致的空指针异常
                     if (currentUserAccount && !db.users[currentUserAccount]) {
                         db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
                     }
                     
-                    try { localStorage.setItem('sealOfLoveDB_v11', JSON.stringify(db)); } catch(e){} return;
+                    try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v12', JSON.stringify(db)); } catch(e){} return;
                 }
             }
         } catch (e) {}
-        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v11'));
+        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v12'));
         if (local && local.stages) { 
             db = local; 
             if(!db.musicLibrary) db.musicLibrary = defaultDB.musicLibrary; 
@@ -702,7 +725,6 @@
     function openUserProfile() {
         if(!currentUserAccount) return;
         
-        // 防御性数据初始化：如果是云端验证通过但本地没数据的管理员，帮其初始化档案
         if (!db.users[currentUserAccount]) {
             db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
         }
@@ -928,7 +950,7 @@
         await saveDB(); hideModal('edit-modal'); renderCardList();
     }
 
-    /* ================= 7. 音频管理与云端直传 ================= */
+    /* ================= 7. R2 音频管理与流媒体直传 ================= */
     let audioPlayer = document.getElementById('bgm-player');
     let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence' }; 
 
