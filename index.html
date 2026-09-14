@@ -9,16 +9,16 @@
     <link rel="shortcut icon" href="favicon.ico">
     <title>恒久印记</title>
     <style>
-        /* ================= 全局重置与 iOS 26 级双轨变量 ================= */
+        /* ================= 全局重置与双轨变量 ================= */
         :root {
             --theme-bg-color: #1a1b20;
             --theme-primary: #d4af37;
             --theme-secondary: #ebd373;
             --theme-text: #ffffff;
-            --theme-glass-bg: rgba(20, 20, 25, 0.4);
-            --theme-glass-border: rgba(255, 255, 255, 0.15);
-            --theme-glass-shadow: rgba(0, 0, 0, 0.5);
-            --theme-glass-inset: rgba(255, 255, 255, 0.1);
+            --theme-glass-bg: rgba(40, 40, 45, 0.6);
+            --theme-glass-border: rgba(255, 255, 255, 0.1);
+            --theme-glass-shadow: rgba(0, 0, 0, 0.3);
+            --theme-glass-inset: rgba(255, 255, 255, 0.05);
             --theme-input-bg: rgba(0, 0, 0, 0.3);
             
             --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -26,10 +26,11 @@
         }
 
         body.light-theme {
+            --theme-bg-color: #faf8f5;
             --theme-text: #1f2937;
-            --theme-glass-bg: rgba(255, 255, 255, 0.65);
-            --theme-glass-border: rgba(255, 255, 255, 0.8);
-            --theme-glass-shadow: rgba(150, 160, 180, 0.15);
+            --theme-glass-bg: rgba(255, 255, 255, 0.85);
+            --theme-glass-border: rgba(230, 230, 230, 0.8);
+            --theme-glass-shadow: rgba(150, 160, 180, 0.12);
             --theme-glass-inset: rgba(255, 255, 255, 0.9);
             --theme-input-bg: rgba(255, 255, 255, 0.9);
         }
@@ -40,20 +41,19 @@
             width: 100%; max-width: 100vw; height: 100%;
             overflow-x: hidden; overflow-y: hidden; 
             background-color: var(--theme-bg-color); color: var(--theme-text);
-            font-family: var(--font-main);
-            transition: background-color 0.8s ease, color 0.8s ease;
+            font-family: var(--font-main); transition: background-color 0.8s ease, color 0.8s ease;
         }
 
         #bg-gradient {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at top center, var(--theme-secondary) 0%, var(--theme-bg-color) 80%);
-            opacity: 0.18; z-index: 1; transition: background 1s ease;
+            opacity: 0.15; z-index: 1; transition: background 1s ease; pointer-events: none;
         }
         #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
 
-        /* ================= 核心容器 ================= */
+        /* ================= 核心容器与多屏控制 ================= */
         #app-container {
-            position: relative; z-index: 10; width: 100%; max-width: 600px; height: 100%;
+            position: relative; z-index: 10; width: 100%; max-width: 650px; height: 100%;
             margin: 0 auto; display: flex; flex-direction: column; overflow: hidden;
         }
 
@@ -69,18 +69,15 @@
         .screen::-webkit-scrollbar { display: none; }
         .screen { -ms-overflow-style: none; scrollbar-width: none; }
         .screen.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); z-index: 20; }
-        
         .screen.center-content { justify-content: center; }
 
-        /* ================= iOS 26 Glassmorphism ================= */
+        /* ================= iOS 26 UI 组件 ================= */
         .glass-panel {
             background: var(--theme-glass-bg);
-            backdrop-filter: blur(30px) saturate(150%);
-            -webkit-backdrop-filter: blur(30px) saturate(150%);
-            border: 1px solid var(--theme-glass-border);
-            border-radius: 28px;
+            backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid var(--theme-glass-border); border-radius: 28px;
             box-shadow: 0 16px 40px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
-            padding: 2rem; width: 100%; text-align: center; transition: all 0.5s ease;
+            padding: 2.5rem 2rem; width: 100%; text-align: center; transition: all 0.5s ease;
         }
 
         .btn-glass {
@@ -88,8 +85,7 @@
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--theme-glass-border);
             box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
-            color: var(--theme-text);
-            padding: 1rem 2rem; font-size: 1.1rem; font-weight: 600; border-radius: 50px;
+            color: var(--theme-text); padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 600; border-radius: 50px;
             cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             width: 85%; margin: 0.8rem auto; display: flex; justify-content: center; align-items: center; letter-spacing: 1px;
         }
@@ -98,27 +94,32 @@
         .btn-primary {
             background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
             border: none; color: #fff !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.25), inset 0 2px 4px rgba(255,255,255,0.4);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25), inset 0 2px 4px rgba(255,255,255,0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        /* 针对预备界面的蓝紫色特殊按钮 */
+        .btn-blue-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+            border: none; color: #fff !important;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4), inset 0 2px 4px rgba(255,255,255,0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
         input, textarea, select {
             width: 100%; background: var(--theme-input-bg);
             border: 1px solid var(--theme-glass-border); color: var(--theme-text);
-            padding: 14px 18px; border-radius: 16px; margin-bottom: 15px; font-size: 1rem;
+            padding: 16px 20px; border-radius: 18px; margin-bottom: 18px; font-size: 1.05rem;
             outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s;
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box;
         }
         input:focus, textarea:focus, select:focus { border-color: var(--theme-primary); }
-        textarea { resize: vertical; min-height: 80px; }
+        textarea { resize: vertical; min-height: 90px; }
         input::placeholder, textarea::placeholder { color: var(--theme-text); opacity: 0.5; }
         select option { background: var(--theme-bg-color); color: var(--theme-text); }
 
-        /* ================= 排版 ================= */
         h1, h2, h3 { font-family: var(--font-title); letter-spacing: 1px; }
         h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 1rem; color: var(--theme-text); transition: color 0.5s; font-weight: 700; }
         p { font-size: clamp(0.95rem, 4vw, 1.1rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
-        .slogan-verse { font-family: var(--font-title); font-size: 1.05rem; opacity: 0.8; margin-bottom: 2rem; }
+        .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; }
 
         /* ================= 悬浮挂件 ================= */
         .widget-controls { position: absolute; top: calc(env(safe-area-inset-top) + 15px); left: 15px; z-index: 100; display: flex; gap: 10px; }
@@ -130,121 +131,123 @@
         }
         .theme-toggle-btn:active { transform: scale(0.9); }
 
-        .apple-music-player {
-            position: absolute; top: calc(env(safe-area-inset-top) + 15px); right: 15px; z-index: 100;
-            background: rgba(10,10,10,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.1);
-            opacity: 0; pointer-events: none; transition: opacity 0.5s;
-        }
-        .apple-music-player.playing { opacity: 1; pointer-events: auto; }
-        .music-icon { width: 22px; height: 22px; border-radius: 6px; background-size: cover; background-position: center; background-image: url('music-artwork.png'); }
-        .music-bars { display: flex; gap: 3px; align-items: flex-end; height: 16px; }
-        .bar { width: 3px; background: #fff; border-radius: 2px; animation: bounce 1s infinite alternate; }
-        .bar:nth-child(2) { animation-delay: 0.2s; }
-        .bar:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0% { height: 4px; } 100% { height: 16px; } }
         .link-text { color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block; }
 
-        /* ================= 3/4 阵列网格 (高级首屏排版) ================= */
-        .stage-row-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(8px, 2vw, 15px); width: 100%; margin-bottom: clamp(8px, 2vw, 15px); }
+        /* ================= 主屏：上3下4 精确阵列排版 ================= */
+        .stage-array-wrapper {
+            display: flex; flex-direction: column; gap: clamp(8px, 2vw, 15px); width: 100%; align-items: center; padding: 10px 0;
+        }
+        /* 上层 3 个等分 */
+        .stage-row-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(8px, 2vw, 15px); width: 100%; }
+        /* 下层 4 个等分 */
         .stage-row-bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(6px, 1.5vw, 12px); width: 100%; }
         
         .stage-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 100%);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            background: var(--theme-glass-bg);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--theme-glass-border); border-radius: 20px;
-            padding: clamp(10px, 3vw, 20px) 5px; 
+            padding: clamp(12px, 3.5vw, 25px) 5px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px var(--theme-glass-shadow), inset 0 1px 1px rgba(255,255,255,0.1);
+            box-shadow: 0 6px 18px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset);
             cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
         }
-        .stage-card:active { transform: translateY(2px) scale(0.96); box-shadow: 0 2px 5px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1); }
+        .stage-card:active { transform: translateY(2px) scale(0.96); box-shadow: 0 2px 8px var(--theme-glass-shadow); }
         
+        /* 编辑模式下名称可修改 */
         .stage-card-title {
-            margin-top: 10px; font-weight: 600; font-size: clamp(0.75rem, 2.5vw, 1rem);
-            color: var(--theme-text); letter-spacing: 1px; pointer-events: none; text-align: center;
+            margin-top: 12px; font-weight: 600; font-size: clamp(0.75rem, 2.8vw, 1rem);
+            color: var(--theme-text); letter-spacing: 1px; text-align: center; width: 90%;
+            background: transparent; border: none; outline: none; pointer-events: none;
         }
+        .edit-mode .stage-card-title { pointer-events: auto; border-bottom: 1px dashed var(--theme-primary); }
 
         .stage-icon-dropzone {
-            width: clamp(45px, 12vw, 65px); height: clamp(45px, 12vw, 65px); border-radius: 50%;
+            width: clamp(48px, 13vw, 70px); height: clamp(48px, 13vw, 70px); border-radius: 50%;
             background-size: cover; background-position: center; background-color: var(--theme-input-bg);
             border: 2px solid transparent; transition: all 0.3s; position: relative;
             display: flex; justify-content: center; align-items: center; overflow: hidden;
-            box-shadow: 0 4px 10px var(--theme-glass-shadow);
+            box-shadow: 0 4px 12px var(--theme-glass-shadow);
         }
         .edit-mode .stage-icon-dropzone { border: 2px dashed var(--theme-primary); cursor: pointer; pointer-events: auto; }
+        .edit-mode .stage-card { border: 1px dashed var(--theme-primary); }
 
-        /* ================= 卡片列表 ================= */
+        /* ================= 详情内容网格与虚线卡片 ================= */
         .cat-tabs-container {
-            display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 10px 5px 20px 5px;
-            scrollbar-width: none; -ms-overflow-style: none;
+            display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 10px 5px 25px 5px; scrollbar-width: none;
         }
         .cat-tabs-container::-webkit-scrollbar { display: none; }
         
         .cat-tab {
-            padding: 8px 20px; border-radius: 20px; font-size: 1rem; font-weight: 600; white-space: nowrap;
+            padding: 8px 22px; border-radius: 20px; font-size: 1rem; font-weight: 600; white-space: nowrap;
             background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border);
             color: var(--theme-text); opacity: 0.6; transition: all 0.3s; cursor: pointer;
             box-shadow: 0 4px 10px var(--theme-glass-shadow);
         }
         .cat-tab.active { opacity: 1; background: var(--theme-primary); color: #fff; border-color: transparent; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
 
-        .module-section { width: 100%; text-align: left; margin-bottom: 30px; }
-        .module-title { font-size: 1.15rem; margin-bottom: 15px; color: var(--theme-primary); font-family: var(--font-title); display: flex; align-items: center; gap: 8px; font-weight: bold; }
-        /* 前置圆点修饰 */
-        .module-title::before { content: ''; width: 6px; height: 18px; background: var(--theme-primary); border-radius: 4px; }
+        .module-section { width: 100%; text-align: left; margin-bottom: 35px; }
+        .module-title { font-size: 1.15rem; margin-bottom: 15px; color: #d97706; font-family: var(--font-title); display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .light-theme .module-title { color: #ea580c; }
+        /* 左侧橙色竖条 */
+        .module-title::before { content: ''; width: 5px; height: 18px; background: currentColor; border-radius: 4px; }
 
         .content-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; width: 100%;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 18px; width: 100%;
         }
 
         .data-card {
             position: relative;
             background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--theme-glass-border); border-radius: 22px;
-            padding: 1.2rem 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 1.5rem 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center;
             cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
-            aspect-ratio: 1 / 1; 
+            aspect-ratio: 1 / 1.05; 
         }
         .data-card:active { transform: scale(0.95); box-shadow: 0 4px 12px var(--theme-glass-shadow); }
         .data-card.draggable { cursor: grab; }
         
-        .card-inner-title { font-size: 1rem; font-weight: 600; margin-bottom: 10px; text-align: center; line-height: 1.4; color: var(--theme-text); }
-        .card-tag { font-size: 0.75rem; background: rgba(128,128,128,0.2); padding: 4px 12px; border-radius: 12px; opacity: 0.8; color: var(--theme-text); }
+        .card-inner-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 15px; text-align: center; line-height: 1.4; color: var(--theme-text); font-family: var(--font-title); }
+        .card-tag { font-size: 0.8rem; background: rgba(128,128,128,0.15); padding: 5px 14px; border-radius: 12px; opacity: 0.8; color: var(--theme-text); }
 
         .admin-controls { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 15px); left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 95%; }
-        .btn-small { padding: 8px 16px; font-size: 0.85rem; border-radius: 20px; width: auto; margin: 0; }
+        .btn-small { padding: 8px 18px; font-size: 0.9rem; border-radius: 20px; width: auto; margin: 0; }
         
-        /* 悬浮边缘操作按钮 */
-        .admin-card-actions { position: absolute; top: -8px; right: -8px; display: none; gap: 6px; flex-direction: column; z-index: 5; }
+        /* 悬浮角标操作按钮与虚线框 (高度还原图2) */
+        .admin-card-actions { position: absolute; top: -10px; right: -10px; display: none; gap: 6px; flex-direction: column; z-index: 5; }
         .edit-mode .admin-card-actions { display: flex; }
-        .edit-mode .data-card { border: 1px dashed var(--theme-primary); }
-        .action-icon { width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.65); color: #fff; display: flex; justify-content: center; align-items: center; font-size: 0.75rem; backdrop-filter: blur(8px); box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); transition: transform 0.2s; }
-        .action-icon:active { transform: scale(0.9); }
+        .edit-mode .data-card { border: 1.5px dashed #f59e0b; background: transparent; box-shadow: none; }
+        .action-icon { width: 32px; height: 32px; border-radius: 50%; background: #6b7280; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--theme-bg-color); transition: transform 0.2s; cursor: pointer; }
+        .action-icon.del { background: #ef4444; }
+        .action-icon:active { transform: scale(0.85); }
 
-        /* ================= 进度与合并动画 ================= */
+        /* ================= 合并动画引擎 ================= */
         .progress-bar { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
         .progress-dot { width: 10px; height: 10px; border-radius: 50%; background-color: var(--theme-glass-border); transition: all 0.4s; }
         .progress-dot.active { background-color: var(--theme-primary); transform: scale(1.3); box-shadow: 0 0 8px var(--theme-primary); }
 
         .sync-container { width: 250px; height: 250px; position: relative; margin: 2rem auto; border-radius: 50%; box-shadow: 0 15px 40px var(--theme-glass-shadow), inset 0 2px 10px var(--theme-glass-inset); background: var(--theme-input-bg); overflow: hidden; backdrop-filter: blur(15px); }
+        
         .sync-half { position: absolute; top: 0; width: 50%; height: 100%; background-size: cover; background-repeat: no-repeat; transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        /* 双人左右合并 */
         .sync-half.boy { left: 0; background-position: left center; transform: translateX(-120%); opacity: 0.3; border-right: 1px solid var(--theme-glass-border); }
         .sync-half.girl { right: 0; background-position: right center; transform: translateX(120%); opacity: 0.3; border-left: 1px solid var(--theme-glass-border); }
         .sync-container.merged .boy { transform: translateX(0); opacity: 1; border-right: transparent; }
         .sync-container.merged .girl { transform: translateX(0); opacity: 1; border-left: transparent; }
 
+        /* 单身期向上合并专属动画 */
+        .sync-half.single-up { width: 100%; height: 100%; left: 0; top: 0; background-position: center; transform: translateY(120%); opacity: 0; border: none; transition: all 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .sync-container.merged .single-up { transform: translateY(0); opacity: 1; }
+
         /* ================= 长按宣告进度 ================= */
-        .long-press-area { position: relative; width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, var(--theme-glass-bg), transparent); box-shadow: 0 10px 35px var(--theme-glass-shadow), inset 0 2px 4px var(--theme-glass-inset); display: flex; justify-content: center; align-items: center; margin: 2rem auto; cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border); }
-        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.1rem; }
+        .long-press-area { position: relative; width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, var(--theme-glass-bg), transparent); box-shadow: 0 10px 35px var(--theme-glass-shadow), inset 0 2px 4px var(--theme-glass-inset); display: flex; justify-content: center; align-items: center; margin: 2rem auto; cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border); }
+        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.15rem; }
         .press-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: var(--theme-primary); opacity: 0.7; transition: height 0.1s linear; z-index: 1; }
 
         /* ================= 模态框 ================= */
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 28px; padding: 25px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; }
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 28px; padding: 30px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
         .modal-content::-webkit-scrollbar { display: none; }
         .qr-image { width: 200px; height: auto; border-radius: 16px; margin: 20px auto; display: block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
 
@@ -259,10 +262,6 @@
 <div class="widget-controls" id="theme-widget">
     <div class="theme-toggle-btn" onclick="toggleTheme()" id="btn-theme">🌙</div>
 </div>
-<div class="apple-music-player" id="apple-music-box">
-    <div class="music-icon"></div>
-    <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
-</div>
 
 <div id="app-container">
     
@@ -274,33 +273,31 @@
     <!-- 0. 登录屏 -->
     <div class="screen active center-content" id="screen-login">
         <div class="glass-panel">
-            <h1>恒久印记</h1>
+            <h1 style="font-size: 2.2rem;">恒久印记</h1>
             <p class="slogan-verse">爱情，众水不能熄灭，大水也不能淹没</p>
             <input type="text" id="ipt-username" placeholder="账号 (限英文/数字组合)" autocomplete="off">
             <input type="password" id="ipt-pwd" placeholder="密码" autocomplete="off">
-            <button class="btn-glass btn-primary" onclick="handleLogin()">登 录</button>
+            <button class="btn-glass btn-primary" style="margin-top: 25px;" onclick="handleLogin()">登 录</button>
             <button class="btn-glass" onclick="handleRegister()">注 册</button>
             <span class="link-text" onclick="showModal('qr-modal')">联系站长</span>
         </div>
     </div>
 
-    <!-- 1. 阶段选择屏 (3/4 阵列布局) -->
+    <!-- 1. 阶段选择屏 (3/4 精确不对称阵列) -->
     <div class="screen center-content" id="screen-stage">
-        <h1 style="margin-top:20px;">恒久印记</h1>
-        <p class="slogan-verse">选择生命当前的季节，开始今日的操练</p>
-        <div class="glass-panel" style="padding: 1.5rem 1rem; background: transparent; border: none; box-shadow: none;">
-            <div id="stage-buttons-container" style="width: 100%;">
-                <!-- 动态渲染 3/4 行网格 -->
-            </div>
+        <h1 style="margin-top:10px;">恒久印记</h1>
+        <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
+        <div class="stage-array-wrapper" id="stage-buttons-container">
+            <!-- JS 动态注入 .stage-row-top 和 .stage-row-bottom -->
         </div>
     </div>
 
     <!-- 2. 分类与卡片列表屏 -->
     <div class="screen" id="screen-card-list" style="padding-top: calc(env(safe-area-inset-top) + 70px);">
         <h1 id="list-stage-title" style="margin-bottom: 5px;">阶段卡片</h1>
-        <p style="opacity: 0.8; margin-bottom: 20px;">顺服引导，操练爱意</p>
+        <p style="opacity: 0.8; margin-bottom: 25px;">顺服引导，感悟成长</p>
         
-        <div class="admin-card-actions edit-mode-only" style="width: 100%; flex-direction: row; flex-wrap:wrap; justify-content: center; gap: 10px; margin-bottom: 15px; display: none; position: static;">
+        <div class="admin-card-actions edit-mode-only" style="width: 100%; flex-direction: row; flex-wrap:wrap; justify-content: center; gap: 12px; margin-bottom: 20px; display: none; position: static;">
             <button class="btn-glass btn-small btn-primary" onclick="openEditModal(null)">+ 新增卡片</button>
             <button class="btn-glass btn-small" onclick="manageCategories()">管理大选项</button>
             <button class="btn-glass btn-small" onclick="editPrepText()">预备提示语</button>
@@ -312,27 +309,28 @@
         <button class="btn-glass" style="margin: 30px auto;" onclick="navigateTo('screen-stage')">返回首页</button>
     </div>
 
-    <!-- 3. 预备提醒屏 (触发音乐唤醒) -->
+    <!-- 3. 预备提醒屏 (淡入音乐) -->
     <div class="screen center-content" id="screen-prep">
-        <div class="glass-panel">
-            <h1 style="color: var(--theme-primary);">操练预备</h1>
-            <p id="prep-text" style="font-size: 1.1rem; margin: 2.5rem 0;">...</p>
-            <button class="btn-glass btn-primary" onclick="confirmPrepAndPlay()">我们已预备好</button>
+        <div class="glass-panel" style="padding: 3.5rem 2rem;">
+            <h1 style="color: var(--theme-primary); font-size: 2rem; margin-bottom: 1.5rem;">操练预备</h1>
+            <p id="prep-text" style="font-size: 1.15rem; margin: 2rem 0 3rem 0; line-height: 2;">...</p>
+            <!-- 使用参考图3的高级蓝紫色按钮 -->
+            <button class="btn-glass btn-blue-gradient" onclick="confirmPrepAndPlay()">我们已预备好</button>
         </div>
     </div>
 
-    <!-- 4. 角色选择屏 -->
+    <!-- 4. 角色选择屏 (单身期跳过) -->
     <div class="screen center-content" id="screen-role">
         <h1 id="role-stage-title">缔结印记</h1>
-        <p style="margin-bottom: 2.5rem;">请选择您的身份<br>随后将两台手机并排平放</p>
-        <button class="btn-glass" style="border-color: #4a90e2; color: #4a90e2;" onclick="selectRole('boy')">我是男生 ♂</button>
-        <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81;" onclick="selectRole('girl')">我是女生 ♀</button>
+        <p style="margin-bottom: 3rem;">请选择您的身份<br>随后将两台手机并排平放</p>
+        <button class="btn-glass" style="border-color: #4a90e2; color: #4a90e2; padding: 1.2rem 2rem;" onclick="selectRole('boy')">我是男生 ♂</button>
+        <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81; padding: 1.2rem 2rem;" onclick="selectRole('girl')">我是女生 ♀</button>
     </div>
 
     <!-- 5. 合并动画屏 -->
     <div class="screen center-content" id="screen-sync">
-        <h1>双向奔赴</h1>
-        <p>确认手机贴合后，点击合并印记</p>
+        <h1 id="sync-title">双向奔赴</h1>
+        <p id="sync-subtitle">确认手机贴合后，点击合并</p>
         <div class="sync-container" id="sync-animation-box"></div>
         <button class="btn-glass btn-primary" onclick="triggerSync()">确 认 合 并</button>
     </div>
@@ -342,16 +340,16 @@
         <div class="progress-bar" id="content-progress">
             <div class="progress-dot" id="dot-1"></div><div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
         </div>
-        <div class="glass-panel" style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px; min-height: 50vh;">
-            <h2 id="content-type-title" style="margin-bottom: 1rem; font-size: 1.1rem; opacity: 0.8; letter-spacing: 2px;"></h2>
-            <h1 id="step-title" style="color: var(--theme-primary); font-size: 1.4rem; margin-bottom: 1.5rem;"></h1>
-            <p id="step-text" style="font-size: 1.05rem; text-align: left; text-align-last: left; line-height: 1.9;"></p>
+        <div class="glass-panel" style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin-bottom: 25px; min-height: 55vh;">
+            <h2 id="content-type-title" style="margin-bottom: 1.5rem; font-size: 1.2rem; opacity: 0.8; letter-spacing: 2px;"></h2>
+            <h1 id="step-title" style="color: var(--theme-primary); font-size: 1.6rem; margin-bottom: 2rem;"></h1>
+            <p id="step-text" style="font-size: 1.15rem; text-align: left; text-align-last: left; line-height: 2; padding: 0 10px;"></p>
         </div>
         
         <div id="action-area" style="width: 100%; min-height: 150px;">
             <button class="btn-glass btn-primary" id="btn-next-step" onclick="nextContentStep()">进 入 下 一 步</button>
             <div class="long-press-area" id="btn-long-press" style="display: none;">
-                <div class="press-text">同心宣告<br>(长按)</div>
+                <div class="press-text">内心宣告<br>(长按)</div>
                 <div class="press-fill" id="press-fill"></div>
             </div>
         </div>
@@ -360,10 +358,10 @@
     <!-- 7. 完成屏 -->
     <div class="screen center-content" id="screen-finish">
         <div class="glass-panel">
-            <h1 style="color: var(--theme-primary);">印记已成</h1>
-            <p>众水不能熄灭爱情，大水也不能淹没。</p>
-            <p style="font-size: 0.95rem; opacity: 0.6; margin-top: 2.5rem;">静谧的旋律将伴随你们，享受此刻的安宁。</p>
-            <button class="btn-glass" style="margin-top:20px;" onclick="resetToStage()">返回主页</button>
+            <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem;">印记已成</h1>
+            <p>众水不能熄灭爱意，大水也不能淹没。</p>
+            <p style="font-size: 0.95rem; opacity: 0.6; margin-top: 3rem;">静谧的旋律将伴随您，享受此刻的安宁。</p>
+            <button class="btn-glass" style="margin-top:25px;" onclick="resetToStage()">返回主页</button>
         </div>
     </div>
 
@@ -375,32 +373,32 @@
     <div class="modal-content" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary);">联系站长</h2>
         <img src="微信二维码.jpg" alt="微信二维码" class="qr-image" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23ddd\'/><text x=\'50\' y=\'50\' text-anchor=\'middle\' dominant-baseline=\'middle\' fill=\'%23666\'>无图片</text></svg>'">
-        <p style="font-size: 0.9rem; opacity: 0.8;">扫一扫二维码，与我联系</p>
-        <button class="btn-glass" style="margin-top: 15px;" onclick="hideModal('qr-modal')">关 闭</button>
+        <p style="font-size: 0.95rem; opacity: 0.8;">扫一扫二维码，与我联系</p>
+        <button class="btn-glass" style="margin-top: 20px;" onclick="hideModal('qr-modal')">关 闭</button>
     </div>
 </div>
 
 <div class="modal-overlay" id="cat-modal">
     <div class="modal-content">
-        <h2 style="margin-bottom: 15px; color: var(--theme-primary);">管理大选项 (分类)</h2>
-        <div id="cat-list-edit" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;"></div>
-        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary);" onclick="addNewCategory()">+ 添加新分类</button>
-        <div style="display: flex; gap: 10px; margin-top: 25px;">
-            <button class="btn-glass btn-primary" style="margin:0;" onclick="saveCategories()">完成并保存</button>
+        <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理大选项 (分类)</h2>
+        <div id="cat-list-edit" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;"></div>
+        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%;" onclick="addNewCategory()">+ 添加新分类</button>
+        <div style="display: flex; gap: 15px; margin-top: 30px;">
+            <button class="btn-glass btn-primary" style="margin:0; width:100%;" onclick="saveCategories()">完成并保存</button>
         </div>
     </div>
 </div>
 
 <div class="modal-overlay" id="edit-modal">
     <div class="modal-content">
-        <h2 style="margin-bottom: 20px; color: var(--theme-primary);" id="modal-title">编辑卡片内容</h2>
+        <h2 style="margin-bottom: 25px; color: var(--theme-primary);" id="modal-title">编辑卡片内容</h2>
         <input type="hidden" id="edit-card-id">
         
-        <label style="font-size: 0.85rem; opacity: 0.8; margin-left: 5px;">所属大选项 (分类)</label>
-        <select id="edit-card-category" style="margin-bottom: 15px;"></select>
+        <label style="font-size: 0.9rem; opacity: 0.8; margin-left: 8px;">所属大选项 (分类)</label>
+        <select id="edit-card-category" style="margin-bottom: 20px;"></select>
 
-        <label style="font-size: 0.85rem; opacity: 0.8; margin-left: 5px;">所属模块</label>
-        <select id="edit-card-type" style="margin-bottom: 15px;">
+        <label style="font-size: 0.9rem; opacity: 0.8; margin-left: 8px;">所属模块</label>
+        <select id="edit-card-type" style="margin-bottom: 20px;">
             <option value="脑">脑 (认知与理念)</option>
             <option value="心">心 (情感与渴望)</option>
             <option value="手">手 (行动与操练)</option>
@@ -409,73 +407,81 @@
         <input type="text" id="edit-card-title" placeholder="卡片标题 (如: Day 1: 倾听的心)">
         <input type="text" id="edit-card-bgm" placeholder="背景音乐 URL (选填 R2 直链)">
         
-        <h4 style="margin: 15px 0 10px 5px; color:var(--theme-primary);">步骤 1: 行为解释</h4>
+        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 1: 行为解释</h4>
         <input type="text" id="edit-s1-title" placeholder="步骤标题">
         <textarea id="edit-s1-text" placeholder="为什么我们要如此做..."></textarea>
         
-        <h4 style="margin: 15px 0 10px 5px; color:var(--theme-primary);">步骤 2: 具体操练</h4>
+        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 2: 具体操练</h4>
         <input type="text" id="edit-s2-title" placeholder="步骤标题">
         <textarea id="edit-s2-text" placeholder="日常生活中具体的互动指引..."></textarea>
 
-        <h4 style="margin: 15px 0 10px 5px; color:var(--theme-primary);">步骤 3: 同心宣告</h4>
+        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 3: 内心宣告</h4>
         <input type="text" id="edit-s3-title" placeholder="步骤标题">
-        <textarea id="edit-s3-text" placeholder="邀请双方一起同声宣读的内容..."></textarea>
+        <textarea id="edit-s3-text" placeholder="邀请一起宣读的内容..."></textarea>
 
-        <div style="display: flex; gap: 10px; margin-top: 25px;">
-            <button class="btn-glass btn-primary" style="margin:0;" onclick="saveCard()">保 存</button>
-            <button class="btn-glass" style="margin:0;" onclick="hideModal('edit-modal')">取 消</button>
+        <div style="display: flex; gap: 15px; margin-top: 35px;">
+            <button class="btn-glass btn-primary" style="margin:0; width: 50%;" onclick="saveCard()">保 存</button>
+            <button class="btn-glass" style="margin:0; width: 50%;" onclick="hideModal('edit-modal')">取 消</button>
         </div>
     </div>
 </div>
 
 <script>
-    /* ================= 1. 高级数据中枢与双轨主题配置 ================= */
+    /* ================= 1. 高级数据中枢与 R2 架构 ================= */
     const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
     const defaultDB = {
-        users: {}, 
+        users: {}, // 全站用户数据池
         stages: {
             '单身期': {
                 themeParams: { dark: { bg: '#10141a', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } },
-                icon: '', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。',
+                icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。',
                 categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }],
                 cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', type: '心', bgm: '', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }]
             },
             '恋爱期': {
                 themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fdf7f9', p: '#d97706', s: '#f472b6' } },
-                icon: '', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。',
+                icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。',
                 categories: [{ id: 'cat_l1', name: '核心操练' }],
-                cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', type: '脑', bgm: '', steps: [{title:'行为意义',text:'倾听是灵魂的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }]
+                cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', type: '脑', bgm: '', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }]
             },
-            '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', prepText: '即将步入婚姻殿堂，回想决定携手一生的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [] },
-            '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', prepText: '誓言要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [] },
-            '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [] },
-            '孕后初期': { themeParams: { dark: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, light: { bg: '#f4f9fd', p: '#0284c7', s: '#7dd3fc' } }, icon: '', prepText: '疲惫需要温柔承托，轻揉肩膀放松。', categories: [{id:'cat_ep1',name:'温柔承托'}], cards: [] },
-            '婚后进阶': { themeParams: { dark: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, light: { bg: '#faf5ff', p: '#7c3aed', s: '#c4b5fd' } }, icon: '', prepText: '全然接纳此刻真实的对方。', categories: [{id:'cat_a1',name:'平淡坚守'}], cards: [] }
+            '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', name: '定婚期', prepText: '即将步入婚姻殿堂，回想决定携手的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [] },
+            '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', name: '结婚', prepText: '爱意要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [] },
+            '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', name: '备孕期', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [] },
+            '孕后初期': { themeParams: { dark: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, light: { bg: '#f4f9fd', p: '#0284c7', s: '#7dd3fc' } }, icon: '', name: '孕后初期', prepText: '疲惫需要温柔承托，轻揉肩膀放松。', categories: [{id:'cat_ep1',name:'温柔承托'}], cards: [] },
+            '婚后进阶': { themeParams: { dark: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, light: { bg: '#faf5ff', p: '#7c3aed', s: '#c4b5fd' } }, icon: '', name: '婚后进阶', prepText: '全然接纳此刻真实的彼此。', categories: [{id:'cat_a1',name:'平淡坚守'}], cards: [] }
         }
     };
 
-    let db = JSON.parse(localStorage.getItem('sealOfLoveDB_v5'));
-    if (!db) {
-        let oldDb = JSON.parse(localStorage.getItem('sealOfLoveDB_v4'));
-        if (oldDb && oldDb.stages) {
-            db = oldDb;
-            stagesList.forEach(k => {
-                if(!db.stages[k]) db.stages[k] = JSON.parse(JSON.stringify(defaultDB.stages[k])); 
-                if (!db.stages[k].categories) {
-                    db.stages[k].categories = [{ id: 'cat_def_' + Date.now(), name: '核心操练' }];
-                    if(db.stages[k].cards) db.stages[k].cards.forEach(c => c.categoryId = db.stages[k].categories[0].id);
-                }
-                if (db.stages[k].themeParams && db.stages[k].themeParams.bg) {
-                    let oldP = db.stages[k].themeParams;
-                    db.stages[k].themeParams = { dark: { bg: oldP.bg, p: oldP.p, s: oldP.s }, light: defaultDB.stages[k] ? defaultDB.stages[k].themeParams.light : { bg: '#fdfaf3', p: oldP.p, s: oldP.s } };
-                }
-            });
-        } else db = defaultDB;
-        saveDB();
-    }
+    let db = defaultDB;
 
-    function saveDB() { localStorage.setItem('sealOfLoveDB_v5', JSON.stringify(db)); }
+    // R2 全栈同步引擎：拉取云端数据 -> 若无则使用本地 -> 若无则使用 Default
+    async function initDB() {
+        try {
+            const res = await fetch('/api/db'); // 读取 R2
+            if (res.ok) {
+                const remoteDb = await res.json();
+                if (remoteDb && remoteDb.stages) {
+                    db = remoteDb; 
+                    localStorage.setItem('sealOfLoveDB_v6', JSON.stringify(db));
+                    return;
+                }
+            }
+        } catch (e) { console.log('R2读取失败，降级本地存储'); }
+
+        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v6'));
+        if (local && local.stages) db = local;
+        else saveDB(); // 初始化并推向 R2
+    }
+    initDB();
+
+    async function saveDB() {
+        localStorage.setItem('sealOfLoveDB_v6', JSON.stringify(db));
+        try {
+            // 将所有修改和用户密码同步至 R2，实现一键迁移架构
+            await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
+        } catch(e) { console.log('R2同步失败，已保存在本地'); }
+    }
 
     /* ================= 2. 状态机与双轨主题引擎 ================= */
     let state = {
@@ -547,14 +553,14 @@
     function handleRegister() {
         const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim();
         if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('仅限英文数字组合');
-        if(db.users[u]) return alert('账号已存在'); db.users[u] = p; saveDB();
+        if(db.users[u]) return alert('账号已存在'); 
+        db.users[u] = p; saveDB(); // 注册时立刻同步到 R2
         state.isLoggedIn = true; state.isAdmin = false; initStageScreen();
     }
 
     function logout() {
         state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false;
-        document.getElementById('top-admin-controls').style.display = 'none';
-        navigateTo('screen-login');
+        document.getElementById('top-admin-controls').style.display = 'none'; navigateTo('screen-login');
         document.body.classList.remove('light-theme'); state.isLightTheme = false; document.getElementById('btn-theme').innerText = '🌙';
         document.documentElement.style.setProperty('--theme-bg-color', '#1a1b20'); document.documentElement.style.setProperty('--theme-primary', '#d4af37');
     }
@@ -570,7 +576,6 @@
 
     function showModal(id) { document.getElementById(id).style.display = 'flex'; }
     function hideModal(id) { document.getElementById(id).style.display = 'none'; }
-
     function navigateTo(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active'); document.getElementById(screenId).scrollTop = 0;
@@ -578,46 +583,51 @@
 
     function applyStageTheme(stageName) {
         const t = db.stages[stageName].themeParams;
-        const root = document.documentElement;
         const currentParams = state.isLightTheme ? t.light : t.dark;
-        root.style.setProperty('--theme-bg-color', currentParams.bg);
-        root.style.setProperty('--theme-primary', currentParams.p);
-        root.style.setProperty('--theme-secondary', currentParams.s);
+        document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg);
+        document.documentElement.style.setProperty('--theme-primary', currentParams.p);
+        document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
     }
 
-    /* ================= 5. 3/4 不对称高定排版 ================= */
+    /* ================= 5. 主屏：3/4 精确高定阵列排版 ================= */
     function initStageScreen() {
         document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none';
-        
         const currentParams = state.isLightTheme ? { bg: '#fdfaf3', p: '#d99a29', s: '#f4c453' } : { bg: '#1a1b20', p: '#d4af37', s: '#ebd373' };
         document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg);
         document.documentElement.style.setProperty('--theme-primary', currentParams.p);
         document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
 
-        const container = document.getElementById('stage-buttons-container');
-        container.innerHTML = '';
+        const container = document.getElementById('stage-buttons-container'); container.innerHTML = '';
         if(state.isEditMode) container.classList.add('edit-mode'); else container.classList.remove('edit-mode');
 
-        // 构建顶部 3 列网格
+        // 构建 3/4 阵列
         const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top';
-        // 构建底部 4 列网格
         const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom';
 
-        stagesList.forEach((sName, index) => {
-            const iconB64 = db.stages[sName].icon;
+        stagesList.forEach((sKey, index) => {
+            const sData = db.stages[sKey];
+            const iconB64 = sData.icon;
+            const displayName = sData.name || sKey; // 支持自定义名称
+
             const card = document.createElement('div'); card.className = 'stage-card';
-            card.onclick = (e) => { if(!state.isEditMode) selectStage(sName); };
+            card.onclick = (e) => { if(!state.isEditMode) selectStage(sKey); };
 
             const iconDiv = document.createElement('div'); iconDiv.className = 'stage-icon-dropzone';
             if (iconB64) { iconDiv.style.backgroundImage = `url(${iconB64})`; } 
-            else { iconDiv.innerHTML = `<span style="font-size: clamp(14px, 4vw, 24px); color:var(--theme-text); opacity:0.8;">${sName.charAt(0)}</span>`; }
+            else { iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; }
+
+            const titleInput = document.createElement('input'); 
+            titleInput.className = 'stage-card-title'; 
+            titleInput.value = displayName;
 
             if (state.isEditMode) {
-                iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) processIcon(ev.target.files[0], sName)}; input.click(); });
+                iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) processIcon(ev.target.files[0], sKey)}; input.click(); });
+                // 监听名字修改
+                titleInput.addEventListener('click', (e) => { e.stopPropagation(); });
+                titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; saveDB(); });
             }
-            const title = document.createElement('div'); title.className = 'stage-card-title'; title.innerText = sName;
-            card.appendChild(iconDiv); card.appendChild(title); 
-            
+
+            card.appendChild(iconDiv); card.appendChild(titleInput); 
             if (index < 3) rowTop.appendChild(card); else rowBottom.appendChild(card);
         });
         
@@ -625,18 +635,18 @@
         navigateTo('screen-stage');
     }
     
-    function processIcon(file, stageName) {
+    function processIcon(file, stageKey) {
         if (file.size > 2 * 1024 * 1024) return alert('图片限制 2MB');
-        const reader = new FileReader(); reader.onload = ev => { db.stages[stageName].icon = ev.target.result; saveDB(); initStageScreen(); }; reader.readAsDataURL(file);
+        const reader = new FileReader(); reader.onload = ev => { db.stages[stageKey].icon = ev.target.result; saveDB(); initStageScreen(); }; reader.readAsDataURL(file);
     }
 
-    /* ================= 6. 分类大选项与瀑布流卡片 ================= */
-    function selectStage(sName) {
+    /* ================= 6. 分类大选项与瀑布流虚线卡片 ================= */
+    function selectStage(sKey) {
         if(state.isEditMode) return;
-        state.stage = sName; applyStageTheme(sName);
-        document.getElementById('list-stage-title').innerText = `${sName}`;
+        state.stage = sKey; applyStageTheme(sKey);
+        document.getElementById('list-stage-title').innerText = `${db.stages[sKey].name}`;
         
-        const cats = db.stages[sName].categories || [];
+        const cats = db.stages[sKey].categories || [];
         if(cats.length > 0) state.activeCategoryId = cats[0].id; else state.activeCategoryId = '';
 
         renderCardList(); navigateTo('screen-card-list');
@@ -671,12 +681,13 @@
                 
                 modCards.forEach((card) => {
                     const cardDiv = document.createElement('div'); cardDiv.className = 'data-card';
+                    // 如果卡片有配置单独的封面图，可以扩展展示，这里默认显示文本排版
                     cardDiv.innerHTML = `<h3 class="card-inner-title">${card.title}</h3><span class="card-tag">${modType}板块</span>`;
                     
                     if (state.isEditMode) {
                         const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id);
                         const actDiv = document.createElement('div'); actDiv.className = 'admin-card-actions';
-                        actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); openEditModal(${globalIndex})">✎</div><div class="action-icon" style="background:rgba(239,68,68,0.85);" onclick="event.stopPropagation(); deleteCard(${globalIndex})">✖</div>`;
+                        actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); deleteCard(${globalIndex})">✖</div>`;
                         cardDiv.appendChild(actDiv);
                     }
                     cardDiv.onclick = () => { if(!state.isEditMode) selectCard(card); };
@@ -684,13 +695,13 @@
                 });
                 
                 if(modCards.length === 0 && state.isEditMode) {
-                    grid.innerHTML = `<p style="opacity:0.4; font-size:0.8rem; text-align:center; width:100%; grid-column: 1 / -1;">该板块暂无卡片</p>`;
+                    grid.innerHTML = `<p style="opacity:0.4; font-size:0.85rem; text-align:center; width:100%; grid-column: 1 / -1; padding: 20px;">该板块暂无卡片</p>`;
                 }
                 section.appendChild(grid); container.appendChild(section);
             }
         });
 
-        if(!hasRenderedAny) container.innerHTML = '<p style="opacity:0.5; margin-top:20px; text-align:center;">当前分类暂无内容</p>';
+        if(!hasRenderedAny) container.innerHTML = '<p style="opacity:0.5; margin-top:30px; text-align:center;">当前分类暂无内容</p>';
     }
 
     /* ====== 大选项 (分类) 管理 ====== */
@@ -698,8 +709,8 @@
         const listDiv = document.getElementById('cat-list-edit'); listDiv.innerHTML = '';
         const cats = db.stages[state.stage].categories || [];
         cats.forEach((cat, idx) => {
-            const div = document.createElement('div'); div.style.display = 'flex'; div.style.gap = '10px';
-            div.innerHTML = `<input type="text" style="margin:0;" id="cat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:40px; margin:0; color:#ef4444; padding:0;" onclick="removeCat(${idx})">✖</button>`;
+            const div = document.createElement('div'); div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center';
+            div.innerHTML = `<input type="text" style="margin:0; flex:1;" id="cat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:45px; height:45px; margin:0; color:#ef4444; padding:0; border-radius:12px;" onclick="removeCat(${idx})">✖</button>`;
             listDiv.appendChild(div);
         });
         showModal('cat-modal');
@@ -711,7 +722,7 @@
     function removeCat(idx) {
         const catId = db.stages[state.stage].categories[idx].id;
         const linkedCards = db.stages[state.stage].cards.filter(c => c.categoryId === catId);
-        if(linkedCards.length > 0 && !confirm(`该分类下有 ${linkedCards.length} 张卡片，删除分类将把这些卡片变成无头数据。确定删除吗？`)) return;
+        if(linkedCards.length > 0 && !confirm(`该分类下有 ${linkedCards.length} 张卡片，确定删除吗？`)) return;
         db.stages[state.stage].categories.splice(idx, 1); manageCategories();
     }
     function saveCategories() {
@@ -765,7 +776,7 @@
         saveDB(); hideModal('edit-modal'); renderCardList();
     }
 
-    /* ================= 7. 音频预备与播放缓动引擎 ================= */
+    /* ================= 7. 音频缓入预备引擎与单身期分流 ================= */
     let audioPlayer = document.getElementById('bgm-player');
     
     function selectCard(card) {
@@ -774,14 +785,14 @@
         navigateTo('screen-prep');
     }
 
-    // 唤醒音乐并淡入
+    // 唤醒音乐并淡入，同时进行“单身期”逻辑分流
     function confirmPrepAndPlay() {
         if(state.currentCard && state.currentCard.bgm) {
+            // 防抖与错误拦截
             if(audioPlayer.src !== state.currentCard.bgm) { audioPlayer.src = state.currentCard.bgm; }
-            audioPlayer.volume = 0; // 初始音量设为 0
+            audioPlayer.volume = 0; 
             audioPlayer.play().then(() => { 
                 document.getElementById('apple-music-box').classList.add('playing'); 
-                // 缓动渐入音量
                 let vol = 0;
                 const fadeInterval = setInterval(() => {
                     vol += 0.05;
@@ -790,7 +801,25 @@
                 }, 100);
             }).catch(e => console.log("等待交互后播放", e));
         }
-        navigateTo('screen-role');
+
+        // [核心需求] 单身期无需选择角色，直接进入合并，且动画是向上合并
+        if (state.stage === '单身期') {
+            const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged');
+            const iconB64 = db.stages[state.stage].icon;
+            const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`;
+            
+            document.getElementById('sync-title').innerText = "自我圆满";
+            document.getElementById('sync-subtitle').innerText = "深呼吸，点击融合内心力量";
+            
+            // 注入向上合并专属 DOM
+            syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`;
+            navigateTo('screen-sync');
+        } else {
+            // 非单身期进入角色选择
+            document.getElementById('sync-title').innerText = "双向奔赴";
+            document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并";
+            navigateTo('screen-role');
+        }
     }
 
     function selectRole(role) {
