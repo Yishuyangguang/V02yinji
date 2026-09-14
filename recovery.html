@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>恒久印记 - 密码云端调度台</title>
+    <title>恒久印记 - 云端密码调度台</title>
     <style>
         :root {
             --theme-bg-color: #1c1d22;
@@ -90,7 +90,6 @@
         }
 
         try {
-            // 向云端直连拉取最新全站数据快照
             const res = await fetch('/api/db');
             if(!res.ok) throw new Error();
             const db = await res.json();
@@ -99,7 +98,6 @@
             let foundAccount = null;
             let foundData = null;
 
-            // 双重遍历检索 (账号 OR 昵称)
             for (let key in users) {
                 if (key === query || (users[key].nickname && users[key].nickname === query)) {
                     foundAccount = key;
@@ -109,7 +107,6 @@
             }
 
             if (foundAccount && foundData) {
-                // 防空值兜底：兼容旧版字符串格式
                 const password = typeof foundData === 'string' ? foundData : foundData.password;
                 const nickname = typeof foundData === 'string' ? '无' : (foundData.nickname || '无');
 
