@@ -11,13 +11,13 @@
     <style>
         /* ================= 全局重置与双轨变量 ================= */
         :root {
-            --theme-bg-color: #1a1b20;
+            --theme-bg-color: #1c1d22;
             --theme-primary: #d4af37;
             --theme-secondary: #ebd373;
             --theme-text: #ffffff;
-            --theme-glass-bg: rgba(40, 40, 45, 0.6);
-            --theme-glass-border: rgba(255, 255, 255, 0.1);
-            --theme-glass-shadow: rgba(0, 0, 0, 0.3);
+            --theme-glass-bg: rgba(42, 43, 48, 0.7);
+            --theme-glass-border: rgba(255, 255, 255, 0.08);
+            --theme-glass-shadow: rgba(0, 0, 0, 0.4);
             --theme-glass-inset: rgba(255, 255, 255, 0.05);
             --theme-input-bg: rgba(0, 0, 0, 0.3);
             
@@ -26,13 +26,13 @@
         }
 
         body.light-theme {
-            --theme-bg-color: #faf8f5;
+            --theme-bg-color: #f8f6f0;
             --theme-text: #1f2937;
-            --theme-glass-bg: rgba(255, 255, 255, 0.85);
-            --theme-glass-border: rgba(230, 230, 230, 0.8);
-            --theme-glass-shadow: rgba(150, 160, 180, 0.12);
-            --theme-glass-inset: rgba(255, 255, 255, 0.9);
-            --theme-input-bg: rgba(255, 255, 255, 0.9);
+            --theme-glass-bg: rgba(255, 255, 255, 0.95);
+            --theme-glass-border: rgba(230, 230, 230, 0.9);
+            --theme-glass-shadow: rgba(150, 160, 180, 0.15);
+            --theme-glass-inset: rgba(255, 255, 255, 1);
+            --theme-input-bg: rgba(250, 250, 250, 0.9);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -47,7 +47,7 @@
         #bg-gradient {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at top center, var(--theme-secondary) 0%, var(--theme-bg-color) 80%);
-            opacity: 0.15; z-index: 1; transition: background 1s ease; pointer-events: none;
+            opacity: 0.12; z-index: 1; transition: background 1s ease; pointer-events: none;
         }
         #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
 
@@ -62,8 +62,8 @@
             padding: calc(env(safe-area-inset-top) + 2rem) 1.5rem calc(env(safe-area-inset-bottom) + 2rem) 1.5rem;
             display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
             opacity: 0; pointer-events: none;
-            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-            transform: scale(0.96) translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: scale(0.97) translateY(15px);
             overflow-y: auto; overflow-x: hidden;
         }
         .screen::-webkit-scrollbar { display: none; }
@@ -71,17 +71,29 @@
         .screen.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); z-index: 20; }
         .screen.center-content { justify-content: center; }
 
-        /* ================= iOS 26 UI 组件 ================= */
+        /* ================= 极速 Toast 反馈 ================= */
+        .global-toast {
+            position: fixed; top: -60px; left: 50%; transform: translateX(-50%);
+            background: rgba(30, 41, 59, 0.9); color: #fff; padding: 10px 20px; border-radius: 30px;
+            font-size: 0.9rem; z-index: 9999; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex; align-items: center; gap: 8px; font-weight: 500;
+        }
+        .global-toast.show { top: calc(env(safe-area-inset-top) + 20px); }
+        .global-toast.success { border-color: #10b981; }
+        .global-toast.error { border-color: #ef4444; }
+
+        /* ================= UI 组件 ================= */
         .glass-panel {
             background: var(--theme-glass-bg);
-            backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+            backdrop-filter: blur(35px) saturate(150%); -webkit-backdrop-filter: blur(35px) saturate(150%);
             border: 1px solid var(--theme-glass-border); border-radius: 28px;
-            box-shadow: 0 16px 40px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
-            padding: 2.5rem 2rem; width: 100%; text-align: center; transition: all 0.5s ease;
+            box-shadow: 0 20px 50px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
+            padding: 3rem 2rem; width: 100%; text-align: center; transition: all 0.5s ease;
         }
 
         .btn-glass {
-            background: linear-gradient(135deg, var(--theme-glass-bg) 0%, transparent 100%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--theme-glass-border);
             box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
@@ -93,15 +105,15 @@
 
         .btn-primary {
             background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
-            border: none; color: #fff !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.25), inset 0 2px 4px rgba(255,255,255,0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            border: none; color: #111 !important; font-weight: bold;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5);
         }
         
-        /* 针对预备界面的蓝紫色特殊按钮 */
         .btn-blue-gradient {
             background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
-            border: none; color: #fff !important;
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4), inset 0 2px 4px rgba(255,255,255,0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            border: none; color: #fff !important; font-weight: bold;
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4), inset 0 2px 4px rgba(255,255,255,0.3);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         input, textarea, select {
@@ -109,7 +121,7 @@
             border: 1px solid var(--theme-glass-border); color: var(--theme-text);
             padding: 16px 20px; border-radius: 18px; margin-bottom: 18px; font-size: 1.05rem;
             outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box;
         }
         input:focus, textarea:focus, select:focus { border-color: var(--theme-primary); }
         textarea { resize: vertical; min-height: 90px; }
@@ -118,8 +130,14 @@
 
         h1, h2, h3 { font-family: var(--font-title); letter-spacing: 1px; }
         h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 1rem; color: var(--theme-text); transition: color 0.5s; font-weight: 700; }
-        p { font-size: clamp(0.95rem, 4vw, 1.1rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
+        p { font-size: clamp(1rem, 4vw, 1.15rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
         .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; }
+
+        /* 渐变标题 */
+        .text-gradient {
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
 
         /* ================= 悬浮挂件 ================= */
         .widget-controls { position: absolute; top: calc(env(safe-area-inset-top) + 15px); left: 15px; z-index: 100; display: flex; gap: 10px; }
@@ -131,46 +149,60 @@
         }
         .theme-toggle-btn:active { transform: scale(0.9); }
 
+        .apple-music-player {
+            position: absolute; top: calc(env(safe-area-inset-top) + 15px); right: 15px; z-index: 100;
+            background: rgba(15,15,18,0.9); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.1);
+            opacity: 0; pointer-events: none; transition: opacity 0.5s;
+        }
+        .apple-music-player.playing { opacity: 1; pointer-events: auto; }
+        .music-icon { width: 22px; height: 22px; border-radius: 6px; background-size: cover; background-position: center; background-image: url('music-artwork.png'); }
+        .music-bars { display: flex; gap: 3px; align-items: flex-end; height: 16px; }
+        .bar { width: 3px; background: #fff; border-radius: 2px; animation: bounce 1s infinite alternate; }
+        .bar:nth-child(2) { animation-delay: 0.2s; }
+        .bar:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0% { height: 4px; } 100% { height: 16px; } }
         .link-text { color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block; }
 
-        /* ================= 主屏：上3下4 精确阵列排版 ================= */
+        /* ================= 主屏：上3下4 深空灰高定阵列排版 ================= */
         .stage-array-wrapper {
-            display: flex; flex-direction: column; gap: clamp(8px, 2vw, 15px); width: 100%; align-items: center; padding: 10px 0;
+            display: flex; flex-direction: column; gap: clamp(10px, 2.5vw, 18px); width: 100%; align-items: center; padding: 10px 0;
         }
-        /* 上层 3 个等分 */
-        .stage-row-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(8px, 2vw, 15px); width: 100%; }
-        /* 下层 4 个等分 */
-        .stage-row-bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(6px, 1.5vw, 12px); width: 100%; }
+        .stage-row-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(10px, 2.5vw, 18px); width: 100%; }
+        .stage-row-bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(8px, 2vw, 14px); width: 100%; }
         
         .stage-card {
-            background: var(--theme-glass-bg);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--theme-glass-border); border-radius: 20px;
-            padding: clamp(12px, 3.5vw, 25px) 5px; 
+            background: rgba(45, 45, 48, 0.5); /* 深空灰质感 */
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--theme-glass-border); border-radius: 18px;
+            padding: clamp(15px, 4vw, 25px) 5px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 6px 18px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.05);
             cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative;
         }
-        .stage-card:active { transform: translateY(2px) scale(0.96); box-shadow: 0 2px 8px var(--theme-glass-shadow); }
+        .light-theme .stage-card { background: rgba(255,255,255,0.8); }
+        .stage-card:active { transform: translateY(2px) scale(0.96); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
-        /* 编辑模式下名称可修改 */
         .stage-card-title {
-            margin-top: 12px; font-weight: 600; font-size: clamp(0.75rem, 2.8vw, 1rem);
+            margin-top: 15px; font-weight: bold; font-size: clamp(0.85rem, 3vw, 1.05rem);
             color: var(--theme-text); letter-spacing: 1px; text-align: center; width: 90%;
             background: transparent; border: none; outline: none; pointer-events: none;
         }
         .edit-mode .stage-card-title { pointer-events: auto; border-bottom: 1px dashed var(--theme-primary); }
 
         .stage-icon-dropzone {
-            width: clamp(48px, 13vw, 70px); height: clamp(48px, 13vw, 70px); border-radius: 50%;
-            background-size: cover; background-position: center; background-color: var(--theme-input-bg);
-            border: 2px solid transparent; transition: all 0.3s; position: relative;
+            width: clamp(55px, 15vw, 80px); height: clamp(55px, 15vw, 80px); border-radius: 50%;
+            background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05);
+            border: 2px dashed var(--theme-primary); /* 常驻高级虚线边框 */
+            transition: all 0.3s; position: relative;
             display: flex; justify-content: center; align-items: center; overflow: hidden;
-            box-shadow: 0 4px 12px var(--theme-glass-shadow);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
-        .edit-mode .stage-icon-dropzone { border: 2px dashed var(--theme-primary); cursor: pointer; pointer-events: auto; }
-        .edit-mode .stage-card { border: 1px dashed var(--theme-primary); }
+        .stage-icon-dropzone img { width: 100%; height: 100%; object-fit: cover; }
+        .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
         /* ================= 详情内容网格与虚线卡片 ================= */
         .cat-tabs-container {
@@ -179,58 +211,54 @@
         .cat-tabs-container::-webkit-scrollbar { display: none; }
         
         .cat-tab {
-            padding: 8px 22px; border-radius: 20px; font-size: 1rem; font-weight: 600; white-space: nowrap;
+            padding: 10px 24px; border-radius: 25px; font-size: 1.05rem; font-weight: 600; white-space: nowrap;
             background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border);
             color: var(--theme-text); opacity: 0.6; transition: all 0.3s; cursor: pointer;
-            box-shadow: 0 4px 10px var(--theme-glass-shadow);
+            box-shadow: 0 6px 15px var(--theme-glass-shadow);
         }
-        .cat-tab.active { opacity: 1; background: var(--theme-primary); color: #fff; border-color: transparent; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+        .cat-tab.active { opacity: 1; background: var(--theme-primary); color: #111; border-color: transparent; box-shadow: 0 8px 20px rgba(212,175,55,0.4); }
 
         .module-section { width: 100%; text-align: left; margin-bottom: 35px; }
-        .module-title { font-size: 1.15rem; margin-bottom: 15px; color: #d97706; font-family: var(--font-title); display: flex; align-items: center; gap: 8px; font-weight: bold; }
-        .light-theme .module-title { color: #ea580c; }
-        /* 左侧橙色竖条 */
+        .module-title { font-size: 1.2rem; margin-bottom: 18px; color: #f59e0b; font-family: var(--font-title); display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        .light-theme .module-title { color: #d97706; }
         .module-title::before { content: ''; width: 5px; height: 18px; background: currentColor; border-radius: 4px; }
 
         .content-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 18px; width: 100%;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; width: 100%;
         }
 
         .data-card {
             position: relative;
             background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--theme-glass-border); border-radius: 22px;
-            padding: 1.5rem 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 1px dashed var(--theme-glass-border); border-radius: 24px; /* 虚线框 */
+            padding: 1.8rem 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center;
             cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
             aspect-ratio: 1 / 1.05; 
         }
         .data-card:active { transform: scale(0.95); box-shadow: 0 4px 12px var(--theme-glass-shadow); }
-        .data-card.draggable { cursor: grab; }
         
-        .card-inner-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 15px; text-align: center; line-height: 1.4; color: var(--theme-text); font-family: var(--font-title); }
-        .card-tag { font-size: 0.8rem; background: rgba(128,128,128,0.15); padding: 5px 14px; border-radius: 12px; opacity: 0.8; color: var(--theme-text); }
+        .card-inner-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; text-align: center; line-height: 1.5; color: var(--theme-text); font-family: var(--font-title); }
+        .card-tag { font-size: 0.85rem; background: rgba(128,128,128,0.2); padding: 5px 15px; border-radius: 15px; opacity: 0.9; color: var(--theme-text); }
 
         .admin-controls { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 15px); left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 95%; }
         .btn-small { padding: 8px 18px; font-size: 0.9rem; border-radius: 20px; width: auto; margin: 0; }
         
-        /* 悬浮角标操作按钮与虚线框 (高度还原图2) */
-        .admin-card-actions { position: absolute; top: -10px; right: -10px; display: none; gap: 6px; flex-direction: column; z-index: 5; }
+        .admin-card-actions { position: absolute; top: -10px; right: -10px; display: none; gap: 8px; flex-direction: column; z-index: 5; }
         .edit-mode .admin-card-actions { display: flex; }
-        .edit-mode .data-card { border: 1.5px dashed #f59e0b; background: transparent; box-shadow: none; }
-        .action-icon { width: 32px; height: 32px; border-radius: 50%; background: #6b7280; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--theme-bg-color); transition: transform 0.2s; cursor: pointer; }
+        .edit-mode .data-card { border: 2px dashed #f59e0b; background: rgba(255,255,255,0.05); }
+        .action-icon { width: 34px; height: 34px; border-radius: 50%; background: #4b5563; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid var(--theme-bg-color); transition: transform 0.2s; cursor: pointer; }
         .action-icon.del { background: #ef4444; }
         .action-icon:active { transform: scale(0.85); }
 
-        /* ================= 合并动画引擎 ================= */
-        .progress-bar { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        /* ================= 动画引擎 ================= */
+        .progress-bar { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
         .progress-dot { width: 10px; height: 10px; border-radius: 50%; background-color: var(--theme-glass-border); transition: all 0.4s; }
-        .progress-dot.active { background-color: var(--theme-primary); transform: scale(1.3); box-shadow: 0 0 8px var(--theme-primary); }
+        .progress-dot.active { background-color: var(--theme-primary); transform: scale(1.4); box-shadow: 0 0 10px var(--theme-primary); }
 
-        .sync-container { width: 250px; height: 250px; position: relative; margin: 2rem auto; border-radius: 50%; box-shadow: 0 15px 40px var(--theme-glass-shadow), inset 0 2px 10px var(--theme-glass-inset); background: var(--theme-input-bg); overflow: hidden; backdrop-filter: blur(15px); }
+        .sync-container { width: 260px; height: 260px; position: relative; margin: 2rem auto; border-radius: 50%; box-shadow: 0 20px 50px var(--theme-glass-shadow), inset 0 2px 10px var(--theme-glass-inset); background: var(--theme-input-bg); overflow: hidden; backdrop-filter: blur(20px); }
         
-        .sync-half { position: absolute; top: 0; width: 50%; height: 100%; background-size: cover; background-repeat: no-repeat; transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        /* 双人左右合并 */
+        .sync-half { position: absolute; top: 0; width: 50%; height: 100%; background-size: cover; background-repeat: no-repeat; transition: transform 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .sync-half.boy { left: 0; background-position: left center; transform: translateX(-120%); opacity: 0.3; border-right: 1px solid var(--theme-glass-border); }
         .sync-half.girl { right: 0; background-position: right center; transform: translateX(120%); opacity: 0.3; border-left: 1px solid var(--theme-glass-border); }
         .sync-container.merged .boy { transform: translateX(0); opacity: 1; border-right: transparent; }
@@ -241,13 +269,13 @@
         .sync-container.merged .single-up { transform: translateY(0); opacity: 1; }
 
         /* ================= 长按宣告进度 ================= */
-        .long-press-area { position: relative; width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, var(--theme-glass-bg), transparent); box-shadow: 0 10px 35px var(--theme-glass-shadow), inset 0 2px 4px var(--theme-glass-inset); display: flex; justify-content: center; align-items: center; margin: 2rem auto; cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border); }
-        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.15rem; }
-        .press-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: var(--theme-primary); opacity: 0.7; transition: height 0.1s linear; z-index: 1; }
+        .long-press-area { position: relative; width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(135deg, var(--theme-glass-bg), transparent); box-shadow: 0 15px 45px var(--theme-glass-shadow), inset 0 2px 5px var(--theme-glass-inset); display: flex; justify-content: center; align-items: center; margin: 3rem auto; cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border); }
+        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .press-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: var(--theme-primary); opacity: 0.8; transition: height 0.1s linear; z-index: 1; }
 
         /* ================= 模态框 ================= */
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 28px; padding: 30px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
         .modal-content::-webkit-scrollbar { display: none; }
         .qr-image { width: 200px; height: auto; border-radius: 16px; margin: 20px auto; display: block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
 
@@ -263,6 +291,17 @@
     <div class="theme-toggle-btn" onclick="toggleTheme()" id="btn-theme">🌙</div>
 </div>
 
+<div class="apple-music-player" id="apple-music-box">
+    <div class="music-icon"></div>
+    <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+</div>
+
+<!-- 全局极速 Toast 反馈 -->
+<div class="global-toast" id="global-toast">
+    <span id="toast-icon">⏳</span>
+    <span id="toast-text">正在同步至云端...</span>
+</div>
+
 <div id="app-container">
     
     <div class="admin-controls" id="top-admin-controls" style="display: none;">
@@ -273,7 +312,7 @@
     <!-- 0. 登录屏 -->
     <div class="screen active center-content" id="screen-login">
         <div class="glass-panel">
-            <h1 style="font-size: 2.2rem;">恒久印记</h1>
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">恒久印记</h1>
             <p class="slogan-verse">爱情，众水不能熄灭，大水也不能淹没</p>
             <input type="text" id="ipt-username" placeholder="账号 (限英文/数字组合)" autocomplete="off">
             <input type="password" id="ipt-pwd" placeholder="密码" autocomplete="off">
@@ -312,14 +351,13 @@
     <!-- 3. 预备提醒屏 (淡入音乐) -->
     <div class="screen center-content" id="screen-prep">
         <div class="glass-panel" style="padding: 3.5rem 2rem;">
-            <h1 style="color: var(--theme-primary); font-size: 2rem; margin-bottom: 1.5rem;">操练预备</h1>
-            <p id="prep-text" style="font-size: 1.15rem; margin: 2rem 0 3rem 0; line-height: 2;">...</p>
-            <!-- 使用参考图3的高级蓝紫色按钮 -->
-            <button class="btn-glass btn-blue-gradient" onclick="confirmPrepAndPlay()">我们已预备好</button>
+            <h1 class="text-gradient" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
+            <p id="prep-text" style="font-size: 1.2rem; margin: 2rem 0 3.5rem 0; line-height: 2;">...</p>
+            <button class="btn-glass btn-blue-gradient" id="btn-prep-confirm" onclick="confirmPrepAndPlay()">我们已预备好</button>
         </div>
     </div>
 
-    <!-- 4. 角色选择屏 (单身期跳过) -->
+    <!-- 4. 角色选择屏 -->
     <div class="screen center-content" id="screen-role">
         <h1 id="role-stage-title">缔结印记</h1>
         <p style="margin-bottom: 3rem;">请选择您的身份<br>随后将两台手机并排平放</p>
@@ -329,10 +367,10 @@
 
     <!-- 5. 合并动画屏 -->
     <div class="screen center-content" id="screen-sync">
-        <h1 id="sync-title">双向奔赴</h1>
-        <p id="sync-subtitle">确认手机贴合后，点击合并</p>
+        <h1 id="sync-title" style="font-size: 2.2rem;">双向奔赴</h1>
+        <p id="sync-subtitle" style="font-size: 1.1rem;">确认手机贴合后，点击合并</p>
         <div class="sync-container" id="sync-animation-box"></div>
-        <button class="btn-glass btn-primary" onclick="triggerSync()">确 认 合 并</button>
+        <button class="btn-glass btn-primary" id="btn-sync-confirm" onclick="triggerSync()">确 认 合 并</button>
     </div>
 
     <!-- 6. 核心内容屏 -->
@@ -341,15 +379,15 @@
             <div class="progress-dot" id="dot-1"></div><div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
         </div>
         <div class="glass-panel" style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin-bottom: 25px; min-height: 55vh;">
-            <h2 id="content-type-title" style="margin-bottom: 1.5rem; font-size: 1.2rem; opacity: 0.8; letter-spacing: 2px;"></h2>
-            <h1 id="step-title" style="color: var(--theme-primary); font-size: 1.6rem; margin-bottom: 2rem;"></h1>
-            <p id="step-text" style="font-size: 1.15rem; text-align: left; text-align-last: left; line-height: 2; padding: 0 10px;"></p>
+            <h2 id="content-type-title" style="margin-bottom: 1.5rem; font-size: 1.25rem; opacity: 0.8; letter-spacing: 2px;"></h2>
+            <h1 id="step-title" style="color: var(--theme-primary); font-size: 1.8rem; margin-bottom: 2rem;"></h1>
+            <p id="step-text" style="font-size: 1.2rem; text-align: left; text-align-last: left; line-height: 2.2; padding: 0 10px;"></p>
         </div>
         
-        <div id="action-area" style="width: 100%; min-height: 150px;">
+        <div id="action-area" style="width: 100%; min-height: 160px;">
             <button class="btn-glass btn-primary" id="btn-next-step" onclick="nextContentStep()">进 入 下 一 步</button>
             <div class="long-press-area" id="btn-long-press" style="display: none;">
-                <div class="press-text">内心宣告<br>(长按)</div>
+                <div class="press-text" id="press-text-label">内心宣告<br>(长按)</div>
                 <div class="press-fill" id="press-fill"></div>
             </div>
         </div>
@@ -359,16 +397,15 @@
     <div class="screen center-content" id="screen-finish">
         <div class="glass-panel">
             <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem;">印记已成</h1>
-            <p>众水不能熄灭爱意，大水也不能淹没。</p>
-            <p style="font-size: 0.95rem; opacity: 0.6; margin-top: 3rem;">静谧的旋律将伴随您，享受此刻的安宁。</p>
-            <button class="btn-glass" style="margin-top:25px;" onclick="resetToStage()">返回主页</button>
+            <p>愿你在光中行走，内心充满力量与安宁。</p>
+            <p style="font-size: 1rem; opacity: 0.6; margin-top: 3rem;">静谧的旋律将伴随您，享受此刻的沉淀。</p>
+            <button class="btn-glass" style="margin-top:30px;" onclick="resetToStage()">返回主页</button>
         </div>
     </div>
 
 </div>
 
 <!-- ================= 弹窗群 ================= -->
-
 <div class="modal-overlay" id="qr-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary);">联系站长</h2>
@@ -382,9 +419,9 @@
     <div class="modal-content">
         <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理大选项 (分类)</h2>
         <div id="cat-list-edit" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;"></div>
-        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%;" onclick="addNewCategory()">+ 添加新分类</button>
+        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%; margin-bottom: 10px;" onclick="addNewCategory()">+ 添加新分类</button>
         <div style="display: flex; gap: 15px; margin-top: 30px;">
-            <button class="btn-glass btn-primary" style="margin:0; width:100%;" onclick="saveCategories()">完成并保存</button>
+            <button class="btn-glass btn-primary" style="margin:0; width:100%;" onclick="saveCategories()">完成并极速保存</button>
         </div>
     </div>
 </div>
@@ -407,7 +444,7 @@
         <input type="text" id="edit-card-title" placeholder="卡片标题 (如: Day 1: 倾听的心)">
         <input type="text" id="edit-card-bgm" placeholder="背景音乐 URL (选填 R2 直链)">
         
-        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 1: 行为解释</h4>
+        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 1: 行为解释 / 认知</h4>
         <input type="text" id="edit-s1-title" placeholder="步骤标题">
         <textarea id="edit-s1-text" placeholder="为什么我们要如此做..."></textarea>
         
@@ -415,26 +452,26 @@
         <input type="text" id="edit-s2-title" placeholder="步骤标题">
         <textarea id="edit-s2-text" placeholder="日常生活中具体的互动指引..."></textarea>
 
-        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 3: 内心宣告</h4>
+        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 3: 宣告</h4>
         <input type="text" id="edit-s3-title" placeholder="步骤标题">
-        <textarea id="edit-s3-text" placeholder="邀请一起宣读的内容..."></textarea>
+        <textarea id="edit-s3-text" placeholder="内心或同声宣告的内容..."></textarea>
 
         <div style="display: flex; gap: 15px; margin-top: 35px;">
-            <button class="btn-glass btn-primary" style="margin:0; width: 50%;" onclick="saveCard()">保 存</button>
+            <button class="btn-glass btn-primary" style="margin:0; width: 50%;" onclick="saveCard()">保存并同步</button>
             <button class="btn-glass" style="margin:0; width: 50%;" onclick="hideModal('edit-modal')">取 消</button>
         </div>
     </div>
 </div>
 
 <script>
-    /* ================= 1. 高级数据中枢与 R2 架构 ================= */
+    /* ================= 1. 高级数据中枢与 R2 极速同步架构 ================= */
     const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
     const defaultDB = {
-        users: {}, // 全站用户数据池
+        users: {}, // 全站用户密码资料池，全站一键备份
         stages: {
             '单身期': {
-                themeParams: { dark: { bg: '#10141a', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } },
+                themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } },
                 icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。',
                 categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }],
                 cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', type: '心', bgm: '', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }]
@@ -455,10 +492,43 @@
 
     let db = defaultDB;
 
-    // R2 全栈同步引擎：拉取云端数据 -> 若无则使用本地 -> 若无则使用 Default
+    // Toast 极速反馈引擎
+    let toastTimeout;
+    function showGlobalToast(text, type = 'loading') {
+        const toast = document.getElementById('global-toast');
+        const icon = document.getElementById('toast-icon');
+        const msg = document.getElementById('toast-text');
+        
+        toast.className = `global-toast show ${type}`;
+        msg.innerText = text;
+        if(type === 'loading') icon.innerText = '⏳';
+        if(type === 'success') icon.innerText = '✓';
+        if(type === 'error') icon.innerText = '✖';
+
+        clearTimeout(toastTimeout);
+        if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); }
+    }
+
+    // 阻塞强同步 R2 引擎
+    async function saveDB() {
+        localStorage.setItem('sealOfLoveDB_v6', JSON.stringify(db));
+        try {
+            showGlobalToast('正在同步至云端...', 'loading');
+            const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
+            if(res.ok) {
+                showGlobalToast('已极速同步至 R2 储存桶', 'success');
+            } else {
+                showGlobalToast('云端同步异常，已存本地', 'error');
+            }
+        } catch(e) {
+            console.log(e);
+            showGlobalToast('网络异常，暂存本地', 'error');
+        }
+    }
+
     async function initDB() {
         try {
-            const res = await fetch('/api/db'); // 读取 R2
+            const res = await fetch('/api/db'); 
             if (res.ok) {
                 const remoteDb = await res.json();
                 if (remoteDb && remoteDb.stages) {
@@ -471,17 +541,9 @@
 
         const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v6'));
         if (local && local.stages) db = local;
-        else saveDB(); // 初始化并推向 R2
+        else saveDB();
     }
     initDB();
-
-    async function saveDB() {
-        localStorage.setItem('sealOfLoveDB_v6', JSON.stringify(db));
-        try {
-            // 将所有修改和用户密码同步至 R2，实现一键迁移架构
-            await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
-        } catch(e) { console.log('R2同步失败，已保存在本地'); }
-    }
 
     /* ================= 2. 状态机与双轨主题引擎 ================= */
     let state = {
@@ -545,16 +607,16 @@
                 const result = await response.json();
                 if(result.success) { state.isLoggedIn = true; state.isAdmin = true; initStageScreen(); return; }
             }
-        } catch (error) { console.log("后端鉴权降级至本地测试"); }
+        } catch (error) { console.log("后端鉴权降级至本地"); }
         if(db.users[u] && db.users[u] === p) { state.isLoggedIn = true; state.isAdmin = false; initStageScreen(); } 
         else alert('账号或密码错误。');
     }
 
-    function handleRegister() {
+    async function handleRegister() {
         const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim();
         if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('仅限英文数字组合');
         if(db.users[u]) return alert('账号已存在'); 
-        db.users[u] = p; saveDB(); // 注册时立刻同步到 R2
+        db.users[u] = p; await saveDB(); // 等待同步完成
         state.isLoggedIn = true; state.isAdmin = false; initStageScreen();
     }
 
@@ -589,7 +651,7 @@
         document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
     }
 
-    /* ================= 5. 主屏：3/4 精确高定阵列排版 ================= */
+    /* ================= 5. 主屏：3/4 精确不对称高定排版 ================= */
     function initStageScreen() {
         document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none';
         const currentParams = state.isLightTheme ? { bg: '#fdfaf3', p: '#d99a29', s: '#f4c453' } : { bg: '#1a1b20', p: '#d4af37', s: '#ebd373' };
@@ -600,20 +662,19 @@
         const container = document.getElementById('stage-buttons-container'); container.innerHTML = '';
         if(state.isEditMode) container.classList.add('edit-mode'); else container.classList.remove('edit-mode');
 
-        // 构建 3/4 阵列
         const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top';
         const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom';
 
         stagesList.forEach((sKey, index) => {
             const sData = db.stages[sKey];
             const iconB64 = sData.icon;
-            const displayName = sData.name || sKey; // 支持自定义名称
+            const displayName = sData.name || sKey; 
 
             const card = document.createElement('div'); card.className = 'stage-card';
             card.onclick = (e) => { if(!state.isEditMode) selectStage(sKey); };
 
             const iconDiv = document.createElement('div'); iconDiv.className = 'stage-icon-dropzone';
-            if (iconB64) { iconDiv.style.backgroundImage = `url(${iconB64})`; } 
+            if (iconB64) { iconDiv.innerHTML = `<img src="${iconB64}">`; } 
             else { iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; }
 
             const titleInput = document.createElement('input'); 
@@ -622,7 +683,6 @@
 
             if (state.isEditMode) {
                 iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) processIcon(ev.target.files[0], sKey)}; input.click(); });
-                // 监听名字修改
                 titleInput.addEventListener('click', (e) => { e.stopPropagation(); });
                 titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; saveDB(); });
             }
@@ -635,9 +695,11 @@
         navigateTo('screen-stage');
     }
     
-    function processIcon(file, stageKey) {
+    async function processIcon(file, stageKey) {
         if (file.size > 2 * 1024 * 1024) return alert('图片限制 2MB');
-        const reader = new FileReader(); reader.onload = ev => { db.stages[stageKey].icon = ev.target.result; saveDB(); initStageScreen(); }; reader.readAsDataURL(file);
+        const reader = new FileReader(); 
+        reader.onload = async (ev) => { db.stages[stageKey].icon = ev.target.result; await saveDB(); initStageScreen(); }; 
+        reader.readAsDataURL(file);
     }
 
     /* ================= 6. 分类大选项与瀑布流虚线卡片 ================= */
@@ -681,7 +743,6 @@
                 
                 modCards.forEach((card) => {
                     const cardDiv = document.createElement('div'); cardDiv.className = 'data-card';
-                    // 如果卡片有配置单独的封面图，可以扩展展示，这里默认显示文本排版
                     cardDiv.innerHTML = `<h3 class="card-inner-title">${card.title}</h3><span class="card-tag">${modType}板块</span>`;
                     
                     if (state.isEditMode) {
@@ -704,8 +765,7 @@
         if(!hasRenderedAny) container.innerHTML = '<p style="opacity:0.5; margin-top:30px; text-align:center;">当前分类暂无内容</p>';
     }
 
-    /* ====== 大选项 (分类) 管理 ====== */
-    function manageCategories() {
+    async function manageCategories() {
         const listDiv = document.getElementById('cat-list-edit'); listDiv.innerHTML = '';
         const cats = db.stages[state.stage].categories || [];
         cats.forEach((cat, idx) => {
@@ -719,23 +779,22 @@
         if(!db.stages[state.stage].categories) db.stages[state.stage].categories = [];
         db.stages[state.stage].categories.push({ id: 'cat_' + Date.now(), name: '新建大选项' }); manageCategories();
     }
-    function removeCat(idx) {
+    async function removeCat(idx) {
         const catId = db.stages[state.stage].categories[idx].id;
         const linkedCards = db.stages[state.stage].cards.filter(c => c.categoryId === catId);
         if(linkedCards.length > 0 && !confirm(`该分类下有 ${linkedCards.length} 张卡片，确定删除吗？`)) return;
         db.stages[state.stage].categories.splice(idx, 1); manageCategories();
     }
-    function saveCategories() {
+    async function saveCategories() {
         const cats = db.stages[state.stage].categories || [];
         cats.forEach((cat, idx) => { const input = document.getElementById(`cat_input_${idx}`); if(input) cat.name = input.value; });
-        saveDB(); hideModal('cat-modal'); 
+        await saveDB(); hideModal('cat-modal'); 
         if(!cats.find(c => c.id === state.activeCategoryId) && cats.length > 0) state.activeCategoryId = cats[0].id;
         renderCardList();
     }
 
-    /* ====== 卡片编辑 ====== */
-    function editPrepText() { const t = prompt("预备提醒文本：", db.stages[state.stage].prepText); if (t !== null) { db.stages[state.stage].prepText = t; saveDB(); } }
-    function deleteCard(index) { if(confirm('确认删除？')) { db.stages[state.stage].cards.splice(index, 1); saveDB(); renderCardList(); } }
+    async function editPrepText() { const t = prompt("预备提醒文本：", db.stages[state.stage].prepText); if (t !== null) { db.stages[state.stage].prepText = t; await saveDB(); } }
+    async function deleteCard(index) { if(confirm('确认删除？')) { db.stages[state.stage].cards.splice(index, 1); await saveDB(); renderCardList(); } }
 
     function openEditModal(index) {
         const isNew = (index === null);
@@ -760,7 +819,7 @@
         showModal('edit-modal');
     }
 
-    function saveCard() {
+    async function saveCard() {
         const idxStr = document.getElementById('edit-card-id').value;
         const c = {
             id: idxStr === 'new' ? 'c_' + Date.now() : db.stages[state.stage].cards[parseInt(idxStr)].id,
@@ -773,22 +832,26 @@
         for(let i=1; i<=3; i++) c.steps.push({ title: document.getElementById(`edit-s${i}-title`).value, text: document.getElementById(`edit-s${i}-text`).value });
 
         if(idxStr === 'new') db.stages[state.stage].cards.push(c); else db.stages[state.stage].cards[parseInt(idxStr)] = c;
-        saveDB(); hideModal('edit-modal'); renderCardList();
+        await saveDB(); hideModal('edit-modal'); renderCardList();
     }
 
-    /* ================= 7. 音频缓入预备引擎与单身期分流 ================= */
+    /* ================= 7. 音频缓入与单身期专属分流交互 ================= */
     let audioPlayer = document.getElementById('bgm-player');
     
     function selectCard(card) {
         state.currentCard = card;
         document.getElementById('prep-text').innerText = db.stages[state.stage].prepText;
+        
+        // 单身期专属文案适配
+        const prepBtn = document.getElementById('btn-prep-confirm');
+        if (state.stage === '单身期') { prepBtn.innerText = '我已准备好'; } 
+        else { prepBtn.innerText = '我们已预备好'; }
+        
         navigateTo('screen-prep');
     }
 
-    // 唤醒音乐并淡入，同时进行“单身期”逻辑分流
     function confirmPrepAndPlay() {
         if(state.currentCard && state.currentCard.bgm) {
-            // 防抖与错误拦截
             if(audioPlayer.src !== state.currentCard.bgm) { audioPlayer.src = state.currentCard.bgm; }
             audioPlayer.volume = 0; 
             audioPlayer.play().then(() => { 
@@ -799,25 +862,36 @@
                     if(vol >= 1) { audioPlayer.volume = 1; clearInterval(fadeInterval); } 
                     else { audioPlayer.volume = vol; }
                 }, 100);
-            }).catch(e => console.log("等待交互后播放", e));
+            }).catch(e => console.log("需交互", e));
         }
 
-        // [核心需求] 单身期无需选择角色，直接进入合并，且动画是向上合并
+        // [核心架构] 单身期分流与动态慰藉文案
         if (state.stage === '单身期') {
             const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged');
             const iconB64 = db.stages[state.stage].icon;
             const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`;
             
-            document.getElementById('sync-title').innerText = "自我圆满";
-            document.getElementById('sync-subtitle').innerText = "深呼吸，点击融合内心力量";
+            document.getElementById('sync-title').innerText = "抬头仰望";
             
-            // 注入向上合并专属 DOM
+            // 动态读取单身期的大选项，给予不同的慰藉语
+            const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || '';
+            let subText = "愿你在静谧中得着内心的力量与安宁。";
+            if (catName.includes('不想') || catName.includes('单身')) {
+                subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。";
+            } else if (catName.includes('想') || catName.includes('进入婚姻')) {
+                subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。";
+            }
+            document.getElementById('sync-subtitle').innerText = subText;
+            document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望";
+            document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)";
+            
             syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`;
             navigateTo('screen-sync');
         } else {
-            // 非单身期进入角色选择
             document.getElementById('sync-title').innerText = "双向奔赴";
             document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并";
+            document.getElementById('btn-sync-confirm').innerText = "确 认 合 并";
+            document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)";
             navigateTo('screen-role');
         }
     }
@@ -836,7 +910,7 @@
     function triggerSync() {
         document.getElementById('sync-animation-box').classList.add('merged');
         state.currentStep = 0;
-        setTimeout(() => { renderContentStep(); navigateTo('screen-content'); }, 1500);
+        setTimeout(() => { renderContentStep(); navigateTo('screen-content'); }, 1800);
     }
 
     function renderContentStep() {
