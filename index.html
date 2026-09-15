@@ -73,8 +73,10 @@
         .btn-glass { background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--theme-glass-border); box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); color: var(--theme-text); padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 600; border-radius: 50px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); width: 85%; margin: 0.8rem auto; display: flex; justify-content: center; align-items: center; letter-spacing: 1px; }
         .btn-glass:active { transform: translateY(3px) scale(0.97); box-shadow: 0 2px 10px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1); }
         .btn-primary { background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); border: none; color: #111 !important; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5); }
-        .btn-blue-gradient { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none !important; color: #fff !important; font-weight: bold; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4), inset 0 1px 2px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
         .btn-type-dark { background: #2d3748 !important; color: #e2e8f0 !important; border: 1px solid rgba(255,255,255,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        
+        /* 专属黄金高定收藏按钮 */
+        .btn-favorite-cat { background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%) !important; border: 1px solid var(--theme-primary) !important; color: var(--theme-primary) !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; font-weight: bold !important; box-shadow: 0 8px 25px rgba(212,175,55,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important; letter-spacing: 2px; }
 
         /* 登录界面的冰蓝框 */
         #screen-login .glass-panel { background: rgba(35, 35, 40, 0.9); border-radius: 24px; padding: 3.5rem 2.5rem; max-width: 380px; box-shadow: 0 25px 60px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.03); }
@@ -139,11 +141,11 @@
         .stage-icon-dropzone img { width: 100%; height: 100%; object-fit: cover; }
         .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
-        /* ================= 详情编辑顶部栏与瀑布流 ================= */
+        /* ================= 详情编辑顶部栏与瀑布流 (Flex居中修复) ================= */
         .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
 
-        .cat-tabs-container { display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 5px 5px 20px 5px; scrollbar-width: none; flex-shrink: 0; justify-content: flex-start; }
+        .cat-tabs-container { display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 5px 5px 20px 5px; scrollbar-width: none; flex-shrink: 0; justify-content: center; flex-wrap: wrap; }
         .cat-tabs-container::-webkit-scrollbar { display: none; }
         .cat-tab { padding: 10px 24px; border-radius: 25px; font-size: 1.05rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); opacity: 0.8; transition: all 0.3s; cursor: pointer; box-shadow: 0 4px 12px var(--theme-glass-shadow); }
         .cat-tab.active { opacity: 1; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border-color: transparent; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4); }
@@ -229,7 +231,7 @@
             align-items: stretch; justify-content: center; width: 100%;
         }
         .player-left-panel { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; min-width: 300px; }
-        .player-right-panel { flex: 1.2; display: flex; flex-direction: column; min-height: 0; min-width: 320px; }
+        .player-right-panel { flex: 1.2; display: flex; flex-direction: column; min-height: 0; min-width: 320px; height: 100%; }
 
         /* 曲目标题 (防超长撑爆布局，单行省略) */
         #player-track-name {
@@ -244,6 +246,10 @@
         .player-controls-wrapper {
             display: flex; width: 100%; max-width: 380px; justify-content: space-between; align-items: center; margin: 15px auto 0; gap: 8px;
         }
+        .ctrl-group { display: flex; align-items: center; }
+        .ctrl-group.left { flex: 1; justify-content: flex-start; gap: 15px; }
+        .ctrl-group.center { flex: 0; justify-content: center; gap: 18px; }
+        .ctrl-group.right { flex: 1; justify-content: flex-end; gap: 15px; }
 
         .ctrl-btn-small { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.15rem; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .ctrl-btn-small:active { transform: scale(0.85); }
@@ -281,6 +287,9 @@
         .netease-info { flex: 1; margin-left: 10px; display: flex; flex-direction: column; overflow: hidden; }
         .netease-title { font-size: 1.05rem; color: #fff; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
         .netease-item.active .netease-title { color: var(--theme-primary); font-weight: bold; opacity: 1; text-shadow: 0 0 8px rgba(212,175,55,0.3); }
+
+        /* ================= 专属高定金框收藏按钮 ================= */
+        .btn-favorite-cat { background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%) !important; border: 1px solid var(--theme-primary) !important; color: var(--theme-primary) !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; font-weight: bold !important; box-shadow: 0 8px 25px rgba(212,175,55,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important; letter-spacing: 2px; }
 
         /* 移动端绝对防溢出折叠架构 (Strict Mobile Boundaries) */
         @media (max-width: 768px) {
@@ -532,7 +541,6 @@
     </div>
 </div>
 
-<!-- 2.5 黑金 3D 定时控制弹窗 -->
 <div class="modal-overlay" id="music-timer-modal">
     <div class="modal-content gold-3d" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary); margin-bottom: 15px; font-size: 1.4rem;">⏳ 定时/定量停止</h2>
@@ -676,7 +684,7 @@ const defaultDB = {
 
 let db = defaultDB; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: false }; let particles = []; let animationId; window.isDraggingProgress = false;
 
-window.cleanupOldLocalStorage = function() { const currentVersion = 'sealOfLoveDB_v32'; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) { localStorage.removeItem(key); } } }
+window.cleanupOldLocalStorage = function() { const currentVersion = 'sealOfLoveDB_v33'; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) { localStorage.removeItem(key); } } }
 
 // 纯正的云端绝对覆盖更新，杜绝本地陈旧数据覆盖云端
 window.upgradeDBStructure = function(source) {
@@ -711,7 +719,7 @@ window.initDB = async function() {
 
     if (!db.users['yishuyangguang']) { db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] }; }
     
-    try { localStorage.setItem('sealOfLoveDB_v32', JSON.stringify(db)); } catch(e){} 
+    try { localStorage.setItem('sealOfLoveDB_v33', JSON.stringify(db)); } catch(e){} 
     
     // 保护网关：如果是已经进入的阶段屏，则热重载UI（用于后台更新后的实时刷新）
     if (document.getElementById('screen-stage').classList.contains('active')) { window.initStageScreen(); }
@@ -720,7 +728,7 @@ window.initDB = async function() {
     if (bestLocalDb && !cloudDb) { window.saveDB(); }
 }
 
-window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v32', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
+window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v33', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
 
 window.showGlobalToast = function(text, type = 'loading') { const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text'); if(!toast) return; toast.className = `global-toast show ${type}`; msg.innerText = text; if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖'; clearTimeout(toastTimeout); if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); } }
 window.compressImageFile = function(file, callback) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 240; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/webp', 0.75)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
@@ -1061,7 +1069,7 @@ window.showPlayerFromFloat = function() { if(state.isLoggedIn && !state.isEditMo
 
 /* ================= 10. 用户卡片交互与无缝背景引擎 ================= */
 window.startCardFlow = function(card) { state.currentCard = card; document.getElementById('prep-text').innerText = db.stages[state.stage].prepText; const prepBtn = document.getElementById('btn-prep-confirm'); if (state.stage === '单身期') { prepBtn.innerText = '我已准备好'; } else { prepBtn.innerText = '我们已预备好'; } window.navigateTo('screen-prep'); }
-window.confirmPrepAndNavigate = function() { if (state.stage === '单身期') { const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged'); const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; document.getElementById('sync-title').innerText = "抬头仰望"; const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || ''; let subText = "愿你在静谧中得着内心的力量与安宁。"; if (catName.includes('不想') || catName.includes('单身')) subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。"; else if (catName.includes('想') || catName.includes('进入婚姻')) subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。"; document.getElementById('sync-subtitle').innerText = subText; document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望"; document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)"; syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`; window.navigateTo('screen-sync'); } else { document.getElementById('sync-title').innerText = "双向奔赴"; document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并"; document.getElementById('btn-sync-confirm').innerText = "确 认 合 合"; document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)"; window.navigateTo('screen-role'); } }
+window.confirmPrepAndNavigate = function() { if (state.stage === '单身期') { const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged'); const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; document.getElementById('sync-title').innerText = "抬头仰望"; const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || ''; let subText = "愿你在静谧中得着内心的力量与安宁。"; if (catName.includes('不想') || catName.includes('单身')) subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。"; else if (catName.includes('想') || catName.includes('进入婚姻')) subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。"; document.getElementById('sync-subtitle').innerText = subText; document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望"; document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)"; syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`; window.navigateTo('screen-sync'); } else { document.getElementById('sync-title').innerText = "双向奔赴"; document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并"; document.getElementById('btn-sync-confirm').innerText = "确 认 合 并"; document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)"; window.navigateTo('screen-role'); } }
 window.selectRole = function(role) { state.role = role; const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged'); const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; if (role === 'boy') syncBox.innerHTML = `<div class="sync-half boy" style="${bgStyle} background-size: cover;"></div>`; else syncBox.innerHTML = `<div class="sync-half girl" style="${bgStyle} background-size: cover;"></div>`; window.navigateTo('screen-sync'); }
 window.triggerSync = function() { document.getElementById('sync-animation-box').classList.add('merged'); state.currentStep = 0; setTimeout(() => { window.renderContentStep(); window.navigateTo('screen-content'); }, 1800); }
 window.renderContentStep = function() { const stepData = state.currentCard.steps[state.currentStep]; document.getElementById('content-type-title').innerText = `【${state.currentCard.type}】的连结`; document.getElementById('step-title').innerText = stepData.title; document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>'); for(let i=1; i<=3; i++) { const dot = document.getElementById(`dot-${i}`); if (i - 1 === state.currentStep) dot.classList.add('active'); else dot.classList.remove('active'); } const nextBtn = document.getElementById('btn-next-step'); const longPressBtn = document.getElementById('btn-long-press'); if (state.currentStep < 2) { nextBtn.style.display = 'flex'; longPressBtn.style.display = 'none'; } else { nextBtn.style.display = 'none'; longPressBtn.style.display = 'flex'; } }
