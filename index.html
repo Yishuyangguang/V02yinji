@@ -4,15 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="印记">
     <meta name="theme-color" content="#1c1d22">
-    <link rel="manifest" href='data:application/manifest+json,{"name":"恒久印记","short_name":"印记","display":"standalone","start_url":".","background_color":"#1c1d22","theme_color":"#d4af37","icons":[{"src":"apple-touch-icon.png","sizes":"180x180","type":"image/png"}]}'>
+    <!-- 安全解析的 PWA Base64 编码 Manifest，消除语法报错 -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoi5oGS5LmF5Y2w6K6wIiwic2hvcnRfbmFtZSI6IuWNsOiusCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwic3RhcnRfdXJsIjoiLiIsImJhY2tncm91bmRfY29sb3ciOiIjMWMxZDIyIiwidGhlbWVfY29sb3ciOiIjZDRhZjM3IiwiaWNvbnMiOlt7InNyYyI6ImFwcGxlLXRvdWNoLWljb24ucG5nIiwic2l6ZXMiOiIxODB4MTgwIiwidHlwZSI6ImltYWdlL3BuZyJ9XX0=">
+    
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="shortcut icon" href="favicon.ico">
     <title>恒久印记</title>
+    
     <style>
         /* ================= 全局重置与双轨变量 ================= */
         :root {
@@ -172,6 +176,7 @@
         .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
         .modal-content::-webkit-scrollbar { display: none; }
         .light-theme .modal-content { background: #fdfdfd; box-shadow: 0 30px 60px rgba(0,0,0,0.15); }
+        
         .qr-image { width: 200px; height: auto; border-radius: 16px; margin: 20px auto; display: block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
 
         /* ================= 网易云风格高定黑胶唱片 ================= */
@@ -212,25 +217,30 @@
         .profile-avatar-zone::after { content: '修改头像'; position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; padding: 4px 0; text-align: center; opacity: 0; transition: opacity 0.3s; }
         .profile-avatar-zone:hover::after { opacity: 1; }
 
+        /* 后台音乐分类管理专属按钮 */
+        .btn-type-blue { background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); color: #fff !important; border: none !important; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4); }
+
     </style>
 </head>
 <body>
 
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
+<!-- 纯净 Audio 引擎，全站后台不间断托底播放 -->
+<audio id="bgm-player"></audio>
 
 <!-- 左上角主题控制 -->
 <div class="widget-controls" id="theme-widget">
-    <div class="theme-toggle-btn" onclick="toggleTheme()" id="btn-theme">🌙</div>
+    <div class="theme-toggle-btn" onclick="window.toggleTheme()" id="btn-theme">🌙</div>
 </div>
 
 <!-- 右上角悬浮工具 -->
 <div class="widget-controls-right">
-    <div class="apple-music-player" id="apple-music-box" onclick="showPlayerFromFloat()">
+    <div class="apple-music-player" id="apple-music-box" onclick="window.showPlayerFromFloat()">
         <div class="music-icon"></div>
         <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
     </div>
-    <div class="user-profile-btn" id="user-widget" onclick="openUserProfile()">
+    <div class="user-profile-btn" id="user-widget" onclick="window.openUserProfile()">
         <img id="user-widget-avatar" class="user-avatar-preview" src="">
         <svg id="user-widget-svg" class="user-svg-icon" viewBox="0 0 24 24">
             <circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path>
@@ -252,8 +262,8 @@
 <div id="app-container">
     
     <div class="admin-controls" id="top-admin-controls" style="display: none;">
-        <button class="btn-glass btn-small" onclick="toggleEditMode()" id="btn-edit-toggle">开启深度编辑</button>
-        <button class="btn-glass btn-small" onclick="logout()">安全退出</button>
+        <button class="btn-glass btn-small" onclick="window.toggleEditMode()" id="btn-edit-toggle">开启深度编辑</button>
+        <button class="btn-glass btn-small" onclick="window.logout()">安全退出</button>
     </div>
 
     <!-- 0. 登录屏 -->
@@ -274,7 +284,7 @@
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
         
-        <!-- 高定胶囊按钮 -->
+        <!-- 高定胶囊按钮：印记音律 (直达全局曲库) -->
         <div class="brand-capsule" onclick="window.openMusicTypeModal()">
             <img src="apple-touch-icon.png" alt="印记" onerror="this.src='favicon-32x32.png'">
             <span>印记音律</span>
@@ -301,7 +311,7 @@
         <button class="btn-glass" style="margin: 30px auto;" onclick="window.navigateTo('screen-stage')">返回首页</button>
     </div>
 
-    <!-- 3. 预备提醒屏 -->
+    <!-- 3. 预备提醒屏 (无干扰直达) -->
     <div class="screen center-content" id="screen-prep">
         <div class="glass-panel" style="padding: 3.5rem 2rem;">
             <h1 class="text-gradient-blue" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
@@ -382,7 +392,7 @@
     </div>
 </div>
 
-<!-- 1. 音乐大类选择 (高定暗黑主题) -->
+<!-- 1. 音乐大类选择 (高定暗色UI 还原图1) -->
 <div class="modal-overlay" id="music-type-modal">
     <div class="modal-content music-type-modal-content" style="text-align: center; max-width: 360px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 25px; font-size: 1.6rem; letter-spacing:1px;">选择背景音律</h2>
@@ -395,7 +405,7 @@
     </div>
 </div>
 
-<!-- 2. 网易云风格：黑胶唱片播放器 -->
+<!-- 2. 网易云风格：黑胶唱片播放器弹窗 -->
 <div class="modal-overlay" id="vinyl-player-modal">
     <div class="modal-content vinyl-player-container">
         
@@ -429,17 +439,14 @@
     </div>
 </div>
 
-<!-- 3. 高定音乐库管理弹窗 -->
+<!-- 3. 高定音乐库管理弹窗 (含编辑功能) -->
 <div class="modal-overlay" id="music-admin-modal">
     <div class="modal-content" style="background: var(--theme-bg-color);">
-        <h2 class="text-gradient-blue" style="margin-bottom: 20px; text-align:left;">全局音律库管理</h2>
+        <h2 class="text-gradient-blue" style="margin-bottom: 20px; text-align:left;">音乐库全局管理</h2>
         
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <p style="font-size: 0.9rem; opacity: 0.8; text-align:left; margin:0;">选择分类库进行管理</p>
-            <button class="btn-glass btn-small" style="margin:0; border: 1px dashed #f59e0b; color:#f59e0b; padding:4px 10px;" onclick="window.manageMusicCategories()">⚙️ 管理分类</button>
-        </div>
-
+        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom:8px; text-align:left;">选择分类进行管理</p>
         <select id="admin-music-cat" onchange="window.renderAdminMusicList()" style="margin-bottom: 20px; background:var(--theme-glass-bg);">
+            <!-- JS 动态加载 -->
         </select>
         
         <input type="search" id="admin-music-search" placeholder="🔍 模糊搜索音乐库..." oninput="window.filterAdminMusicList()" style="margin-bottom:15px;">
@@ -453,7 +460,6 @@
             
             <div id="music-upload-zone" style="width:100%; padding:20px; border: 2px dashed #818cf8; border-radius: 14px; text-align: center; cursor: pointer; margin-bottom: 15px; transition: all 0.3s;">
                 <span id="music-upload-text" style="color: #6366f1; font-weight:500;">点击或拖拽音频文件 (支持多选直传)</span>
-                <!-- 重点：开启多选 multiple -->
                 <input type="file" id="new-music-file" accept="audio/*" multiple style="display: none;">
             </div>
             
@@ -478,6 +484,7 @@
         <button class="btn-glass btn-primary" style="margin-top: 20px; width:100%;" onclick="window.saveMusicCategories()">完成并极速保存</button>
     </div>
 </div>
+
 
 <!-- 其它模态框 -->
 <div class="modal-overlay" id="qr-modal">
