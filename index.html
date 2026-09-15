@@ -3,20 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- PWA 原生应用支持与沉浸式 Meta 注入 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="印记">
     <meta name="theme-color" content="#1c1d22">
     <link rel="manifest" href='data:application/manifest+json,{"name":"恒久印记","short_name":"印记","display":"standalone","start_url":".","background_color":"#1c1d22","theme_color":"#d4af37","icons":[{"src":"apple-touch-icon.png","sizes":"180x180","type":"image/png"}]}'>
-    
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="shortcut icon" href="favicon.ico">
     <title>恒久印记</title>
-    
     <style>
         /* ================= 全局重置与双轨变量 ================= */
         :root {
@@ -97,7 +93,8 @@
 
         .btn-glass {
             background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--theme-glass-border);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--theme-glass-border);
             box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
             color: var(--theme-text); padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 600; border-radius: 50px;
             cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -107,7 +104,8 @@
 
         .btn-primary { background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); border: none; color: #111 !important; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5); }
         .btn-blue-gradient { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none !important; color: #fff !important; font-weight: bold; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4), inset 0 1px 2px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .btn-dark-grey { background: #2d3748 !important; color: #e2e8f0 !important; border: 1px solid rgba(255,255,255,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        
+        .btn-type-dark { background: #2d3748 !important; color: #e2e8f0 !important; border: 1px solid rgba(255,255,255,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
         input, textarea, select {
             width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text);
@@ -123,7 +121,7 @@
         h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 1rem; color: var(--theme-text); transition: color 0.5s; font-weight: 700; }
         p { font-size: clamp(1rem, 4vw, 1.15rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
         .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; letter-spacing: 2px; }
-        .text-gradient-blue { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: bold; }
+        .text-gradient-blue { background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: bold; }
 
         /* ================= 悬浮挂件系统 ================= */
         .widget-controls { position: absolute; top: calc(env(safe-area-inset-top) + 15px); left: 15px; z-index: 100; display: flex; gap: 10px; }
@@ -204,6 +202,7 @@
         .action-icon.del { background: #ef4444; }
         .action-icon:active { transform: scale(0.85); }
 
+        /* ================= 底部管理大按钮 ================= */
         .admin-controls { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 15px); left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 95%; }
         .btn-small { padding: 8px 18px; font-size: 0.9rem; border-radius: 20px; width: auto; margin: 0; }
 
@@ -233,7 +232,8 @@
         
         .qr-image { width: 200px; height: auto; border-radius: 16px; margin: 20px auto; display: block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
 
-        /* ================= 高级黑胶唱片播放器 UI ================= */
+        /* ================= 黑胶唱片播放器 UI ================= */
+        .music-type-modal-content { background: #1c1d22 !important; border-radius: 28px !important; border: 1px solid rgba(255,255,255,0.05) !important; }
         .vinyl-player-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
         .vinyl-disc { width: 220px; height: 220px; border-radius: 50%; background: repeating-radial-gradient(circle, #111 0%, #000 5%, #111 10%); border: 6px solid rgba(255,255,255,0.1); box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; position: relative; animation: spin 12s linear infinite; animation-play-state: paused; margin: 10px auto 25px auto; }
         .vinyl-disc.playing { animation-play-state: running; }
@@ -266,11 +266,9 @@
         .profile-avatar-zone img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .profile-avatar-zone::after { content: '修改头像'; position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; padding: 4px 0; text-align: center; opacity: 0; transition: opacity 0.3s; }
         .profile-avatar-zone:hover::after { opacity: 1; }
-        
-        /* 模态按钮特殊配色 (参考图1) */
+
+        /* 后台音乐分类管理专属按钮 */
         .btn-type-blue { background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); color: #fff !important; border: none !important; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4); }
-        .btn-type-dark { background: #2d3748 !important; color: #e2e8f0 !important; border: 1px solid rgba(255,255,255,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .music-type-modal-content { background: #1c1d22 !important; border-radius: 28px !important; border: 1px solid rgba(255,255,255,0.05) !important; }
 
     </style>
 </head>
@@ -278,7 +276,7 @@
 
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
-<!-- 纯净 Audio 引擎，全权托管背景播放 -->
+<!-- 纯净 Audio 引擎，全站后台不间断托底播放 -->
 <audio id="bgm-player"></audio>
 
 <div class="widget-controls" id="theme-widget">
@@ -327,8 +325,8 @@
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
         
-        <!-- 高定胶囊按钮：印记音律 (还原图2视觉) -->
-        <div class="brand-capsule" onclick="showModal('music-type-modal')">
+        <!-- 高定胶囊按钮：印记音律 (直达全局曲库) -->
+        <div class="brand-capsule" onclick="openMusicTypeModal()">
             <img src="apple-touch-icon.png" alt="印记" onerror="this.src='favicon-32x32.png'">
             <span>印记音律</span>
         </div>
@@ -344,7 +342,6 @@
         <div class="stage-admin-bar edit-mode-only">
             <button class="btn-glass btn-small btn-blue-gradient" onclick="openEditModal(null)">+ 新增卡片</button>
             <button class="btn-glass btn-small" onclick="manageCategories()">管理大选项</button>
-            <button class="btn-glass btn-small" onclick="manageMusicLibrary()">音乐库管理</button>
             <button class="btn-glass btn-small" onclick="editPrepText()">预备提示语</button>
         </div>
 
@@ -354,7 +351,7 @@
         <button class="btn-glass" style="margin: 30px auto;" onclick="navigateTo('screen-stage')">返回首页</button>
     </div>
 
-    <!-- 3. 预备提醒屏 (无干扰直达) -->
+    <!-- 3. 预备提醒屏 (去除了强制断点音乐，直接融入大后台) -->
     <div class="screen center-content" id="screen-prep">
         <div class="glass-panel" style="padding: 3.5rem 2rem;">
             <h1 class="text-gradient-blue" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
@@ -431,19 +428,22 @@
         </div>
         <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 20px;">
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; padding: 0.8rem;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
+            <!-- 在管理面板注入全局音乐库管理入口 -->
+            <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; padding: 0.8rem; margin-top: 10px;" onclick="hideModal('user-profile-modal'); manageMusicLibrary();">⚙️ 管理全局音律分类库</button>
         </div>
     </div>
 </div>
 
-<!-- 1. 音乐大类选择 (高定暗色UI 还原图1) -->
+<!-- 1. 音乐大类选择 (高定暗黑主题，动态加载分类) -->
 <div class="modal-overlay" id="music-type-modal">
     <div class="modal-content music-type-modal-content" style="text-align: center; max-width: 360px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 25px; font-size: 1.6rem; letter-spacing:1px;">选择背景音律</h2>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <button class="btn-glass btn-type-blue" style="margin:0; width:100%; padding:1rem;" onclick="openVinylPlayer('instrumental')">纯 乐 伴 奏</button>
-            <button class="btn-glass btn-type-dark" style="margin:0; width:100%; padding:1rem;" onclick="openVinylPlayer('vocal')">歌 曲 演 唱</button>
-            <button class="btn-glass btn-type-dark" style="margin-top:10px; width: 100%; padding:1rem;" onclick="hideModal('music-type-modal')">取 消</button>
+        
+        <div id="music-type-btn-container" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- JS 动态注入分类按钮 -->
         </div>
+
+        <button class="btn-glass btn-type-dark" style="margin-top: 15px; width: 100%; padding:1rem;" onclick="hideModal('music-type-modal')">取 消</button>
     </div>
 </div>
 
@@ -477,26 +477,23 @@
     </div>
 </div>
 
-<!-- 3. 高定音乐库管理弹窗 (含编辑功能) -->
+<!-- 3. 高定音乐库管理弹窗 (含分类管理、CRUD、云端直传) -->
 <div class="modal-overlay" id="music-admin-modal">
     <div class="modal-content" style="background: var(--theme-bg-color);">
-        <h2 class="text-gradient-blue" style="margin-bottom: 20px; text-align:left;">音乐库全局管理</h2>
+        <h2 class="text-gradient-blue" style="margin-bottom: 20px; text-align:left;">全局音律库管理</h2>
         
-        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom:8px; text-align:left;">选择阶段与分类进行管理</p>
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <select id="admin-music-stage" onchange="renderAdminMusicList()" style="background:var(--theme-glass-bg); margin-bottom:0;">
-                <!-- JS动态注入阶段列表 -->
-            </select>
-            <select id="admin-music-cat" onchange="renderAdminMusicList()" style="background:var(--theme-glass-bg); margin-bottom:0;">
-                <option value="instrumental">纯音乐</option>
-                <option value="vocal">歌曲演唱</option>
-            </select>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <p style="font-size: 0.9rem; opacity: 0.8; text-align:left; margin:0;">选择分类库进行管理</p>
+            <button class="btn-glass btn-small" style="margin:0; border: 1px dashed #f59e0b; color:#f59e0b; padding:4px 10px;" onclick="manageMusicCategories()">⚙️ 管理分类</button>
         </div>
+
+        <select id="admin-music-cat" onchange="renderAdminMusicList()" style="margin-bottom: 20px; background:var(--theme-glass-bg);">
+            <!-- JS 动态注入分类 -->
+        </select>
         
-        <!-- 管理端搜索框 -->
         <input type="search" id="admin-music-search" placeholder="🔍 模糊搜索音乐库..." oninput="filterAdminMusicList()" style="margin-bottom:15px;">
 
-        <div id="admin-music-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; max-height: 25vh; overflow-y:auto; padding-right:5px;"></div>
+        <div id="admin-music-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; max-height: 30vh; overflow-y:auto; padding-right:5px;"></div>
         
         <div style="background: rgba(255,255,255,0.02); padding:20px; border-radius:18px; border: 1.5px dashed #6366f1;">
             <h4 id="admin-music-action-title" style="margin-bottom: 15px; color:#6366f1; text-align:left;">+ 新增曲目</h4>
@@ -518,7 +515,18 @@
     </div>
 </div>
 
-<!-- 其它模态框 -->
+<!-- 4. 音乐分类管理弹窗 -->
+<div class="modal-overlay" id="music-cat-modal">
+    <div class="modal-content">
+        <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理音律分类</h2>
+        <div id="music-cat-list-edit" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;"></div>
+        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%; margin-bottom: 10px;" onclick="addMusicCategory()">+ 添加新音律分类</button>
+        <button class="btn-glass btn-primary" style="margin-top: 20px; width:100%;" onclick="saveMusicCategories()">完成并极速保存</button>
+    </div>
+</div>
+
+
+<!-- 其它基础模态框 -->
 <div class="modal-overlay" id="qr-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary);">联系站长</h2>
@@ -529,7 +537,7 @@
 
 <div class="modal-overlay" id="cat-modal">
     <div class="modal-content">
-        <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理大选项 (分类)</h2>
+        <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理大选项 (阶段分类)</h2>
         <div id="cat-list-edit" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;"></div>
         <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%; margin-bottom: 10px;" onclick="addNewCategory()">+ 添加新分类</button>
         <button class="btn-glass btn-primary" style="margin-top: 20px; width:100%;" onclick="saveCategories()">完成并极速保存</button>
@@ -571,14 +579,25 @@
 
     const defaultDB = {
         users: {}, 
+        // v15 架构大升级：全局动态音乐库
+        globalMusicConfig: {
+            categories: [
+                { id: 'mcat_1', name: '纯乐伴奏' },
+                { id: 'mcat_2', name: '歌曲演唱' }
+            ],
+            library: {
+                'mcat_1': [{ name: "宁静钢琴曲", url: "https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3" }],
+                'mcat_2': []
+            }
+        },
         stages: {
-            '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', type: '心', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }], musicLibrary: { instrumental: [], vocal: [] } },
-            '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', type: '脑', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }], musicLibrary: { instrumental: [], vocal: [] } },
-            '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', name: '定婚期', prepText: '即将步入婚姻殿堂，回想决定携手的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [], musicLibrary: { instrumental: [], vocal: [] } },
-            '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', name: '结婚初阶', prepText: '爱意要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [], musicLibrary: { instrumental: [], vocal: [] } },
-            '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', name: '备孕时期', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [], musicLibrary: { instrumental: [], vocal: [] } },
-            '孕后初期': { themeParams: { dark: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, light: { bg: '#f4f9fd', p: '#0284c7', s: '#7dd3fc' } }, icon: '', name: '孕后初期', prepText: '疲惫需要温柔承托，轻揉肩膀放松。', categories: [{id:'cat_ep1',name:'温柔承托'}], cards: [], musicLibrary: { instrumental: [], vocal: [] } },
-            '婚后进阶': { themeParams: { dark: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, light: { bg: '#faf5ff', p: '#7c3aed', s: '#c4b5fd' } }, icon: '', name: '婚后进阶', prepText: '全然接纳此刻真实的彼此。', categories: [{id:'cat_a1',name:'平淡坚守'}], cards: [], musicLibrary: { instrumental: [], vocal: [] } }
+            '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', type: '心', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
+            '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', type: '脑', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }] },
+            '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', name: '定婚期', prepText: '即将步入婚姻殿堂，回想决定携手的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [] },
+            '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', name: '结婚', prepText: '爱意要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [] },
+            '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', name: '备孕期', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [] },
+            '孕后初期': { themeParams: { dark: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, light: { bg: '#f4f9fd', p: '#0284c7', s: '#7dd3fc' } }, icon: '', name: '孕后初期', prepText: '疲惫需要温柔承托，轻揉肩膀放松。', categories: [{id:'cat_ep1',name:'温柔承托'}], cards: [] },
+            '婚后进阶': { themeParams: { dark: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, light: { bg: '#faf5ff', p: '#7c3aed', s: '#c4b5fd' } }, icon: '', name: '婚后进阶', prepText: '全然接纳此刻真实的彼此。', categories: [{id:'cat_a1',name:'平淡坚守'}], cards: [] }
         }
     };
 
@@ -587,7 +606,7 @@
     let currentUserAccount = null; 
 
     function cleanupOldLocalStorage() {
-        const currentVersion = 'sealOfLoveDB_v14';
+        const currentVersion = 'sealOfLoveDB_v15';
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
@@ -620,7 +639,7 @@
 
     async function saveDB() {
         let localSaved = false;
-        try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v14', JSON.stringify(db)); localSaved = true; } catch (e) {}
+        try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v15', JSON.stringify(db)); localSaved = true; } catch (e) {}
         try {
             showGlobalToast('正在同步至云端...', 'loading');
             const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
@@ -629,7 +648,6 @@
         } catch(e) { showGlobalToast('网络异常，数据未保存至云端', 'error'); }
     }
 
-    // 热升级数据结构：迁移老版本的全局音乐库到按时期分类
     function upgradeDBStructure(tempDb) {
         if (!tempDb) return defaultDB;
         for (let key in tempDb.users) {
@@ -637,17 +655,35 @@
         }
         stagesList.forEach(s => {
             if(!tempDb.stages[s]) tempDb.stages[s] = JSON.parse(JSON.stringify(defaultDB.stages[s]));
-            if(!tempDb.stages[s].musicLibrary) tempDb.stages[s].musicLibrary = { instrumental: [], vocal: [] };
         });
-        if(tempDb.musicLibrary) {
-            // 将老版本的全局音乐挂载到第一阶段作为兜底
-            if(Array.isArray(tempDb.musicLibrary.instrumental) && tempDb.musicLibrary.instrumental.length > 0) {
-                tempDb.stages[stagesList[0]].musicLibrary.instrumental = tempDb.musicLibrary.instrumental;
+        
+        // 核心：无损热升级旧版音乐库到 全局动态音乐库 v15
+        if (!tempDb.globalMusicConfig) {
+            tempDb.globalMusicConfig = {
+                categories: [ { id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' } ],
+                library: { 'mcat_1': [], 'mcat_2': [] }
+            };
+            
+            // 尝试把旧版数据打捞合并进新版
+            const tryMigrate = (list, targetCat) => {
+                if(Array.isArray(list)) list.forEach(m => {
+                    if(!tempDb.globalMusicConfig.library[targetCat].find(x => x.url === m.url)) tempDb.globalMusicConfig.library[targetCat].push(m);
+                });
+            };
+            
+            if(tempDb.musicLibrary) {
+                tryMigrate(tempDb.musicLibrary.instrumental, 'mcat_1');
+                tryMigrate(tempDb.musicLibrary.vocal, 'mcat_2');
+                delete tempDb.musicLibrary;
             }
-            if(Array.isArray(tempDb.musicLibrary.vocal) && tempDb.musicLibrary.vocal.length > 0) {
-                tempDb.stages[stagesList[0]].musicLibrary.vocal = tempDb.musicLibrary.vocal;
-            }
-            delete tempDb.musicLibrary; // 销毁废弃节点
+            
+            stagesList.forEach(s => {
+                if (tempDb.stages[s].musicLibrary) {
+                    tryMigrate(tempDb.stages[s].musicLibrary.instrumental, 'mcat_1');
+                    tryMigrate(tempDb.stages[s].musicLibrary.vocal, 'mcat_2');
+                    delete tempDb.stages[s].musicLibrary;
+                }
+            });
         }
         return tempDb;
     }
@@ -660,11 +696,11 @@
                 if (remoteDb && remoteDb.stages) {
                     db = upgradeDBStructure(remoteDb); 
                     if (currentUserAccount && !db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
-                    try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v14', JSON.stringify(db)); } catch(e){} return;
+                    try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v15', JSON.stringify(db)); } catch(e){} return;
                 }
             }
         } catch (e) {}
-        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v14'));
+        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v15'));
         if (local && local.stages) { db = upgradeDBStructure(local); }
         else saveDB();
     }
@@ -714,7 +750,7 @@
         try {
             const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: baseUsername, password: p }) });
             if (response.ok) { const result = await response.json(); if(result.success) { loginSuccess(baseUsername, true); return; } }
-        } catch (error) {}
+        } catch (error) { console.log("后端鉴权降级至本地"); }
 
         if(db.users[baseUsername] && db.users[baseUsername].password === p) { loginSuccess(baseUsername, false); } else alert('账号或密码错误。');
     }
@@ -928,17 +964,18 @@
         await saveDB(); hideModal('edit-modal'); renderCardList();
     }
 
-    /* ================= 7. R2 音乐库全局接管与高级搜索控制引擎 ================= */
+    /* ================= 7. 动态音乐大库管理与直传 ================= */
     let audioPlayer = document.getElementById('bgm-player');
-    let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; 
+    let musicState = { categoryId: '', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; 
 
+    // 全局防竞态单例化
     audioPlayer.removeEventListener('ended', handleAudioEnded);
     audioPlayer.addEventListener('ended', handleAudioEnded);
 
     function handleAudioEnded() {
         if(musicState.playlist.length === 0) return;
         
-        // 定时定量播放拦截器
+        // 倒数计数器拦截机制
         if (musicState.tracksLimit > 0) {
             musicState.tracksLimit--;
             const limitTextEl = document.getElementById('player-limit-text');
@@ -947,7 +984,7 @@
                 pauseTrack();
                 musicState.tracksLimit = -1;
                 if(limitTextEl) limitTextEl.innerText = `⏳ 定时/定量`;
-                return; 
+                return; // 倒数结束，打断接下来的播放
             }
         }
 
@@ -956,16 +993,50 @@
         else { musicState.currentIndex = (musicState.currentIndex + 1) % musicState.playlist.length; playCurrentTrack(); }
     }
 
-    // A. 音乐后台管理：按时期与大类过滤，带编辑功能
-    function initAdminMusicStageSelect() {
-        const stageSel = document.getElementById('admin-music-stage'); stageSel.innerHTML = '';
-        stagesList.forEach(s => { stageSel.innerHTML += `<option value="${s}">${s}</option>`; });
+    // A. 音乐分类大库管理 (CRUD)
+    function initAdminMusicCatSelect() {
+        const catSel = document.getElementById('admin-music-cat'); catSel.innerHTML = '';
+        const cats = db.globalMusicConfig.categories || [];
+        cats.forEach(c => { catSel.innerHTML += `<option value="${c.id}">${c.name}</option>`; });
     }
 
+    function manageMusicCategories() {
+        const listDiv = document.getElementById('music-cat-list-edit'); listDiv.innerHTML = '';
+        const cats = db.globalMusicConfig.categories || [];
+        cats.forEach((cat, idx) => {
+            const div = document.createElement('div'); div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center';
+            div.innerHTML = `<input type="text" style="margin:0; flex:1;" id="mcat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:45px; height:45px; margin:0; color:#ef4444; padding:0; border-radius:12px;" onclick="removeMusicCategory(${idx})">✖</button>`;
+            listDiv.appendChild(div);
+        });
+        showModal('music-cat-modal');
+    }
+
+    function addMusicCategory() {
+        if(!db.globalMusicConfig.categories) db.globalMusicConfig.categories = [];
+        const newId = 'mcat_' + Date.now();
+        db.globalMusicConfig.categories.push({ id: newId, name: '新建音乐类' });
+        db.globalMusicConfig.library[newId] = [];
+        manageMusicCategories();
+    }
+
+    async function removeMusicCategory(idx) {
+        const catId = db.globalMusicConfig.categories[idx].id;
+        const linkedMusic = db.globalMusicConfig.library[catId] || [];
+        if(linkedMusic.length > 0 && !confirm(`该分类下有 ${linkedMusic.length} 首音乐，删除分类将清空这些音乐。确定删除吗？`)) return;
+        db.globalMusicConfig.categories.splice(idx, 1);
+        delete db.globalMusicConfig.library[catId];
+        manageMusicCategories();
+    }
+
+    async function saveMusicCategories() {
+        const cats = db.globalMusicConfig.categories || [];
+        cats.forEach((cat, idx) => { const input = document.getElementById(`mcat_input_${idx}`); if(input) cat.name = input.value; });
+        await saveDB(); hideModal('music-cat-modal');
+    }
+
+    // B. 曲目详情管理
     function manageMusicLibrary() { 
-        initAdminMusicStageSelect();
-        // 默认选中当前正在浏览的时期
-        if(state.stage) document.getElementById('admin-music-stage').value = state.stage;
+        initAdminMusicCatSelect();
         document.getElementById('admin-music-search').value = '';
         resetMusicEdit();
         renderAdminMusicList(); 
@@ -976,14 +1047,14 @@
     function filterAdminMusicList() { renderAdminMusicList(); }
 
     function renderAdminMusicList() {
-        const targetStage = document.getElementById('admin-music-stage').value;
-        const type = document.getElementById('admin-music-cat').value;
+        const catId = document.getElementById('admin-music-cat').value;
         const query = document.getElementById('admin-music-search').value.trim().toLowerCase();
         const listDiv = document.getElementById('admin-music-list'); listDiv.innerHTML = '';
-        
-        const list = db.stages[targetStage].musicLibrary[type] || [];
-        
+        if(!catId) { listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">请先添加音乐分类</div>`; return; }
+
+        const list = db.globalMusicConfig.library[catId] || [];
         let matchCount = 0;
+        
         list.forEach((m, idx) => {
             if (query && !m.name.toLowerCase().includes(query)) return; 
             matchCount++;
@@ -995,8 +1066,8 @@
                     <span style="font-size:0.75rem; opacity:0.6; word-break:break-all; color:var(--theme-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.url}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <div class="action-icon" style="background:#4f46e5;" onclick="editAdminMusic('${targetStage}', '${type}', ${idx})">✎</div>
-                    <div class="action-icon del" onclick="deleteAdminMusic('${targetStage}', '${type}', ${idx})">✖</div>
+                    <div class="action-icon" style="background:#4f46e5;" onclick="editAdminMusic('${catId}', ${idx})">✎</div>
+                    <div class="action-icon del" onclick="deleteAdminMusic('${catId}', ${idx})">✖</div>
                 </div>
             `; listDiv.appendChild(div);
         });
@@ -1023,8 +1094,8 @@
         }
     }
 
-    function editAdminMusic(targetStage, type, idx) {
-        const m = db.stages[targetStage].musicLibrary[type][idx];
+    function editAdminMusic(catId, idx) {
+        const m = db.globalMusicConfig.library[catId][idx];
         document.getElementById('new-music-name').value = m.name;
         document.getElementById('new-music-url').value = m.url;
         document.getElementById('edit-music-idx').value = idx;
@@ -1046,10 +1117,10 @@
     async function saveMusicToLibrary() {
         const name = document.getElementById('new-music-name').value.trim();
         let url = document.getElementById('new-music-url').value.trim();
-        const targetStage = document.getElementById('admin-music-stage').value;
-        const type = document.getElementById('admin-music-cat').value;
+        const catId = document.getElementById('admin-music-cat').value;
         const editIdx = document.getElementById('edit-music-idx').value;
 
+        if(!catId) return alert('请先创建分类');
         if(!name) return alert('请输入曲目名称');
         if(!url && !selectedAudioFile) return alert('请拖入音频或填写链接');
 
@@ -1064,37 +1135,47 @@
             } catch(e) { showGlobalToast('传输中断，请重试', 'error'); return; }
         }
 
-        if(!db.stages[targetStage].musicLibrary[type]) db.stages[targetStage].musicLibrary[type] = [];
+        if(!db.globalMusicConfig.library[catId]) db.globalMusicConfig.library[catId] = [];
         
-        if (editIdx !== '') db.stages[targetStage].musicLibrary[type][parseInt(editIdx)] = { name, url };
-        else db.stages[targetStage].musicLibrary[type].push({name, url});
+        if (editIdx !== '') {
+            db.globalMusicConfig.library[catId][parseInt(editIdx)] = { name, url };
+        } else {
+            db.globalMusicConfig.library[catId].push({name, url});
+        }
         
         await saveDB(); resetMusicEdit(); renderAdminMusicList();
     }
     
-    async function deleteAdminMusic(targetStage, type, idx) { if(confirm('确认删除此曲？')) { db.stages[targetStage].musicLibrary[type].splice(idx, 1); await saveDB(); renderAdminMusicList(); } }
+    async function deleteAdminMusic(catId, idx) { if(confirm('确认删除此曲？')) { db.globalMusicConfig.library[catId].splice(idx, 1); await saveDB(); renderAdminMusicList(); } }
 
 
-    // B. 用户侧网易云风格播放器
+    // C. 前台动态网易云风格播放器
     function openMusicTypeModal() {
+        const container = document.getElementById('music-type-btn-container');
+        container.innerHTML = '';
+        const cats = db.globalMusicConfig.categories || [];
+        
+        if(cats.length === 0) {
+            container.innerHTML = '<p style="opacity:0.5; font-size:0.9rem;">暂无音律分类，请联系管理员添加。</p>';
+        } else {
+            cats.forEach((cat, index) => {
+                const btn = document.createElement('button');
+                // 还原参考图 1: 首选项发光蓝紫，其余深灰质感
+                if (index === 0) { btn.className = 'btn-glass btn-type-blue'; } 
+                else { btn.className = 'btn-glass btn-type-dark'; }
+                btn.style.margin = '0'; btn.style.width = '100%'; btn.style.padding = '1.2rem'; btn.style.fontSize = '1.15rem';
+                btn.innerText = cat.name;
+                btn.onclick = () => openVinylPlayer(cat.id);
+                container.appendChild(btn);
+            });
+        }
         showModal('music-type-modal');
     }
 
-    function openVinylPlayer(type) {
-        hideModal('music-type-modal'); musicState.type = type;
-        
-        // 动态聚合播放列表：如果在某一个时期内，只播放此时期歌曲。如果在首页，合并所有时期的此类型歌曲。
-        let targetList = [];
-        if (state.stage) {
-            targetList = db.stages[state.stage].musicLibrary[type] || [];
-        } else {
-            stagesList.forEach(s => {
-                const slist = db.stages[s].musicLibrary[type] || [];
-                targetList = targetList.concat(slist);
-            });
-        }
-
-        musicState.playlist = targetList;
+    function openVinylPlayer(catId) {
+        hideModal('music-type-modal'); 
+        musicState.categoryId = catId;
+        musicState.playlist = db.globalMusicConfig.library[catId] || [];
         musicState.currentIndex = 0; musicState.mode = 'sequence'; musicState.tracksLimit = -1;
         
         document.getElementById('player-mode-text').innerText = '🔁 列表循环';
@@ -1109,7 +1190,7 @@
 
     function renderVinylPlaylist() {
         const box = document.getElementById('playlist-ui'); box.innerHTML = '';
-        if(musicState.playlist.length === 0) { box.innerHTML = '<p style="padding:15px; opacity:0.5; text-align:center;">暂无音乐</p>'; return; }
+        if(musicState.playlist.length === 0) { box.innerHTML = '<p style="padding:15px; opacity:0.5; text-align:center;">暂无音乐，请管理员添加</p>'; return; }
         
         const query = document.getElementById('vinyl-search').value.toLowerCase().trim();
         
@@ -1118,10 +1199,7 @@
             item.className = `netease-item ${idx === musicState.currentIndex ? 'active' : ''}`;
             item.id = `track-item-${idx}`; 
             
-            // 沉浸式隐式搜索过滤，不破坏原数组索引
-            if(query && !track.name.toLowerCase().includes(query)) {
-                item.style.display = 'none';
-            }
+            if(query && !track.name.toLowerCase().includes(query)) { item.style.display = 'none'; }
             
             const numPad = (idx + 1).toString().padStart(2, '0');
             item.innerHTML = `
@@ -1146,8 +1224,6 @@
         }).catch(e=>{});
         
         renderVinylPlaylist();
-
-        // 丝滑滚动到激活曲目
         const activeItem = document.getElementById(`track-item-${musicState.currentIndex}`);
         if(activeItem) activeItem.scrollIntoView({ behavior: "smooth", block: "center" });
     }
@@ -1161,7 +1237,7 @@
         const btn = document.getElementById('btn-play-mode'); const text = document.getElementById('player-mode-text');
         if(musicState.mode === 'sequence') { musicState.mode = 'random'; btn.innerText = '🔀'; text.innerText = '🔀 随机播放'; }
         else if(musicState.mode === 'random') { musicState.mode = 'single'; btn.innerText = '🔂'; text.innerText = '🔂 单曲循环'; }
-        else { musicState.mode = 'sequence'; btn.innerText = '🔁'; text.innerText = '🔁 列表顺序播放'; }
+        else { musicState.mode = 'sequence'; btn.innerText = '🔁'; text.innerText = '🔁 列表循环'; }
     }
 
     function setTrackLimit() {
