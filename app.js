@@ -25,7 +25,42 @@ let db = defaultDB;
 let toastTimeout;
 let currentUserAccount = null; 
 // 挂载全局音频对象 (HTML中定义)
-let audioPlayer = document.getElementById('bgm-player');
+let audioPlayer;
+
+/* ================= 0. 核心依赖防崩溃包装 (Defensive Init) ================= */
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. 初始化 Canvas
+    const canvas = document.getElementById('particle-canvas');
+    if (canvas) {
+        window.ctx = canvas.getContext('2d');
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        initParticles();
+        animateParticles();
+    }
+
+    // 2. 初始化 Audio (防止因 DOM 未加载导致的 null crash)
+    audioPlayer = document.getElementById('bgm-player');
+    if (audioPlayer) {
+        audioPlayer.removeEventListener('ended', window.handleAudioEnded);
+        audioPlayer.addEventListener('ended', window.handleAudioEnded);
+    }
+
+    // 3. 初始化长按事件
+    const longPressBtn = document.getElementById('btn-long-press');
+    if (longPressBtn) {
+        longPressBtn.addEventListener('mousedown', window.startPress);
+        longPressBtn.addEventListener('mouseup', window.endPress);
+        longPressBtn.addEventListener('mouseleave', window.endPress);
+        longPressBtn.addEventListener('touchstart', window.startPress, {passive: false});
+        longPressBtn.addEventListener('touchend', window.endPress, {passive: false});
+        longPressBtn.addEventListener('touchcancel', window.endPress, {passive: false});
+    }
+
+    // 4. 启动数据引擎
+    initDB();
+});
+
 
 function cleanupOldLocalStorage() {
     const currentVersion = 'sealOfLoveDB_v16';
@@ -39,6 +74,7 @@ function cleanupOldLocalStorage() {
 
 window.showGlobalToast = function(text, type = 'loading') {
     const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text');
+    if(!toast) return;
     toast.className = `global-toast show ${type}`; msg.innerText = text;
     if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖';
     clearTimeout(toastTimeout);
@@ -97,15 +133,17 @@ async function initDB() {
             if (remoteDb && remoteDb.stages) {
                 db = upgradeDBStructure(remoteDb); 
                 if (currentUserAccount && !db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] };
-                try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v16', JSON.stringify(db)); } catch(e){} return;
+                try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v16', JSON.stringify(db)); } catch(e){} 
+                initStageScreen();
+                return;
             }
         }
     } catch (e) {}
     const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v16'));
-    if (local && local.stages) { db = upgradeDBStructure(local); }
+    if (local && local.stages) { db = upgradeDBStructure(local); initStageScreen(); }
     else window.saveDB();
 }
-initDB();
+
 
 /* ================= 2. 状态机与双轨主题引擎 ================= */
 let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: false };
@@ -117,23 +155,39 @@ window.toggleTheme = function() {
 }
 
 /* ================= 3. 对称粒子系统 ================= */
-const canvas = document.getElementById('particle-canvas'); const ctx = canvas.getContext('2d');
-let particles = []; let animationId;
-function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resizeCanvas); resizeCanvas();
+let particles = []; 
+let animationId;
+function resizeCanvas() { 
+    const canvas = document.getElementById('particle-canvas');
+    if(!canvas) return;
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight; 
+} 
 class Particle {
-    constructor() { this.x = Math.random() * (canvas.width / 2); this.y = Math.random() * canvas.height; this.size = Math.random() * 1.5 + 0.5; this.speedY = Math.random() * 0.4 - 0.2; this.speedX = Math.random() * 0.2 - 0.1; this.baseAlpha = Math.random() * 0.4 + 0.1; this.pulse = Math.random() * Math.PI; }
-    update() { this.y += this.speedY; this.x += this.speedX; if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; if (this.x < 0) this.x = canvas.width / 2; if (this.x > canvas.width / 2) this.x = 0; this.pulse += 0.02; }
-    draw(colorStr) { const alpha = this.baseAlpha + Math.sin(this.pulse) * 0.2; ctx.fillStyle = colorStr.replace(')', `, ${alpha})`).replace('rgb', 'rgba'); ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(canvas.width - this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+    constructor() { 
+        const canvas = document.getElementById('particle-canvas');
+        this.x = Math.random() * (canvas ? canvas.width / 2 : 300); this.y = Math.random() * (canvas ? canvas.height : 600); this.size = Math.random() * 1.5 + 0.5; this.speedY = Math.random() * 0.4 - 0.2; this.speedX = Math.random() * 0.2 - 0.1; this.baseAlpha = Math.random() * 0.4 + 0.1; this.pulse = Math.random() * Math.PI; 
+    }
+    update() { 
+        const canvas = document.getElementById('particle-canvas'); if(!canvas) return;
+        this.y += this.speedY; this.x += this.speedX; if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; if (this.x < 0) this.x = canvas.width / 2; if (this.x > canvas.width / 2) this.x = 0; this.pulse += 0.02; 
+    }
+    draw(colorStr) { 
+        if(!window.ctx) return;
+        const canvas = document.getElementById('particle-canvas');
+        const alpha = this.baseAlpha + Math.sin(this.pulse) * 0.2; window.ctx.fillStyle = colorStr.replace(')', `, ${alpha})`).replace('rgb', 'rgba'); window.ctx.beginPath(); window.ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); window.ctx.fill(); window.ctx.beginPath(); window.ctx.arc(canvas.width - this.x, this.y, this.size, 0, Math.PI * 2); window.ctx.fill(); 
+    }
 }
 function initParticles() { particles = []; const count = window.innerWidth < 600 ? 25 : 50; for (let i = 0; i < count; i++) particles.push(new Particle()); }
 function animateParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const canvas = document.getElementById('particle-canvas');
+    if(!canvas || !window.ctx) return;
+    window.ctx.clearRect(0, 0, canvas.width, canvas.height);
     const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim();
     const hexToRgb = hex => { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return isNaN(r) ? 'rgb(212,175,55)' : `rgb(${r},${g},${b})`; };
     const colorStr = primaryColor.startsWith('#') ? hexToRgb(primaryColor) : 'rgb(212,175,55)';
     particles.forEach(p => { p.update(); p.draw(colorStr); }); animationId = requestAnimationFrame(animateParticles);
 }
-initParticles(); animateParticles();
+
 
 /* ================= 4. 安全鉴权引擎与多态登录映射 ================= */
 window.handleLogin = async function() {
@@ -264,6 +318,7 @@ window.selectStage = function(sKey) {
     if(state.isEditMode) return;
     state.stage = sKey; applyStageTheme(sKey);
     document.getElementById('list-stage-title').innerText = `${db.stages[sKey].name}`;
+    
     const cats = db.stages[sKey].categories || [];
     if(cats.length > 0) state.activeCategoryId = cats[0].id; else state.activeCategoryId = '';
     renderCardList(); window.navigateTo('screen-card-list');
@@ -360,7 +415,7 @@ window.saveCard = async function() {
     await window.saveDB(); window.hideModal('edit-modal'); renderCardList();
 }
 
-/* ================= 7. R2 音频大文件并发上传队列与进度胶囊 ================= */
+/* ================= 7. R2 大文件并发上传队列与进度胶囊 ================= */
 window.uploadQueue = [];
 window.isUploading = false;
 
@@ -377,11 +432,10 @@ async function processUploadQueue() {
     let completedTasks = 0;
 
     while(window.uploadQueue.length > 0) {
-        const task = window.uploadQueue.shift(); // { file, catId, name }
+        const task = window.uploadQueue.shift(); 
         completedTasks++;
         
         try {
-            // XHR Upload Promise for real progress
             const url = await new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', '/api/upload');
@@ -401,7 +455,6 @@ async function processUploadQueue() {
                 xhr.send(formData);
             });
             
-            // 入库
             if(!db.globalMusicConfig.library[task.catId]) db.globalMusicConfig.library[task.catId] = [];
             db.globalMusicConfig.library[task.catId].push({name: task.name, url: url});
             
@@ -514,7 +567,7 @@ window.bindAudioDragDrop = function() {
         } else {
             text.innerText = `已选择 ${selectedAudioFiles.length} 个音频文件，将批量极速上传`;
             document.getElementById('new-music-name').value = "自动取名模式";
-            document.getElementById('new-music-name').disabled = true; // 多文件禁用手动命名
+            document.getElementById('new-music-name').disabled = true; 
         }
     }
 }
@@ -547,7 +600,6 @@ window.saveMusicToLibrary = async function() {
 
     if(!catId) return alert('请先创建分类');
     
-    // 编辑模式 或 单链模式
     if (editIdx !== '' || (url && selectedAudioFiles.length === 0)) {
         if(!name) return alert('请输入曲目名称');
         if(!db.globalMusicConfig.library[catId]) db.globalMusicConfig.library[catId] = [];
@@ -557,7 +609,6 @@ window.saveMusicToLibrary = async function() {
         return;
     }
 
-    // 本地文件上传模式 (支持批量排队)
     if(selectedAudioFiles.length > 0) {
         selectedAudioFiles.forEach(file => {
             let taskName = name === "自动取名模式" || !name ? file.name.replace(/\.[^/.]+$/, "") : name;
@@ -565,7 +616,7 @@ window.saveMusicToLibrary = async function() {
         });
         window.resetMusicEdit();
         window.hideModal('music-admin-modal');
-        processUploadQueue(); // 触发进度胶囊
+        processUploadQueue(); 
     } else {
         alert('请拖入音频或填写链接');
     }
@@ -576,13 +627,9 @@ window.deleteAdminMusic = async function(catId, idx) { if(confirm('确认删除�
 /* ================= 9. 用户云端收藏体系与高定黑胶播放器 ================= */
 let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; 
 
-audioPlayer.removeEventListener('ended', handleAudioEnded);
-audioPlayer.addEventListener('ended', handleAudioEnded);
-
-function handleAudioEnded() {
+window.handleAudioEnded = function() {
     if(musicState.playlist.length === 0) return;
     
-    // 定时定量播放拦截器
     if (musicState.tracksLimit > 0) {
         musicState.tracksLimit--;
         const limitTextEl = document.getElementById('player-limit-text');
@@ -602,14 +649,18 @@ function handleAudioEnded() {
 window.openMusicTypeModal = function() {
     const container = document.getElementById('music-type-btn-container'); container.innerHTML = '';
     const cats = db.globalMusicConfig.categories || [];
+    
     if(cats.length === 0) {
         container.innerHTML = '<p style="opacity:0.5; font-size:0.9rem;">暂无音律分类，请联系管理员添加。</p>';
     } else {
         cats.forEach((cat, index) => {
             const btn = document.createElement('button');
-            if (index === 0) { btn.className = 'btn-glass btn-type-blue'; } else { btn.className = 'btn-glass btn-type-dark'; }
+            if (index === 0) { btn.className = 'btn-glass btn-type-blue'; } 
+            else { btn.className = 'btn-glass btn-type-dark'; }
             btn.style.margin = '0'; btn.style.width = '100%'; btn.style.padding = '1.2rem'; btn.style.fontSize = '1.15rem';
-            btn.innerText = cat.name; btn.onclick = () => window.openVinylPlayer(cat.id); container.appendChild(btn);
+            btn.innerText = cat.name;
+            btn.onclick = () => window.openVinylPlayer(cat.id);
+            container.appendChild(btn);
         });
     }
     window.showModal('music-type-modal');
@@ -619,19 +670,17 @@ window.openVinylPlayer = function(catId) {
     window.hideModal('music-type-modal'); musicState.type = catId;
     
     if (catId === 'favorites') {
-        if(!currentUserAccount || !db.users[currentUserAccount].favorites) {
-            musicState.playlist = [];
-        } else {
-            musicState.playlist = db.users[currentUserAccount].favorites;
-        }
+        if(!currentUserAccount || !db.users[currentUserAccount].favorites) { musicState.playlist = []; } 
+        else { musicState.playlist = db.users[currentUserAccount].favorites; }
     } else {
         musicState.playlist = db.globalMusicConfig.library[catId] || [];
     }
 
     musicState.currentIndex = 0; musicState.mode = 'sequence'; musicState.tracksLimit = -1;
+    
     document.getElementById('player-mode-text').innerText = '🔁 列表循环';
     document.getElementById('player-limit-text').innerText = '⏳ 定时/定量';
-    document.getElementById('vinyl-search').value = '';
+    document.getElementById('vinyl-search').value = ''; 
     
     window.renderVinylPlaylist(); window.showModal('vinyl-player-modal');
     if(musicState.playlist.length > 0) window.playCurrentTrack(); else window.pauseTrack();
@@ -663,8 +712,14 @@ window.renderVinylPlaylist = function() {
     });
 }
 
+// 防抖处理收藏按钮避免频繁读写 R2
+let favDebounce = null;
 window.toggleFavorite = async function() {
-    if(!currentUserAccount || musicState.playlist.length === 0) return window.showGlobalToast('请先登录即可收藏', 'error');
+    if(!currentUserAccount) return window.showGlobalToast('请先登录即可收藏', 'error');
+    if(musicState.playlist.length === 0) return;
+    
+    if(favDebounce) clearTimeout(favDebounce);
+    
     const track = musicState.playlist[musicState.currentIndex];
     if(!db.users[currentUserAccount].favorites) db.users[currentUserAccount].favorites = [];
     
@@ -681,11 +736,13 @@ window.toggleFavorite = async function() {
         window.showGlobalToast('已存入云端收藏', 'success');
     }
     
-    await window.saveDB();
-    if (musicState.type === 'favorites') {
-        musicState.playlist = db.users[currentUserAccount].favorites;
-        window.renderVinylPlaylist();
-    }
+    favDebounce = setTimeout(async () => {
+        await window.saveDB();
+        if (musicState.type === 'favorites') {
+            musicState.playlist = db.users[currentUserAccount].favorites;
+            window.renderVinylPlaylist();
+        }
+    }, 1000);
 }
 
 window.playCurrentTrack = function() {
@@ -693,13 +750,10 @@ window.playCurrentTrack = function() {
     const track = musicState.playlist[musicState.currentIndex];
     document.getElementById('player-track-name').innerText = track.name;
     
-    // 检测是否为收藏
     if (currentUserAccount && db.users[currentUserAccount].favorites) {
         const isFav = db.users[currentUserAccount].favorites.findIndex(f => f.url === track.url) > -1;
         document.getElementById('btn-favorite').innerText = isFav ? '❤️' : '🤍';
-    } else {
-        document.getElementById('btn-favorite').innerText = '🤍';
-    }
+    } else { document.getElementById('btn-favorite').innerText = '🤍'; }
 
     if(audioPlayer.src !== track.url) audioPlayer.src = track.url;
     audioPlayer.volume = 1; audioPlayer.play().then(() => {
@@ -709,7 +763,7 @@ window.playCurrentTrack = function() {
     
     window.renderVinylPlaylist();
     const activeItem = document.getElementById(`track-item-${musicState.currentIndex}`);
-    if(activeItem) activeItem.scrollIntoView({ behavior: "smooth", block: "center" });
+    if(activeItem) { activeItem.scrollIntoView({ behavior: "smooth", block: "center" }); }
 }
 
 window.pauseTrack = function() { audioPlayer.pause(); document.getElementById('vinyl-disc-ui').classList.remove('playing'); document.getElementById('btn-play-pause').innerText = '▶️'; }
@@ -736,7 +790,7 @@ window.closeVinylPlayer = function() { window.hideModal('vinyl-player-modal'); }
 window.showPlayerFromFloat = function() { if(state.isLoggedIn && !state.isEditMode && document.getElementById('vinyl-player-modal').style.display !== 'flex') window.showModal('vinyl-player-modal'); }
 
 
-/* ================= 10. 用户卡片交互引擎 (彻底接管背景音乐，无缝后台播放) ================= */
+/* ================= 10. 用户卡片交互引擎 (无缝后台播放) ================= */
 window.startCardFlow = function(card) {
     state.currentCard = card; document.getElementById('prep-text').innerText = db.stages[state.stage].prepText;
     const prepBtn = document.getElementById('btn-prep-confirm');
@@ -796,20 +850,17 @@ window.nextContentStep = function() {
     }
 }
 
-const longPressBtn = document.getElementById('btn-long-press'); const pressFill = document.getElementById('press-fill');
+const pressFill = document.getElementById('press-fill');
 let progress = 0; let pressFrame = null; let isPressing = false;
 
-function startPress(e) {
+window.startPress = function(e) {
     if(e.type === 'touchstart') e.preventDefault(); if(isPressing) return;
     isPressing = true; progress = 0; cancelAnimationFrame(pressFrame);
     function up() { if(!isPressing) return; progress += (100/90); pressFill.style.height = `${Math.min(progress, 100)}%`; if (progress >= 100) { isPressing = false; completeAction(); } else pressFrame = requestAnimationFrame(up); }
     pressFrame = requestAnimationFrame(up);
 }
-function endPress(e) { if(e.type === 'touchend') e.preventDefault(); isPressing = false; cancelAnimationFrame(pressFrame); if (progress < 100) { progress = 0; pressFill.style.height = `0%`; } }
+window.endPress = function(e) { if(e.type === 'touchend') e.preventDefault(); isPressing = false; cancelAnimationFrame(pressFrame); if (progress < 100) { progress = 0; pressFill.style.height = `0%`; } }
 function completeAction() { cancelAnimationFrame(pressFrame); window.navigateTo('screen-finish'); }
-
-longPressBtn.addEventListener('mousedown', startPress); longPressBtn.addEventListener('mouseup', endPress); longPressBtn.addEventListener('mouseleave', endPress);
-longPressBtn.addEventListener('touchstart', startPress, {passive: false}); longPressBtn.addEventListener('touchend', endPress, {passive: false}); longPressBtn.addEventListener('touchcancel', endPress, {passive: false});
 
 window.resetToStage = function() {
     pressFill.style.height = `0%`;
