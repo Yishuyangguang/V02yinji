@@ -194,7 +194,8 @@
         .music-type-modal-content { background: #1c1d22 !important; border-radius: 28px !important; border: 1px solid rgba(255,255,255,0.05) !important; padding: 20px !important; }
         
         .vinyl-player-container.new-layout {
-            width: 90vw; max-width: 800px; max-height: 85vh; 
+            width: 85vw; max-width: 750px; /* 限制最大宽度，防止拉长 */
+            height: 80vh; max-height: 600px; /* 强制高度限制边界 */
             display: flex; flex-direction: column; padding: 25px;
             background: #1a1a1f !important; border-radius: 28px !important;
             border: 1px solid rgba(255,255,255,0.05) !important;
@@ -202,24 +203,38 @@
             position: relative;
         }
 
+        /* 3D 悬浮玻璃关闭按钮 (绝对右上角，防挤压) */
         .close-3d-btn {
-            position: absolute; top: -12px; right: -12px;
-            width: 38px; height: 38px; border-radius: 50%;
-            background: rgba(30, 30, 35, 0.95);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.25);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 2px 2px rgba(255,255,255,0.2);
+            position: absolute; top: -15px; right: -15px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(50,50,55,0.9), rgba(20,20,25,0.9));
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 2px 3px rgba(255,255,255,0.3);
             color: #fff; display: flex; justify-content: center; align-items: center;
-            cursor: pointer; font-size: 1.1rem; z-index: 999; transition: transform 0.2s;
+            cursor: pointer; font-size: 1.2rem; z-index: 999; transition: transform 0.2s, box-shadow 0.2s;
         }
-        .close-3d-btn:active { transform: scale(0.85); }
+        .close-3d-btn:active { transform: scale(0.9); box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
 
-        .player-main-content { display: flex; flex-direction: row; gap: 30px; flex: 1; min-height: 0; }
-        .player-left-panel { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        .player-right-panel { flex: 1.2; display: flex; flex-direction: column; min-height: 0; }
+        .player-main-content { 
+            display: flex; flex-direction: row; gap: 30px; flex: 1; min-height: 0; 
+            overflow: hidden; /* 防止内部元素撑爆盒子 */
+        }
+        .player-left-panel { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; overflow: hidden; }
+        .player-right-panel { flex: 1.2; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 
-        /* 底部进度条 */
-        .player-progress-bar-container { width: 100%; display: flex; align-items: center; gap: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+        /* 标题截断防护 */
+        #player-track-name {
+            width: 100%; max-width: 100%; text-align: center;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+            margin-bottom: 15px; font-size: 1.25rem; font-weight: bold;
+        }
+
+        /* 底部全宽进度条 */
+        .player-progress-bar-container { 
+            width: 100%; display: flex; align-items: center; gap: 12px; margin-top: 15px; 
+            padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; 
+        }
         #player-time-current, #player-time-total { font-size: 0.85rem; opacity: 0.6; color: #fff; width: 45px; text-align: center; font-family: monospace; }
         .progress-track { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; position: relative; cursor: pointer; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #d4af37, #ebd373); border-radius: 3px; width: 0%; pointer-events: none; }
@@ -236,12 +251,22 @@
         .tech-wave-container.playing .wave-ring:nth-child(3) { animation-delay: 1.6s; }
         @keyframes techWavePulse { 0% { transform: scale(1); opacity: 1; border-width: 3px; } 100% { transform: scale(3.5); opacity: 0; border-width: 0px; } }
         
-        .player-controls { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        /* 极致对称黄金 6 键控制栏 */
+        .player-controls-wrapper {
+            display: flex; width: 100%; justify-content: space-between; align-items: center; margin-bottom: 10px;
+        }
+        .ctrl-group { display: flex; gap: 12px; flex: 1; align-items: center; }
+        .ctrl-group.left { justify-content: flex-start; }
+        .ctrl-group.center { justify-content: center; flex: 1.5; gap: 18px; }
+        .ctrl-group.right { justify-content: flex-end; }
+
+        .ctrl-btn-small { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #fff; width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.05rem; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .ctrl-btn-small:active { transform: scale(0.85); }
         .ctrl-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); color: #fff; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .ctrl-btn:active { transform: scale(0.9); }
-        .ctrl-btn.play-pause { width: 55px; height: 55px; font-size: 1.5rem; background: var(--theme-primary); color: #111; border: none; box-shadow: 0 8px 20px rgba(212,175,55,0.3); }
+        .ctrl-btn.play-pause { width: 58px; height: 58px; font-size: 1.6rem; background: var(--theme-primary); color: #111; border: none; box-shadow: 0 8px 20px rgba(212,175,55,0.3); }
         
-        .playlist-box { width: 100%; flex: 1; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 16px; padding: 5px; border: 1px solid rgba(255,255,255,0.05); text-align: left; scroll-behavior: smooth; margin-bottom: 0; }
+        .playlist-box { flex: 1; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 16px; padding: 5px; border: 1px solid rgba(255,255,255,0.05); text-align: left; scroll-behavior: smooth; min-height: 0; margin-bottom: 0; }
         .netease-item { display: flex; align-items: center; padding: 10px; border-radius: 12px; cursor: pointer; transition: background 0.3s; margin-bottom: 5px; }
         .netease-item:hover { background: rgba(255,255,255,0.08); }
         .netease-item.active { background: rgba(212, 175, 55, 0.15); border-left: 3px solid var(--theme-primary); }
@@ -250,23 +275,22 @@
         .netease-info { flex: 1; margin-left: 10px; display: flex; flex-direction: column; overflow: hidden; }
         .netease-title { font-size: 1rem; color: #fff; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
         .netease-item.active .netease-title { color: var(--theme-primary); font-weight: bold; opacity: 1; text-shadow: 0 0 8px rgba(212,175,55,0.3); }
-        
-        .music-mode-bar { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; margin-bottom: 10px; }
-        .music-mode-text { font-size: 0.85rem; opacity: 0.8; color: #fff; cursor: pointer; transition: opacity 0.2s; padding: 5px; border-radius: 8px; display: flex; align-items: center; gap: 5px; }
-        .music-mode-text:active { opacity: 0.5; background: rgba(255,255,255,0.1); }
-        .heart-icon { font-size: 1.3rem; cursor: pointer; transition: transform 0.2s; }
-        .heart-icon:active { transform: scale(0.8); }
 
-        /* 移动端媒体查询折叠架构 (防溢出核心) */
+        /* 移动端绝对防溢出折叠架构 (Strict Mobile Boundaries) */
         @media (max-width: 768px) {
-            .vinyl-player-container.new-layout { width: 95vw; padding: 20px 15px; max-height: 90vh; }
+            .vinyl-player-container.new-layout { 
+                width: 95vw; padding: 20px 15px; 
+                height: 90vh; /* 严格强制高度锁定，绝不溢出屏幕 */
+            }
             .close-3d-btn { top: -10px; right: -10px; width: 36px; height: 36px; font-size: 1rem; }
-            .player-main-content { flex-direction: column; gap: 10px; }
-            .player-left-panel { flex: none; }
-            .tech-wave-container { margin: 5px auto 15px auto; width: 130px; height: 130px; }
-            .wave-center { width: 55px; height: 55px; } .wave-ring { width: 55px; height: 55px; }
-            .player-right-panel { flex: 1; }
-            .player-progress-bar-container { margin-top: 10px; padding-top: 10px; }
+            .player-main-content { flex-direction: column; gap: 15px; }
+            .player-left-panel { flex: none; height: auto; } /* 自然撑开顶部视觉元素 */
+            .tech-wave-container { margin: 10px auto; width: 120px; height: 120px; }
+            .wave-center { width: 50px; height: 50px; } .wave-ring { width: 50px; height: 50px; }
+            .player-right-panel { flex: 1; } /* 占据剩余可用空间 */
+            .player-controls-wrapper { margin-bottom: 5px; }
+            .ctrl-group.left { gap: 8px; } .ctrl-group.right { gap: 8px; }
+            .ctrl-group.center { gap: 12px; }
         }
 
         .profile-avatar-zone { width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 15px auto; background-color: var(--theme-input-bg); border: 2px dashed var(--theme-primary); display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; position: relative; box-shadow: 0 8px 20px var(--theme-glass-shadow); }
@@ -281,7 +305,7 @@
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
 
-<!-- 纯净 Audio 引擎，全站后台不间断托底播放 -->
+<!-- 纯净 Audio 引擎 -->
 <audio id="bgm-player"></audio>
 
 <!-- 左上角主题控制 -->
@@ -304,12 +328,10 @@
     </div>
 </div>
 
-<!-- 全局进度胶囊 UI -->
 <div class="global-toast" id="global-toast">
     <span id="toast-icon">⏳</span><span id="toast-text">正在同步至云端...</span>
 </div>
 
-<!-- 极速多任务并发上传进度胶囊 -->
 <div class="upload-capsule" id="upload-capsule">
     <div class="upload-capsule-fill" id="upload-capsule-fill"></div>
     <span class="upload-capsule-text" id="upload-capsule-text">准备上传...</span>
@@ -317,13 +339,11 @@
 
 <div id="app-container">
     
-    <!-- 管理员控制台 -->
     <div class="admin-controls" id="top-admin-controls" style="display: none;">
         <button class="btn-glass btn-small" onclick="window.toggleEditMode()" id="btn-edit-toggle">开启深度编辑</button>
         <button class="btn-glass btn-small" onclick="window.logout()">安全退出</button>
     </div>
 
-    <!-- 0. 登录屏 -->
     <div class="screen active center-content" id="screen-login">
         <div class="glass-panel">
             <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">恒久印记</h1>
@@ -336,12 +356,10 @@
         </div>
     </div>
 
-    <!-- 1. 阶段选择屏 -->
     <div class="screen center-content" id="screen-stage">
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
         
-        <!-- 高定胶囊按钮：印记音律 (直达全局曲库) -->
         <div class="brand-capsule" onclick="window.openMusicTypeModal()">
             <img src="apple-touch-icon.png" alt="印记" onerror="this.src='favicon-32x32.png'">
             <span>印记音律</span>
@@ -350,7 +368,6 @@
         <div class="stage-array-wrapper" id="stage-buttons-container"></div>
     </div>
 
-    <!-- 2. 分类与卡片列表屏 -->
     <div class="screen" id="screen-card-list" style="padding-top: calc(env(safe-area-inset-top) + 60px); justify-content: flex-start;">
         <h1 id="list-stage-title" style="margin-bottom: 5px;">阶段卡片</h1>
         <p class="slogan-verse" style="margin-bottom: 25px;">常常操练，感悟成长</p>
@@ -368,7 +385,6 @@
         <button class="btn-glass" style="margin: 30px auto;" onclick="window.navigateTo('screen-stage')">返回首页</button>
     </div>
 
-    <!-- 3. 预备提醒屏 (无干扰直达) -->
     <div class="screen center-content" id="screen-prep">
         <div class="glass-panel" style="padding: 3.5rem 2rem;">
             <h1 class="text-gradient-blue" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
@@ -377,7 +393,6 @@
         </div>
     </div>
 
-    <!-- 4. 角色选择屏 -->
     <div class="screen center-content" id="screen-role">
         <h1 id="role-stage-title">缔结印记</h1>
         <p style="margin-bottom: 3rem;">请选择您的身份<br>随后将两台手机并排平放</p>
@@ -385,7 +400,6 @@
         <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81; padding: 1.2rem 2rem;" onclick="window.selectRole('girl')">我是女生 ♀</button>
     </div>
 
-    <!-- 5. 合并动画屏 -->
     <div class="screen center-content" id="screen-sync">
         <h1 id="sync-title" style="font-size: 2.2rem;">双向奔赴</h1>
         <p id="sync-subtitle" style="font-size: 1.1rem;">确认手机贴合后，点击合并</p>
@@ -393,7 +407,6 @@
         <button class="btn-glass btn-primary" id="btn-sync-confirm" onclick="window.triggerSync()">确 认 合 并</button>
     </div>
 
-    <!-- 6. 核心内容屏 -->
     <div class="screen center-content" id="screen-content">
         <div class="progress-bar" id="content-progress">
             <div class="progress-dot" id="dot-1"></div><div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
@@ -413,7 +426,6 @@
         </div>
     </div>
 
-    <!-- 7. 完成屏 -->
     <div class="screen center-content" id="screen-finish">
         <div class="glass-panel">
             <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem;">印记已成</h1>
@@ -427,7 +439,6 @@
 
 <!-- ================= 弹窗群 ================= -->
 
-<!-- 0. 个人中心弹窗 -->
 <div class="modal-overlay" id="user-profile-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px; padding: 25px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px; font-size:1.6rem;">个人中心</h2>
@@ -440,14 +451,13 @@
         </div>
         <input type="file" id="profile-avatar-upload" accept="image/*" style="display:none;" onchange="window.handleProfileAvatar(this)">
 
-        <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称 (用于登录与展示)" style="text-align:center; padding: 12px 15px;">
+        <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称" style="text-align:center; padding: 12px 15px;">
         
         <div style="display: flex; gap: 15px; margin-top: 20px;">
             <button class="btn-glass btn-blue-gradient" style="margin:0; flex:1; border-radius:20px; padding: 12px;" onclick="window.saveUserProfile()">保 存<br>资 料</button>
             <button class="btn-glass btn-type-dark" style="margin:0; flex:1; border-radius:20px; padding: 12px;" onclick="window.hideModal('user-profile-modal')">取 消</button>
         </div>
 
-        <!-- 管理员专属隐藏入口：云端密码检索 & 全局音律库管理 -->
         <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 25px;">
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; background:transparent; padding: 0.8rem; border-radius:20px;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
             <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; background:transparent; padding: 0.8rem; border-radius:20px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.manageMusicLibrary();">⚙️ 全局音律库管理 (管理员专属)</button>
@@ -455,37 +465,25 @@
     </div>
 </div>
 
-<!-- 1. 音乐大类选择弹窗 (动态加载，默认收藏置顶) -->
 <div class="modal-overlay" id="music-type-modal">
     <div class="modal-content music-type-modal-content" style="text-align: center; max-width: 340px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 25px; font-size: 1.5rem; letter-spacing:1px;">选择背景音律</h2>
-        
-        <div id="music-type-btn-container" style="display: flex; flex-direction: column; gap: 12px;">
-            <!-- JS 动态注入分类按钮 -->
-        </div>
-
+        <div id="music-type-btn-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
         <button class="btn-glass btn-type-dark" style="margin-top: 15px; width: 100%; padding:0.9rem;" onclick="window.hideModal('music-type-modal')">取 消</button>
     </div>
 </div>
 
-<!-- 2. 高定自适应音乐播放器 (Flex Layout) -->
+<!-- 新版无极自适应高定播放器 (Responsive Symmetrical Flex) -->
 <div class="modal-overlay" id="vinyl-player-modal">
     <div class="modal-content vinyl-player-container new-layout">
         
+        <!-- 独立的真 3D 玻璃浮岛关闭键，远离所有操作热区 -->
         <div class="close-3d-btn" onclick="window.closeVinylPlayer()">✖</div>
         
         <div class="player-main-content">
-            <!-- 左侧：播放控制与视觉动画 -->
+            <!-- 左侧核心面板 -->
             <div class="player-left-panel">
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; padding: 0 5px; margin-bottom:12px;">
-                    <h2 style="color: var(--theme-primary); font-size:1.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 85%; text-shadow: 0 2px 4px rgba(0,0,0,0.8);" id="player-track-name">曲目加载中...</h2>
-                    <div class="heart-icon" id="btn-favorite" onclick="window.toggleFavorite()">🤍</div>
-                </div>
-                
-                <div class="music-mode-bar">
-                    <div class="music-mode-text" id="player-mode-text" onclick="window.changePlayMode()">🔁 顺序播放</div>
-                    <div class="music-mode-text" id="player-limit-text" onclick="window.setTrackLimit()">⏳ 定时/定量</div>
-                </div>
+                <h2 style="color: var(--theme-primary); text-shadow: 0 2px 5px rgba(212,175,55,0.4);" id="player-track-name">曲目加载中...</h2>
                 
                 <!-- 科技感音律波动引擎 -->
                 <div class="tech-wave-container" id="vinyl-disc-ui">
@@ -493,21 +491,35 @@
                     <div class="wave-center"></div>
                 </div>
                 
-                <div class="player-controls">
-                    <div class="ctrl-btn" onclick="window.prevTrack()">⏮</div>
-                    <div class="ctrl-btn play-pause" onclick="window.togglePlayPause()" id="btn-play-pause">▶️</div>
-                    <div class="ctrl-btn" onclick="window.nextTrack()">⏭</div>
+                <!-- 【全新结构】：黄金分割无字图标控制列，绝对居中完美对称 -->
+                <div class="player-controls-wrapper">
+                    <!-- 左列：模式、定时 -->
+                    <div class="ctrl-group left">
+                        <div class="ctrl-btn-small" id="btn-play-mode" onclick="window.changePlayMode()" title="播放模式">🔁</div>
+                        <div class="ctrl-btn-small" id="btn-timer" onclick="window.setTrackLimit()" title="定时定量">⏳</div>
+                    </div>
+                    <!-- 中轴：上一首、播放/暂停、下一首 -->
+                    <div class="ctrl-group center">
+                        <div class="ctrl-btn" onclick="window.prevTrack()" title="上一首">⏮</div>
+                        <div class="ctrl-btn play-pause" onclick="window.togglePlayPause()" id="btn-play-pause">▶️</div>
+                        <div class="ctrl-btn" onclick="window.nextTrack()" title="下一首">⏭</div>
+                    </div>
+                    <!-- 右列：收藏、虚拟占位(强制对称) -->
+                    <div class="ctrl-group right">
+                        <div class="ctrl-btn-small" id="btn-favorite" onclick="window.toggleFavorite()" title="收藏歌曲">🤍</div>
+                        <div class="ctrl-btn-small" style="visibility: hidden; pointer-events: none;"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 右侧：搜索与播放列表 -->
+            <!-- 右侧列表面板 -->
             <div class="player-right-panel">
                 <input type="search" id="vinyl-search" placeholder="🔍 搜索歌曲名称..." oninput="window.filterVinylPlaylist()" style="border-radius:14px; background:rgba(0,0,0,0.4); border-color:rgba(255,255,255,0.1); padding:10px 15px; margin-bottom:10px; flex-shrink:0;">
                 <div class="playlist-box" id="playlist-ui"></div>
             </div>
         </div>
 
-        <!-- 底部进度条 -->
+        <!-- 底部贯穿全屏的高精度进度条 -->
         <div class="player-progress-bar-container">
             <span id="player-time-current">00:00</span>
             <div class="progress-track" id="progress-track" onclick="window.seekAudio(event)">
@@ -520,7 +532,6 @@
     </div>
 </div>
 
-<!-- 2.5 黑金 3D 定时控制弹窗 -->
 <div class="modal-overlay" id="music-timer-modal">
     <div class="modal-content gold-3d" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary); margin-bottom: 15px; font-size: 1.4rem;">⏳ 定时/定量停止</h2>
@@ -533,38 +544,26 @@
     </div>
 </div>
 
-<!-- 3. 高定音乐库管理弹窗 (含编辑功能与紧凑排版) -->
 <div class="modal-overlay" id="music-admin-modal">
     <div class="modal-content" style="background: var(--theme-bg-color); padding: 25px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 15px; text-align:left; font-size: 1.4rem;">全局音律库管理</h2>
-        
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <p style="font-size: 0.85rem; opacity: 0.8; text-align:left; margin:0;">选择分类库进行管理</p>
             <button class="btn-glass btn-small" style="margin:0; border: 1px dashed #f59e0b; color:#f59e0b; padding:4px 8px; font-size: 0.8rem;" onclick="window.manageMusicCategories()">⚙️ 管理分类</button>
         </div>
-
-        <select id="admin-music-cat" onchange="window.renderAdminMusicList()" style="margin-bottom: 15px; padding:10px 15px; background:var(--theme-glass-bg);">
-            <!-- JS 动态加载 -->
-        </select>
-        
+        <select id="admin-music-cat" onchange="window.renderAdminMusicList()" style="margin-bottom: 15px; padding:10px 15px; background:var(--theme-glass-bg);"></select>
         <input type="search" id="admin-music-search" placeholder="🔍 模糊搜索音乐库..." oninput="window.filterAdminMusicList()" style="margin-bottom:12px; padding:10px 15px;">
-
         <div id="admin-music-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; max-height: 25vh; overflow-y:auto; padding-right:5px;"></div>
-        
         <div style="background: rgba(255,255,255,0.02); padding:15px; border-radius:14px; border: 1px dashed #6366f1;">
             <h4 id="admin-music-action-title" style="margin-bottom: 12px; color:#6366f1; text-align:left; font-size: 1rem;">+ 新增曲目</h4>
             <input type="hidden" id="edit-music-idx" value="">
             <input type="text" id="new-music-name" placeholder="曲目名称" style="margin-bottom:10px; padding:12px 15px; background:var(--theme-glass-bg);">
-            
             <div id="music-upload-zone" style="width:100%; padding:15px; border: 2px dashed #818cf8; border-radius: 12px; text-align: center; cursor: pointer; margin-bottom: 10px; transition: all 0.3s;">
                 <span id="music-upload-text" style="color: #6366f1; font-size:0.9rem; font-weight:500;">点击或拖拽音频 (支持批量直传云端)</span>
-                <!-- 开启多选 multiple -->
                 <input type="file" id="new-music-file" accept="audio/*" multiple style="display: none;">
             </div>
-            
             <div style="text-align: center; margin-bottom: 10px; opacity: 0.5; font-size: 0.8rem;">或输入云端直链 URL (单文件)</div>
             <input type="text" id="new-music-url" placeholder="云端直链 URL" style="margin-bottom:15px; padding:12px 15px; background:var(--theme-glass-bg);">
-            
             <div style="display:flex; gap:10px;">
                 <button class="btn-glass btn-blue-gradient" id="btn-admin-music-save" style="flex:1; border-radius:12px; margin:0; padding:10px;" onclick="window.saveMusicToLibrary()">添 加 到 库</button>
                 <button class="btn-glass" id="btn-admin-music-cancel" style="flex:1; border-radius:12px; margin:0; padding:10px; display:none;" onclick="window.resetMusicEdit()">取 消 修 改</button>
@@ -574,7 +573,6 @@
     </div>
 </div>
 
-<!-- 4. 音乐分类管理弹窗 -->
 <div class="modal-overlay" id="music-cat-modal">
     <div class="modal-content">
         <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理音律分类</h2>
@@ -584,7 +582,6 @@
     </div>
 </div>
 
-<!-- 其它模态框 -->
 <div class="modal-overlay" id="qr-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary);">联系站长</h2>
@@ -634,30 +631,16 @@
 <script>
 /* ================= 核心防御性生命周期边界 (DOM Ready Guard) ================= */
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Canvas 粒子初始化防护
     const canvas = document.getElementById('particle-canvas');
-    if (canvas) { 
-        window.ctx = canvas.getContext('2d'); 
-        window.resizeCanvas(); 
-        window.addEventListener('resize', window.resizeCanvas); 
-        window.initParticles(); window.animateParticles(); 
-    }
+    if (canvas) { window.ctx = canvas.getContext('2d'); window.resizeCanvas(); window.addEventListener('resize', window.resizeCanvas); window.initParticles(); window.animateParticles(); }
     
-    // 2. Audio 引擎与进度条防护绑定
     const audioPlayer = document.getElementById('bgm-player');
     if (audioPlayer) { 
-        audioPlayer.addEventListener('ended', (e) => { 
-            if (typeof window.handleAudioEnded === 'function') window.handleAudioEnded(e); 
-        });
-        audioPlayer.addEventListener('timeupdate', () => {
-            if (typeof window.updateProgress === 'function') window.updateProgress();
-        });
-        audioPlayer.addEventListener('loadedmetadata', () => {
-            if (typeof window.updateProgress === 'function') window.updateProgress();
-        });
+        audioPlayer.addEventListener('ended', (e) => { if (typeof window.handleAudioEnded === 'function') window.handleAudioEnded(e); });
+        audioPlayer.addEventListener('timeupdate', () => { if (typeof window.updateProgress === 'function') window.updateProgress(); });
+        audioPlayer.addEventListener('loadedmetadata', () => { if (typeof window.updateProgress === 'function') window.updateProgress(); });
     }
     
-    // 3. 长按按钮防护绑定
     const longPressBtn = document.getElementById('btn-long-press');
     if (longPressBtn) {
         longPressBtn.addEventListener('mousedown', (e) => { if(typeof window.startPress === 'function') window.startPress(e); });
@@ -668,7 +651,6 @@ document.addEventListener("DOMContentLoaded", () => {
         longPressBtn.addEventListener('touchcancel', (e) => { if(typeof window.endPress === 'function') window.endPress(e); }, {passive: false});
     }
 
-    // 4. 启动数据库引擎
     window.initDB();
 });
 
@@ -689,11 +671,9 @@ const defaultDB = {
     }
 };
 
-let db = defaultDB; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let progress = 0; let pressFrame = null; let isPressing = false; let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: false }; let particles = []; let animationId;
+let db = defaultDB; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: false }; let particles = []; let animationId;
 
-/* ================= 声明并提升所有的全局功能函数 ================= */
-
-window.cleanupOldLocalStorage = function() { const currentVersion = 'sealOfLoveDB_v28'; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) { localStorage.removeItem(key); } } }
+window.cleanupOldLocalStorage = function() { const currentVersion = 'sealOfLoveDB_v29'; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) { localStorage.removeItem(key); } } }
 
 window.deepRescueDB = function(target, source) {
     if(!source) return target;
@@ -715,11 +695,11 @@ window.initDB = async function() {
     if (bestLocalDb) db = window.deepRescueDB(db, bestLocalDb);
     if (cloudDb) db = window.deepRescueDB(db, cloudDb);
     if (!db.users['yishuyangguang']) { db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] }; }
-    try { localStorage.setItem('sealOfLoveDB_v28', JSON.stringify(db)); } catch(e){} 
+    try { localStorage.setItem('sealOfLoveDB_v29', JSON.stringify(db)); } catch(e){} 
     if (bestLocalDb && !cloudDb) { window.saveDB(); }
 }
 
-window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v28', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
+window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v29', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
 
 window.showGlobalToast = function(text, type = 'loading') { const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text'); if(!toast) return; toast.className = `global-toast show ${type}`; msg.innerText = text; if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖'; clearTimeout(toastTimeout); if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); } }
 window.compressImageFile = function(file, callback) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 240; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/webp', 0.75)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
@@ -740,25 +720,16 @@ window.handleLogin = async function() {
         const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: baseUsername, password: p }) }); 
         if (response.ok) { const result = await response.json(); if(result.success) { window.loginSuccess(baseUsername, true); return; } } 
     } catch (error) {} 
-    
-    if(db.users[baseUsername] && db.users[baseUsername].password === p) { 
-        const isAdmin = (baseUsername === 'yishuyangguang'); 
-        window.loginSuccess(baseUsername, isAdmin); 
-    } else alert('账号或密码错误。'); 
+    if(db.users[baseUsername] && db.users[baseUsername].password === p) { const isAdmin = (baseUsername === 'yishuyangguang'); window.loginSuccess(baseUsername, isAdmin); } else alert('账号或密码错误。'); 
 }
 
 window.loginSuccess = function(baseUser, isAdmin) { state.isLoggedIn = true; state.isAdmin = isAdmin; currentUserAccount = baseUser; document.getElementById('user-widget').style.display = 'flex'; window.updateUserWidgetIcon(); window.initStageScreen(); }
-
 window.handleRegister = async function() { const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim(); if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('原生账号仅限英文数字组合'); if(db.users[u]) return alert('账号已存在'); db.users[u] = { password: p, nickname: '', avatar: '', favorites: [] }; await window.saveDB(); window.loginSuccess(u, false); }
-
 window.logout = function() { state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null; document.getElementById('top-admin-controls').style.display = 'none'; document.getElementById('user-widget').style.display = 'none'; window.navigateTo('screen-login'); document.body.classList.remove('light-theme'); state.isLightTheme = false; document.getElementById('btn-theme').innerText = '🌙'; document.documentElement.style.setProperty('--theme-bg-color', '#1c1d22'); document.documentElement.style.setProperty('--theme-primary', '#d4af37'); }
 
 window.openUserProfile = function() { if(!currentUserAccount) return; if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('profile-avatar-img'); const svgEl = document.getElementById('profile-svg-placeholder'); if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } document.getElementById('profile-nickname-input').value = userData.nickname || ''; const recoveryWrap = document.getElementById('admin-recovery-btn-wrap'); if (state.isAdmin) recoveryWrap.style.display = 'block'; else recoveryWrap.style.display = 'none'; window.showModal('user-profile-modal'); }
-
 window.handleProfileAvatar = function(inputEl) { if(inputEl.files.length > 0) { window.compressImageFile(inputEl.files[0], (base64) => { const imgEl = document.getElementById('profile-avatar-img'); imgEl.src = base64; imgEl.style.display = 'block'; document.getElementById('profile-svg-placeholder').style.display = 'none'; }); } }
-
 window.saveUserProfile = async function() { if(!currentUserAccount) return; const nick = document.getElementById('profile-nickname-input').value.trim(); const imgEl = document.getElementById('profile-avatar-img'); for(let key in db.users) { if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) { return alert('该昵称已被使用'); } } if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; db.users[currentUserAccount].nickname = nick; if(imgEl.style.display === 'block') db.users[currentUserAccount].avatar = imgEl.src; await window.saveDB(); window.updateUserWidgetIcon(); window.hideModal('user-profile-modal'); }
-
 window.updateUserWidgetIcon = function() { if(!currentUserAccount) return; if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('user-widget-avatar'); const svgEl = document.getElementById('user-widget-svg'); if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } }
 
 window.toggleEditMode = function() { state.isEditMode = !state.isEditMode; document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑'; if(state.isEditMode) document.body.classList.add('edit-mode'); else document.body.classList.remove('edit-mode'); if (document.getElementById('screen-stage').classList.contains('active')) window.initStageScreen(); else if (document.getElementById('screen-card-list').classList.contains('active')) window.renderCardList(); }
@@ -873,10 +844,10 @@ window.openVinylPlayer = function(catId) {
     else { musicState.playlist = db.globalMusicConfig.library[catId] || []; } 
     
     musicState.currentIndex = 0; musicState.mode = 'sequence'; musicState.tracksLimit = -1; 
-    document.getElementById('player-mode-text').innerText = '🔁 顺序播放'; 
-    document.getElementById('player-limit-text').innerText = '⏳ 定时/定量'; 
-    document.getElementById('vinyl-search').value = ''; 
+    const modeBtn = document.getElementById('btn-play-mode'); if(modeBtn) modeBtn.innerText = '🔁';
+    const limitTextEl = document.getElementById('player-limit-text'); if(limitTextEl) limitTextEl.innerText = '';
     
+    document.getElementById('vinyl-search').value = ''; 
     window.renderVinylPlaylist(); window.showModal('vinyl-player-modal'); 
     if(musicState.playlist.length > 0) window.playCurrentTrack(); else window.pauseTrack(); 
 }
@@ -954,12 +925,12 @@ window.nextTrack = function() {
     window.playCurrentTrack(); 
 }
 
-// 修改播放模式：只修改文字，去除多余按钮耦合
+// 【修复：仅修改按钮内的图标文字，并显示成功提示】
 window.changePlayMode = function() { 
-    const text = document.getElementById('player-mode-text'); 
-    if(musicState.mode === 'sequence') { musicState.mode = 'random'; if(text) text.innerText = '🔀 随机播放'; } 
-    else if(musicState.mode === 'random') { musicState.mode = 'single'; if(text) text.innerText = '🔂 单曲循环'; } 
-    else { musicState.mode = 'sequence'; if(text) text.innerText = '🔁 顺序播放'; } 
+    const btn = document.getElementById('btn-play-mode'); 
+    if(musicState.mode === 'sequence') { musicState.mode = 'random'; if(btn) btn.innerText = '🔀'; window.showGlobalToast('随机播放', 'success'); } 
+    else if(musicState.mode === 'random') { musicState.mode = 'single'; if(btn) btn.innerText = '🔂'; window.showGlobalToast('单曲循环', 'success'); } 
+    else { musicState.mode = 'sequence'; if(btn) btn.innerText = '🔁'; window.showGlobalToast('顺序播放', 'success'); } 
 }
 
 window.handleAudioEnded = function() { 
@@ -968,9 +939,14 @@ window.handleAudioEnded = function() {
     
     if (musicState.tracksLimit > 0) { 
         musicState.tracksLimit--; 
-        const limitTextEl = document.getElementById('player-limit-text'); 
-        if(limitTextEl) limitTextEl.innerText = `⏳ 定时关闭 (剩 ${musicState.tracksLimit} 首)`; 
-        if (musicState.tracksLimit === 0) { window.pauseTrack(); musicState.tracksLimit = -1; if(limitTextEl) limitTextEl.innerText = `⏳ 定时/定量`; return; } 
+        if (musicState.tracksLimit === 0) { 
+            window.pauseTrack(); 
+            musicState.tracksLimit = -1; 
+            const timerBtn = document.getElementById('btn-timer');
+            if(timerBtn) timerBtn.style.color = '#fff';
+            window.showGlobalToast('定时结束，已暂停', 'success');
+            return; 
+        } 
     } 
     
     if(musicState.mode === 'single') { 
@@ -985,7 +961,20 @@ window.handleAudioEnded = function() {
 }
 
 window.setTrackLimit = function() { document.getElementById('timer-input-val').value = ''; window.showModal('music-timer-modal'); }
-window.confirmTrackLimit = function() { let val = parseInt(document.getElementById('timer-input-val').value); const limitTextEl = document.getElementById('player-limit-text'); if (isNaN(val) || val <= 0) { musicState.tracksLimit = -1; limitTextEl.innerText = "⏳ 定时/定量"; } else { musicState.tracksLimit = val; limitTextEl.innerText = `⏳ 定时关闭 (剩 ${musicState.tracksLimit} 首)`; } window.hideModal('music-timer-modal'); }
+window.confirmTrackLimit = function() { 
+    let val = parseInt(document.getElementById('timer-input-val').value); 
+    const timerBtn = document.getElementById('btn-timer');
+    if (isNaN(val) || val <= 0) { 
+        musicState.tracksLimit = -1; 
+        if(timerBtn) timerBtn.style.color = '#fff';
+        window.showGlobalToast('已取消定时', 'success');
+    } else { 
+        musicState.tracksLimit = val; 
+        if(timerBtn) timerBtn.style.color = 'var(--theme-primary)';
+        window.showGlobalToast(`定时: ${val} 首后停止`, 'success');
+    } 
+    window.hideModal('music-timer-modal'); 
+}
 window.closeVinylPlayer = function() { window.hideModal('vinyl-player-modal'); }
 window.showPlayerFromFloat = function() { if(state.isLoggedIn && !state.isEditMode && document.getElementById('vinyl-player-modal').style.display !== 'flex') window.showModal('vinyl-player-modal'); }
 
