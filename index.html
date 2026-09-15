@@ -62,7 +62,7 @@
         .global-toast.show { top: calc(env(safe-area-inset-top) + 20px); }
         .global-toast.success { border-color: #d4af37; } .global-toast.error { border-color: #ef4444; }
 
-        /* ================= 极速上传任务胶囊 ================= */
+        /* ================= 极速上传任务胶囊 (Progress Capsule) ================= */
         .upload-capsule { position: fixed; bottom: -80px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.85); width: 85%; max-width: 400px; height: 48px; border-radius: 24px; z-index: 9999; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.6); overflow: hidden; display: flex; justify-content: center; align-items: center; transition: bottom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .upload-capsule.show { bottom: calc(env(safe-area-inset-bottom) + 30px); }
         .upload-capsule-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: linear-gradient(90deg, #6366f1, #a855f7); z-index: 1; transition: width 0.3s ease; opacity: 0.8; }
@@ -168,7 +168,7 @@
         .action-icon:active { transform: scale(0.85); }
 
         .admin-controls { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 15px); left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 95%; }
-        .btn-small { padding: 6px 14px; font-size: 0.85rem; border-radius: 18px; width: auto; margin: 0; }
+        .btn-small { padding: 8px 18px; font-size: 0.9rem; border-radius: 20px; width: auto; margin: 0; }
 
         /* ================= 动画引擎 ================= */
         .progress-bar { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
@@ -244,10 +244,10 @@
         .player-controls-wrapper {
             display: flex; width: 100%; justify-content: space-between; align-items: center; margin-top: 15px;
         }
-        .ctrl-group { display: flex; gap: 15px; flex: 1; align-items: center; }
-        .ctrl-group.left { justify-content: flex-start; }
-        .ctrl-group.center { justify-content: center; flex: 1.5; gap: 18px; }
-        .ctrl-group.right { justify-content: flex-end; }
+        .ctrl-group { display: flex; align-items: center; }
+        .ctrl-group.left { flex: 1; justify-content: flex-start; gap: 15px; }
+        .ctrl-group.center { flex: 0; justify-content: center; gap: 18px; }
+        .ctrl-group.right { flex: 1; justify-content: flex-end; gap: 15px; }
 
         .ctrl-btn-small { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.15rem; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .ctrl-btn-small:active { transform: scale(0.85); }
@@ -320,7 +320,7 @@
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
 
-<!-- 纯净 Audio 引擎 -->
+<!-- 纯净 Audio 引擎，全站后台不间断托底播放 -->
 <audio id="bgm-player"></audio>
 
 <!-- 左上角主题控制 -->
@@ -343,10 +343,12 @@
     </div>
 </div>
 
+<!-- 全局进度胶囊 UI -->
 <div class="global-toast" id="global-toast">
     <span id="toast-icon">⏳</span><span id="toast-text">正在同步至云端...</span>
 </div>
 
+<!-- 极速多任务并发上传进度胶囊 -->
 <div class="upload-capsule" id="upload-capsule">
     <div class="upload-capsule-fill" id="upload-capsule-fill"></div>
     <span class="upload-capsule-text" id="upload-capsule-text">准备上传...</span>
@@ -354,11 +356,13 @@
 
 <div id="app-container">
     
+    <!-- 管理员控制台 -->
     <div class="admin-controls" id="top-admin-controls" style="display: none;">
         <button class="btn-glass btn-small" onclick="window.toggleEditMode()" id="btn-edit-toggle">开启深度编辑</button>
         <button class="btn-glass btn-small" onclick="window.logout()">安全退出</button>
     </div>
 
+    <!-- 0. 登录屏 -->
     <div class="screen active center-content" id="screen-login">
         <div class="glass-panel">
             <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">恒久印记</h1>
@@ -371,10 +375,12 @@
         </div>
     </div>
 
+    <!-- 1. 阶段选择屏 -->
     <div class="screen center-content" id="screen-stage">
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
         
+        <!-- 高定胶囊按钮：印记音律 (直达全局曲库) -->
         <div class="brand-capsule" onclick="window.openMusicTypeModal()">
             <img src="apple-touch-icon.png" alt="印记" onerror="this.src='favicon-32x32.png'">
             <span>印记音律</span>
@@ -383,6 +389,7 @@
         <div class="stage-array-wrapper" id="stage-buttons-container"></div>
     </div>
 
+    <!-- 2. 分类与卡片列表屏 -->
     <div class="screen" id="screen-card-list" style="padding-top: calc(env(safe-area-inset-top) + 60px); justify-content: flex-start;">
         <h1 id="list-stage-title" style="margin-bottom: 5px;">阶段卡片</h1>
         <p class="slogan-verse" style="margin-bottom: 25px;">常常操练，感悟成长</p>
@@ -400,6 +407,7 @@
         <button class="btn-glass" style="margin: 30px auto;" onclick="window.navigateTo('screen-stage')">返回首页</button>
     </div>
 
+    <!-- 3. 预备提醒屏 (无干扰直达) -->
     <div class="screen center-content" id="screen-prep">
         <div class="glass-panel" style="padding: 3.5rem 2rem;">
             <h1 class="text-gradient-blue" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
@@ -408,6 +416,7 @@
         </div>
     </div>
 
+    <!-- 4. 角色选择屏 -->
     <div class="screen center-content" id="screen-role">
         <h1 id="role-stage-title">缔结印记</h1>
         <p style="margin-bottom: 3rem;">请选择您的身份<br>随后将两台手机并排平放</p>
@@ -415,6 +424,7 @@
         <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81; padding: 1.2rem 2rem;" onclick="window.selectRole('girl')">我是女生 ♀</button>
     </div>
 
+    <!-- 5. 合并动画屏 -->
     <div class="screen center-content" id="screen-sync">
         <h1 id="sync-title" style="font-size: 2.2rem;">双向奔赴</h1>
         <p id="sync-subtitle" style="font-size: 1.1rem;">确认手机贴合后，点击合并</p>
@@ -422,6 +432,7 @@
         <button class="btn-glass btn-primary" id="btn-sync-confirm" onclick="window.triggerSync()">确 认 合 并</button>
     </div>
 
+    <!-- 6. 核心内容屏 -->
     <div class="screen center-content" id="screen-content">
         <div class="progress-bar" id="content-progress">
             <div class="progress-dot" id="dot-1"></div><div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
@@ -441,6 +452,7 @@
         </div>
     </div>
 
+    <!-- 7. 完成屏 -->
     <div class="screen center-content" id="screen-finish">
         <div class="glass-panel">
             <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem;">印记已成</h1>
@@ -454,6 +466,7 @@
 
 <!-- ================= 弹窗群 ================= -->
 
+<!-- 0. 个人中心弹窗 (头像、昵称、找回密码) -->
 <div class="modal-overlay" id="user-profile-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px; padding: 25px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px; font-size:1.6rem;">个人中心</h2>
@@ -466,13 +479,14 @@
         </div>
         <input type="file" id="profile-avatar-upload" accept="image/*" style="display:none;" onchange="window.handleProfileAvatar(this)">
 
-        <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称" style="text-align:center; padding: 12px 15px;">
+        <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称 (用于登录与展示)" style="text-align:center; padding: 12px 15px;">
         
         <div style="display: flex; gap: 15px; margin-top: 20px;">
             <button class="btn-glass btn-blue-gradient" style="margin:0; flex:1; border-radius:20px; padding: 12px;" onclick="window.saveUserProfile()">保 存<br>资 料</button>
             <button class="btn-glass btn-type-dark" style="margin:0; flex:1; border-radius:20px; padding: 12px;" onclick="window.hideModal('user-profile-modal')">取 消</button>
         </div>
 
+        <!-- 管理员专属隐藏入口：云端密码检索 & 全局音律库管理 -->
         <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 25px;">
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; background:transparent; padding: 0.8rem; border-radius:20px;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
             <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; background:transparent; padding: 0.8rem; border-radius:20px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.manageMusicLibrary();">⚙️ 全局音律库管理 (管理员专属)</button>
@@ -480,15 +494,20 @@
     </div>
 </div>
 
+<!-- 1. 音乐大类选择弹窗 (动态加载，默认收藏置顶) -->
 <div class="modal-overlay" id="music-type-modal">
     <div class="modal-content music-type-modal-content" style="text-align: center; max-width: 340px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 25px; font-size: 1.5rem; letter-spacing:1px;">选择背景音律</h2>
-        <div id="music-type-btn-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        
+        <div id="music-type-btn-container" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- JS 动态注入分类按钮 -->
+        </div>
+
         <button class="btn-glass btn-type-dark" style="margin-top: 15px; width: 100%; padding:0.9rem;" onclick="window.hideModal('music-type-modal')">取 消</button>
     </div>
 </div>
 
-<!-- 新版防溢出自适应高定播放器 (Responsive Symmetrical Flex) -->
+<!-- 2. 新版防溢出自适应高定播放器 (Responsive Symmetrical Flex) -->
 <div class="modal-overlay" id="vinyl-player-modal">
     <div class="modal-content vinyl-player-container new-layout">
         
@@ -547,6 +566,7 @@
     </div>
 </div>
 
+<!-- 2.5 黑金 3D 定时控制弹窗 -->
 <div class="modal-overlay" id="music-timer-modal">
     <div class="modal-content gold-3d" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary); margin-bottom: 15px; font-size: 1.4rem;">⏳ 定时/定量停止</h2>
@@ -559,26 +579,38 @@
     </div>
 </div>
 
+<!-- 3. 高定音乐库管理弹窗 (含编辑功能与紧凑排版) -->
 <div class="modal-overlay" id="music-admin-modal">
     <div class="modal-content" style="background: var(--theme-bg-color); padding: 25px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 15px; text-align:left; font-size: 1.4rem;">全局音律库管理</h2>
+        
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <p style="font-size: 0.85rem; opacity: 0.8; text-align:left; margin:0;">选择分类库进行管理</p>
             <button class="btn-glass btn-small" style="margin:0; border: 1px dashed #f59e0b; color:#f59e0b; padding:4px 8px; font-size: 0.8rem;" onclick="window.manageMusicCategories()">⚙️ 管理分类</button>
         </div>
-        <select id="admin-music-cat" onchange="window.renderAdminMusicList()" style="margin-bottom: 15px; padding:10px 15px; background:var(--theme-glass-bg);"></select>
+
+        <select id="admin-music-cat" onchange="window.renderAdminMusicList()" style="margin-bottom: 15px; padding:10px 15px; background:var(--theme-glass-bg);">
+            <!-- JS 动态加载 -->
+        </select>
+        
         <input type="search" id="admin-music-search" placeholder="🔍 模糊搜索音乐库..." oninput="window.filterAdminMusicList()" style="margin-bottom:12px; padding:10px 15px;">
+
         <div id="admin-music-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; max-height: 25vh; overflow-y:auto; padding-right:5px;"></div>
+        
         <div style="background: rgba(255,255,255,0.02); padding:15px; border-radius:14px; border: 1px dashed #6366f1;">
             <h4 id="admin-music-action-title" style="margin-bottom: 12px; color:#6366f1; text-align:left; font-size: 1rem;">+ 新增曲目</h4>
             <input type="hidden" id="edit-music-idx" value="">
             <input type="text" id="new-music-name" placeholder="曲目名称" style="margin-bottom:10px; padding:12px 15px; background:var(--theme-glass-bg);">
+            
             <div id="music-upload-zone" style="width:100%; padding:15px; border: 2px dashed #818cf8; border-radius: 12px; text-align: center; cursor: pointer; margin-bottom: 10px; transition: all 0.3s;">
                 <span id="music-upload-text" style="color: #6366f1; font-size:0.9rem; font-weight:500;">点击或拖拽音频 (支持批量直传云端)</span>
+                <!-- 开启多选 multiple -->
                 <input type="file" id="new-music-file" accept="audio/*" multiple style="display: none;">
             </div>
+            
             <div style="text-align: center; margin-bottom: 10px; opacity: 0.5; font-size: 0.8rem;">或输入云端直链 URL (单文件)</div>
             <input type="text" id="new-music-url" placeholder="云端直链 URL" style="margin-bottom:15px; padding:12px 15px; background:var(--theme-glass-bg);">
+            
             <div style="display:flex; gap:10px;">
                 <button class="btn-glass btn-blue-gradient" id="btn-admin-music-save" style="flex:1; border-radius:12px; margin:0; padding:10px;" onclick="window.saveMusicToLibrary()">添 加 到 库</button>
                 <button class="btn-glass" id="btn-admin-music-cancel" style="flex:1; border-radius:12px; margin:0; padding:10px; display:none;" onclick="window.resetMusicEdit()">取 消 修 改</button>
@@ -588,6 +620,7 @@
     </div>
 </div>
 
+<!-- 4. 音乐分类管理弹窗 -->
 <div class="modal-overlay" id="music-cat-modal">
     <div class="modal-content">
         <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理音律分类</h2>
@@ -597,6 +630,7 @@
     </div>
 </div>
 
+<!-- 其它模态框 -->
 <div class="modal-overlay" id="qr-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary);">联系站长</h2>
@@ -646,16 +680,30 @@
 <script>
 /* ================= 核心防御性生命周期边界 (DOM Ready Guard) ================= */
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. Canvas 粒子初始化防护
     const canvas = document.getElementById('particle-canvas');
-    if (canvas) { window.ctx = canvas.getContext('2d'); window.resizeCanvas(); window.addEventListener('resize', window.resizeCanvas); window.initParticles(); window.animateParticles(); }
-    
-    const audioPlayer = document.getElementById('bgm-player');
-    if (audioPlayer) { 
-        audioPlayer.addEventListener('ended', (e) => { if (typeof window.handleAudioEnded === 'function') window.handleAudioEnded(e); });
-        audioPlayer.addEventListener('timeupdate', () => { if (typeof window.updateProgress === 'function') window.updateProgress(); });
-        audioPlayer.addEventListener('loadedmetadata', () => { if (typeof window.updateProgress === 'function') window.updateProgress(); });
+    if (canvas) { 
+        window.ctx = canvas.getContext('2d'); 
+        window.resizeCanvas(); 
+        window.addEventListener('resize', window.resizeCanvas); 
+        window.initParticles(); window.animateParticles(); 
     }
     
+    // 2. Audio 引擎与进度条防护绑定
+    const audioPlayer = document.getElementById('bgm-player');
+    if (audioPlayer) { 
+        audioPlayer.addEventListener('ended', (e) => { 
+            if (typeof window.handleAudioEnded === 'function') window.handleAudioEnded(e); 
+        });
+        audioPlayer.addEventListener('timeupdate', () => {
+            if (typeof window.updateProgress === 'function') window.updateProgress();
+        });
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            if (typeof window.updateProgress === 'function') window.updateProgress();
+        });
+    }
+    
+    // 3. 长按按钮防护绑定
     const longPressBtn = document.getElementById('btn-long-press');
     if (longPressBtn) {
         longPressBtn.addEventListener('mousedown', (e) => { if(typeof window.startPress === 'function') window.startPress(e); });
@@ -666,6 +714,7 @@ document.addEventListener("DOMContentLoaded", () => {
         longPressBtn.addEventListener('touchcancel', (e) => { if(typeof window.endPress === 'function') window.endPress(e); }, {passive: false});
     }
 
+    // 4. 启动数据库引擎
     window.initDB();
     window.initProgressDrag();
 });
@@ -674,7 +723,10 @@ document.addEventListener("DOMContentLoaded", () => {
 const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
 const defaultDB = {
-    users: { 'yishuyangguang': { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] } }, 
+    // 默认内置一条超级管理员账号，作为极端的兜底策略
+    users: {
+        'yishuyangguang': { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] }
+    }, 
     globalMusicConfig: { categories: [{ id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' }], library: { 'mcat_1': [], 'mcat_2': [] } },
     stages: {
         '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', type: '心', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
@@ -689,33 +741,107 @@ const defaultDB = {
 
 let db = defaultDB; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: false }; let particles = []; let animationId; window.isDraggingProgress = false;
 
-window.cleanupOldLocalStorage = function() { const currentVersion = 'sealOfLoveDB_v30'; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) { localStorage.removeItem(key); } } }
+/* ================= 声明并提升所有的全局功能函数 (Hoisted Functions) ================= */
 
+// 绝不直接暴力清空 localStorage，仅清除特定过期快照，确保数据可被搜救
+window.cleanupOldLocalStorage = function() { 
+    const currentVersion = 'sealOfLoveDB_v31'; 
+    for (let i = 0; i < localStorage.length; i++) { 
+        const key = localStorage.key(i); 
+        // 保留 v31，并且不再删除老版本，以便 deepRescueDB() 能顺利打捞
+    } 
+}
+
+// 核心：自研深度数据搜救引擎，将老版本意外遗失的资料重新合并拼接
 window.deepRescueDB = function(target, source) {
     if(!source) return target;
-    if (source.users) { for (let u in source.users) { if (!target.users[u]) target.users[u] = source.users[u]; else { if (source.users[u].avatar && !target.users[u].avatar) target.users[u].avatar = source.users[u].avatar; if (source.users[u].nickname && !target.users[u].nickname) target.users[u].nickname = source.users[u].nickname; if (source.users[u].favorites && source.users[u].favorites.length > 0) target.users[u].favorites = source.users[u].favorites; } } }
-    if (source.stages) { stagesList.forEach(s => { if (source.stages[s] && target.stages[s]) { if (source.stages[s].icon && source.stages[s].icon !== '') target.stages[s].icon = source.stages[s].icon; if (source.stages[s].name && target.stages[s].name === s) target.stages[s].name = source.stages[s].name; if (source.stages[s].prepText) target.stages[s].prepText = source.stages[s].prepText; if (source.stages[s].cards && source.stages[s].cards.length > target.stages[s].cards.length) target.stages[s].cards = source.stages[s].cards; if (source.stages[s].categories && source.stages[s].categories.length > target.stages[s].categories.length) target.stages[s].categories = source.stages[s].categories; } }); }
-    if (source.globalMusicConfig) { if (source.globalMusicConfig.categories && source.globalMusicConfig.categories.length > 0) { target.globalMusicConfig.categories = source.globalMusicConfig.categories; } for(let cat in source.globalMusicConfig.library) { if (!target.globalMusicConfig.library[cat]) target.globalMusicConfig.library[cat] = []; source.globalMusicConfig.library[cat].forEach(track => { if (!target.globalMusicConfig.library[cat].find(t => t.url === track.url)) { target.globalMusicConfig.library[cat].push(track); } }); } }
+    // 搜救用户资料 (含头像、昵称、收藏)
+    if (source.users) {
+        for (let u in source.users) {
+            if (!target.users[u]) target.users[u] = source.users[u];
+            else {
+                if (source.users[u].avatar && !target.users[u].avatar) target.users[u].avatar = source.users[u].avatar;
+                if (source.users[u].nickname && !target.users[u].nickname) target.users[u].nickname = source.users[u].nickname;
+                if (source.users[u].favorites && source.users[u].favorites.length > 0) target.users[u].favorites = source.users[u].favorites;
+            }
+        }
+    }
+    // 搜救各阶段图标与卡片数据
+    if (source.stages) {
+        stagesList.forEach(s => {
+            if (source.stages[s] && target.stages[s]) {
+                if (source.stages[s].icon && source.stages[s].icon !== '') target.stages[s].icon = source.stages[s].icon;
+                if (source.stages[s].name && target.stages[s].name === s) target.stages[s].name = source.stages[s].name;
+                if (source.stages[s].prepText) target.stages[s].prepText = source.stages[s].prepText;
+                if (source.stages[s].cards && source.stages[s].cards.length > target.stages[s].cards.length) target.stages[s].cards = source.stages[s].cards;
+                if (source.stages[s].categories && source.stages[s].categories.length > target.stages[s].categories.length) target.stages[s].categories = source.stages[s].categories;
+            }
+        });
+    }
+    // 搜救全局音律库
+    if (source.globalMusicConfig) {
+        if (source.globalMusicConfig.categories && source.globalMusicConfig.categories.length > 0) {
+            target.globalMusicConfig.categories = source.globalMusicConfig.categories;
+        }
+        for(let cat in source.globalMusicConfig.library) {
+            if (!target.globalMusicConfig.library[cat]) target.globalMusicConfig.library[cat] = [];
+            source.globalMusicConfig.library[cat].forEach(track => {
+                if (!target.globalMusicConfig.library[cat].find(t => t.url === track.url)) {
+                    target.globalMusicConfig.library[cat].push(track);
+                }
+            });
+        }
+    }
     return target;
 }
 
+// 防御性数据拉取与热升级
 window.initDB = async function() { 
     let cloudDb = null;
-    try { const res = await fetch('/api/db'); if (res.ok) { const remoteDb = await res.json(); if (remoteDb && remoteDb.stages) { cloudDb = remoteDb; } } } catch (e) {} 
-    let bestLocalDb = null; let maxLen = 0;
+    try { 
+        const res = await fetch('/api/db'); 
+        if (res.ok) { 
+            const remoteDb = await res.json(); 
+            if (remoteDb && remoteDb.stages) { 
+                cloudDb = remoteDb;
+            } 
+        } 
+    } catch (e) {} 
+
+    // 全局打捞本地所有历史版本，寻找最长、最完整的可用数据
+    let bestLocalDb = null;
+    let maxLen = 0;
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('sealOfLoveDB_')) { const val = localStorage.getItem(key); if (val && val.length > maxLen) { maxLen = val.length; try { bestLocalDb = JSON.parse(val); } catch(e){} } }
+        if (key && key.startsWith('sealOfLoveDB_')) {
+            const val = localStorage.getItem(key);
+            if (val && val.length > maxLen) {
+                maxLen = val.length;
+                try { bestLocalDb = JSON.parse(val); } catch(e){}
+            }
+        }
     }
+
+    // 从最干净的底座开始
     db = JSON.parse(JSON.stringify(defaultDB));
+
+    // 智能搜救与合并：本地优先补全，云端最终覆盖修正
     if (bestLocalDb) db = window.deepRescueDB(db, bestLocalDb);
     if (cloudDb) db = window.deepRescueDB(db, cloudDb);
-    if (!db.users['yishuyangguang']) { db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] }; }
-    try { localStorage.setItem('sealOfLoveDB_v30', JSON.stringify(db)); } catch(e){} 
+
+    // 确保默认超管账户永不掉线
+    if (!db.users['yishuyangguang']) {
+        db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] };
+    }
+
+    // 存入最新的安全版本键中
+    try { localStorage.setItem('sealOfLoveDB_v31', JSON.stringify(db)); } catch(e){} 
+    
+    // 如果云端挂了但本地有数据，才静默上传补救
     if (bestLocalDb && !cloudDb) { window.saveDB(); }
 }
 
-window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v30', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
+window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v31', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
 
 window.showGlobalToast = function(text, type = 'loading') { const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text'); if(!toast) return; toast.className = `global-toast show ${type}`; msg.innerText = text; if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖'; clearTimeout(toastTimeout); if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); } }
 window.compressImageFile = function(file, callback) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 240; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/webp', 0.75)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
@@ -744,12 +870,17 @@ window.handleLogin = async function() {
 }
 
 window.loginSuccess = function(baseUser, isAdmin) { state.isLoggedIn = true; state.isAdmin = isAdmin; currentUserAccount = baseUser; document.getElementById('user-widget').style.display = 'flex'; window.updateUserWidgetIcon(); window.initStageScreen(); }
+
 window.handleRegister = async function() { const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim(); if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('原生账号仅限英文数字组合'); if(db.users[u]) return alert('账号已存在'); db.users[u] = { password: p, nickname: '', avatar: '', favorites: [] }; await window.saveDB(); window.loginSuccess(u, false); }
+
 window.logout = function() { state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null; document.getElementById('top-admin-controls').style.display = 'none'; document.getElementById('user-widget').style.display = 'none'; window.navigateTo('screen-login'); document.body.classList.remove('light-theme'); state.isLightTheme = false; document.getElementById('btn-theme').innerText = '🌙'; document.documentElement.style.setProperty('--theme-bg-color', '#1c1d22'); document.documentElement.style.setProperty('--theme-primary', '#d4af37'); }
 
 window.openUserProfile = function() { if(!currentUserAccount) return; if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('profile-avatar-img'); const svgEl = document.getElementById('profile-svg-placeholder'); if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } document.getElementById('profile-nickname-input').value = userData.nickname || ''; const recoveryWrap = document.getElementById('admin-recovery-btn-wrap'); if (state.isAdmin) recoveryWrap.style.display = 'block'; else recoveryWrap.style.display = 'none'; window.showModal('user-profile-modal'); }
+
 window.handleProfileAvatar = function(inputEl) { if(inputEl.files.length > 0) { window.compressImageFile(inputEl.files[0], (base64) => { const imgEl = document.getElementById('profile-avatar-img'); imgEl.src = base64; imgEl.style.display = 'block'; document.getElementById('profile-svg-placeholder').style.display = 'none'; }); } }
+
 window.saveUserProfile = async function() { if(!currentUserAccount) return; const nick = document.getElementById('profile-nickname-input').value.trim(); const imgEl = document.getElementById('profile-avatar-img'); for(let key in db.users) { if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) { return alert('该昵称已被使用'); } } if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; db.users[currentUserAccount].nickname = nick; if(imgEl.style.display === 'block') db.users[currentUserAccount].avatar = imgEl.src; await window.saveDB(); window.updateUserWidgetIcon(); window.hideModal('user-profile-modal'); }
+
 window.updateUserWidgetIcon = function() { if(!currentUserAccount) return; if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('user-widget-avatar'); const svgEl = document.getElementById('user-widget-svg'); if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } }
 
 window.toggleEditMode = function() { state.isEditMode = !state.isEditMode; document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑'; if(state.isEditMode) document.body.classList.add('edit-mode'); else document.body.classList.remove('edit-mode'); if (document.getElementById('screen-stage').classList.contains('active')) window.initStageScreen(); else if (document.getElementById('screen-card-list').classList.contains('active')) window.renderCardList(); }
