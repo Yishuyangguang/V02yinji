@@ -16,101 +16,54 @@
     <style>
         /* ================= 全局重置与双轨变量 ================= */
         :root {
-            --theme-bg-color: #1c1d22;
-            --theme-primary: #d4af37;
-            --theme-secondary: #ebd373;
-            --theme-text: #ffffff;
-            --theme-glass-bg: rgba(42, 43, 48, 0.7);
-            --theme-glass-border: rgba(255, 255, 255, 0.08);
-            --theme-glass-shadow: rgba(0, 0, 0, 0.4);
-            --theme-glass-inset: rgba(255, 255, 255, 0.05);
-            --theme-input-bg: rgba(0, 0, 0, 0.3);
+            --theme-bg-color: #1c1d22; --theme-primary: #d4af37; --theme-secondary: #ebd373;
+            --theme-text: #ffffff; --theme-glass-bg: rgba(42, 43, 48, 0.7);
+            --theme-glass-border: rgba(255, 255, 255, 0.08); --theme-glass-shadow: rgba(0, 0, 0, 0.4);
+            --theme-glass-inset: rgba(255, 255, 255, 0.05); --theme-input-bg: rgba(0, 0, 0, 0.3);
             --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             --font-title: "Songti SC", "SimSun", serif;
         }
 
         body.light-theme {
-            --theme-bg-color: #f8f6f0;
-            --theme-text: #1f2937;
-            --theme-glass-bg: rgba(255, 255, 255, 0.95);
-            --theme-glass-border: rgba(230, 230, 230, 0.9);
-            --theme-glass-shadow: rgba(150, 160, 180, 0.15);
-            --theme-glass-inset: rgba(255, 255, 255, 1);
-            --theme-input-bg: rgba(250, 250, 250, 0.9);
+            --theme-bg-color: #f8f6f0; --theme-text: #1f2937; --theme-glass-bg: rgba(255, 255, 255, 0.95);
+            --theme-glass-border: rgba(230, 230, 230, 0.9); --theme-glass-shadow: rgba(150, 160, 180, 0.15);
+            --theme-glass-inset: rgba(255, 255, 255, 1); --theme-input-bg: rgba(250, 250, 250, 0.9);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body, html { width: 100%; max-width: 100vw; height: 100%; overflow-x: hidden; overflow-y: hidden; background-color: var(--theme-bg-color); color: var(--theme-text); font-family: var(--font-main); transition: background-color 0.8s ease, color 0.8s ease; }
 
-        body, html {
-            width: 100%; max-width: 100vw; height: 100%; overflow-x: hidden; overflow-y: hidden; 
-            background-color: var(--theme-bg-color); color: var(--theme-text);
-            font-family: var(--font-main); transition: background-color 0.8s ease, color 0.8s ease;
-        }
-
-        #bg-gradient {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at top center, var(--theme-secondary) 0%, var(--theme-bg-color) 80%);
-            opacity: 0.12; z-index: 1; transition: background 1s ease; pointer-events: none;
-        }
+        #bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top center, var(--theme-secondary) 0%, var(--theme-bg-color) 80%); opacity: 0.12; z-index: 1; transition: background 1s ease; pointer-events: none; }
         #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
 
-        #app-container {
-            position: relative; z-index: 10; width: 100%; max-width: 650px; height: 100%;
-            margin: 0 auto; display: flex; flex-direction: column; overflow: hidden;
-        }
+        #app-container { position: relative; z-index: 10; width: 100%; max-width: 650px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; }
 
-        .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            padding: calc(env(safe-area-inset-top) + 2rem) 1.5rem calc(env(safe-area-inset-bottom) + 2rem) 1.5rem;
-            display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            transform: scale(0.97) translateY(15px); overflow-y: auto; overflow-x: hidden;
-        }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: calc(env(safe-area-inset-top) + 2rem) 1.5rem calc(env(safe-area-inset-bottom) + 2rem) 1.5rem; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); transform: scale(0.97) translateY(15px); overflow-y: auto; overflow-x: hidden; }
         .screen::-webkit-scrollbar { display: none; }
         .screen { -ms-overflow-style: none; scrollbar-width: none; }
         .screen.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); z-index: 20; }
         .screen.center-content { justify-content: center; }
 
-        .global-toast {
-            position: fixed; top: -60px; left: 50%; transform: translateX(-50%);
-            background: rgba(30, 41, 59, 0.9); color: #fff; padding: 10px 20px; border-radius: 30px;
-            font-size: 0.9rem; z-index: 9999; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: flex; align-items: center; gap: 8px; font-weight: 500;
-        }
+        /* ================= 极速 Toast 反馈 ================= */
+        .global-toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.9); color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 0.9rem; z-index: 9999; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; gap: 8px; font-weight: 500; }
         .global-toast.show { top: calc(env(safe-area-inset-top) + 20px); }
-        .global-toast.success { border-color: #10b981; }
-        .global-toast.error { border-color: #ef4444; }
+        .global-toast.success { border-color: #10b981; } .global-toast.error { border-color: #ef4444; }
+
+        /* ================= 极速上传任务胶囊 (Progress Capsule) ================= */
+        .upload-capsule { position: fixed; bottom: -80px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.85); width: 85%; max-width: 400px; height: 48px; border-radius: 24px; z-index: 9999; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.6); overflow: hidden; display: flex; justify-content: center; align-items: center; transition: bottom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .upload-capsule.show { bottom: calc(env(safe-area-inset-bottom) + 30px); }
+        .upload-capsule-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: linear-gradient(90deg, #6366f1, #a855f7); z-index: 1; transition: width 0.3s ease; opacity: 0.8; }
+        .upload-capsule-text { position: relative; z-index: 2; color: #fff; font-size: 0.95rem; font-weight: 600; letter-spacing: 1px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
 
         /* ================= UI 组件 ================= */
-        .glass-panel {
-            background: var(--theme-glass-bg); backdrop-filter: blur(35px) saturate(150%); -webkit-backdrop-filter: blur(35px) saturate(150%);
-            border: 1px solid var(--theme-glass-border); border-radius: 28px;
-            box-shadow: 0 20px 50px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
-            padding: 3rem 2rem; width: 100%; text-align: center; transition: all 0.5s ease;
-        }
-
-        .btn-glass {
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--theme-glass-border);
-            box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
-            color: var(--theme-text); padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 600; border-radius: 50px;
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            width: 85%; margin: 0.8rem auto; display: flex; justify-content: center; align-items: center; letter-spacing: 1px;
-        }
+        .glass-panel { background: var(--theme-glass-bg); backdrop-filter: blur(35px) saturate(150%); -webkit-backdrop-filter: blur(35px) saturate(150%); border: 1px solid var(--theme-glass-border); border-radius: 28px; box-shadow: 0 20px 50px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); padding: 3rem 2rem; width: 100%; text-align: center; transition: all 0.5s ease; }
+        .btn-glass { background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--theme-glass-border); box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); color: var(--theme-text); padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 600; border-radius: 50px; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); width: 85%; margin: 0.8rem auto; display: flex; justify-content: center; align-items: center; letter-spacing: 1px; }
         .btn-glass:active { transform: translateY(3px) scale(0.97); box-shadow: 0 2px 10px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1); }
-
         .btn-primary { background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); border: none; color: #111 !important; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5); }
         .btn-blue-gradient { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none !important; color: #fff !important; font-weight: bold; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4), inset 0 1px 2px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        
         .btn-type-dark { background: #2d3748 !important; color: #e2e8f0 !important; border: 1px solid rgba(255,255,255,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-        input, textarea, select {
-            width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text);
-            padding: 16px 20px; border-radius: 18px; margin-bottom: 18px; font-size: 1.05rem; outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box;
-        }
+        input, textarea, select { width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); padding: 16px 20px; border-radius: 18px; margin-bottom: 18px; font-size: 1.05rem; outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
         input[type="search"] { padding: 12px 20px; border-radius: 20px; margin-bottom: 15px; }
         input:focus, textarea:focus, select:focus { border-color: #6366f1; }
         textarea { resize: vertical; min-height: 90px; }
@@ -121,12 +74,11 @@
         h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 1rem; color: var(--theme-text); transition: color 0.5s; font-weight: 700; }
         p { font-size: clamp(1rem, 4vw, 1.15rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
         .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; letter-spacing: 2px; }
-        .text-gradient-blue { background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: bold; }
+        .text-gradient-blue { background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: bold; }
 
         /* ================= 悬浮挂件系统 ================= */
         .widget-controls { position: absolute; top: calc(env(safe-area-inset-top) + 15px); left: 15px; z-index: 100; display: flex; gap: 10px; }
         .widget-controls-right { position: absolute; top: calc(env(safe-area-inset-top) + 15px); right: 15px; z-index: 100; display: flex; gap: 10px; align-items: center; }
-
         .theme-toggle-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); font-size: 1.2rem; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: all 0.3s; }
         .theme-toggle-btn:active { transform: scale(0.9); }
 
@@ -134,7 +86,7 @@
         .apple-music-player.playing { opacity: 1; pointer-events: auto; }
         .music-icon { width: 22px; height: 22px; border-radius: 6px; background-size: cover; background-position: center; background-image: url('music-artwork.png'); }
         .music-bars { display: flex; gap: 3px; align-items: flex-end; height: 16px; }
-        .bar { width: 3px; background: #fff; border-radius: 2px; animation: bounce 1s infinite alternate; }
+        .bar { width: 3px; background: #d4af37; border-radius: 2px; animation: bounce 1s infinite alternate; }
         .bar:nth-child(2) { animation-delay: 0.2s; } .bar:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0% { height: 4px; } 100% { height: 16px; } }
 
@@ -142,18 +94,10 @@
         .user-profile-btn:active { transform: scale(0.9); }
         .user-avatar-preview { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
         .user-svg-icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
         .link-text { color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block; }
 
         /* ================= 主屏：胶囊按钮与阵列排版 ================= */
-        .brand-capsule {
-            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-            background: rgba(45, 45, 48, 0.5); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--theme-glass-border); border-radius: 50px;
-            padding: 6px 20px 6px 6px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            margin: 0 auto 1.5rem auto; color: var(--theme-text);
-        }
+        .brand-capsule { display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: rgba(45, 45, 48, 0.5); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--theme-glass-border); border-radius: 50px; padding: 6px 20px 6px 6px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); margin: 0 auto 1.5rem auto; color: var(--theme-text); }
         .light-theme .brand-capsule { background: rgba(255,255,255,0.9); box-shadow: 0 8px 25px rgba(150, 160, 180, 0.15); border-color: rgba(200,200,200,0.5); }
         .brand-capsule:active { transform: scale(0.95); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .brand-capsule img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
@@ -202,7 +146,6 @@
         .action-icon.del { background: #ef4444; }
         .action-icon:active { transform: scale(0.85); }
 
-        /* ================= 底部管理大按钮 ================= */
         .admin-controls { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 15px); left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 95%; }
         .btn-small { padding: 8px 18px; font-size: 0.9rem; border-radius: 20px; width: auto; margin: 0; }
 
@@ -229,46 +172,45 @@
         .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 30px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
         .modal-content::-webkit-scrollbar { display: none; }
         .light-theme .modal-content { background: #fdfdfd; box-shadow: 0 30px 60px rgba(0,0,0,0.15); }
-        
         .qr-image { width: 200px; height: auto; border-radius: 16px; margin: 20px auto; display: block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
 
-        /* ================= 黑胶唱片播放器 UI ================= */
+        /* ================= 网易云风格高定黑胶唱片 ================= */
         .music-type-modal-content { background: #1c1d22 !important; border-radius: 28px !important; border: 1px solid rgba(255,255,255,0.05) !important; }
-        .vinyl-player-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .vinyl-disc { width: 220px; height: 220px; border-radius: 50%; background: repeating-radial-gradient(circle, #111 0%, #000 5%, #111 10%); border: 6px solid rgba(255,255,255,0.1); box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; position: relative; animation: spin 12s linear infinite; animation-play-state: paused; margin: 10px auto 25px auto; }
+        .vinyl-player-container { display: flex; flex-direction: column; align-items: center; width: 100%; background: #1a1a1f !important; border-color: rgba(255,255,255,0.05) !important; }
+        
+        .vinyl-disc { width: 220px; height: 220px; border-radius: 50%; background: repeating-radial-gradient(circle, #111 0%, #000 5%, #111 10%); border: 6px solid rgba(255,255,255,0.05); box-shadow: 0 15px 40px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; position: relative; animation: spin 12s linear infinite; animation-play-state: paused; margin: 10px auto 30px auto; }
         .vinyl-disc.playing { animation-play-state: running; }
-        .vinyl-center { width: 70px; height: 70px; border-radius: 50%; background: var(--theme-primary); border: 3px solid #000; display: flex; justify-content: center; align-items: center; }
+        .vinyl-center { width: 65px; height: 65px; border-radius: 50%; background: var(--theme-primary); border: 2px solid #000; display: flex; justify-content: center; align-items: center; }
         .vinyl-center::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: #111; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         
-        .player-controls { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
-        .ctrl-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 4px 10px var(--theme-glass-shadow); }
+        .player-controls { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
+        .ctrl-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); color: #fff; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .ctrl-btn:active { transform: scale(0.9); }
-        .ctrl-btn.play-pause { width: 55px; height: 55px; font-size: 1.5rem; background: var(--theme-primary); color: #111; border: none; }
+        .ctrl-btn.play-pause { width: 58px; height: 58px; font-size: 1.6rem; background: var(--theme-primary); color: #111; border: none; box-shadow: 0 8px 20px rgba(212,175,55,0.3); }
         
-        .playlist-box { width: 100%; max-height: 220px; overflow-y: auto; background: var(--theme-input-bg); border-radius: 16px; padding: 5px; border: 1px solid var(--theme-glass-border); text-align: left; scroll-behavior: smooth; }
+        /* 网易云原生播放列表 */
+        .playlist-box { width: 100%; max-height: 220px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 16px; padding: 5px; border: 1px solid rgba(255,255,255,0.05); text-align: left; scroll-behavior: smooth; }
         .netease-item { display: flex; align-items: center; padding: 12px 10px; border-radius: 12px; cursor: pointer; transition: background 0.3s; margin-bottom: 5px; }
         .netease-item:hover { background: rgba(255,255,255,0.08); }
-        .netease-item.active { background: rgba(99, 102, 241, 0.15); }
-        .netease-index { width: 30px; font-size: 1rem; color: var(--theme-text); opacity: 0.5; font-weight: bold; text-align: center; }
-        .netease-item.active .netease-index { color: #6366f1; opacity: 1; }
+        .netease-item.active { background: rgba(212, 175, 55, 0.15); border-left: 3px solid var(--theme-primary); }
+        .netease-index { width: 30px; font-size: 1rem; color: #fff; opacity: 0.5; font-weight: bold; text-align: center; }
+        .netease-item.active .netease-index { color: var(--theme-primary); opacity: 1; }
         .netease-info { flex: 1; margin-left: 10px; display: flex; flex-direction: column; overflow: hidden; }
-        .netease-title { font-size: 1.05rem; color: var(--theme-text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .netease-item.active .netease-title { color: #6366f1; font-weight: bold; }
-        .netease-action { width: 20px; display: none; justify-content: flex-end; }
-        .netease-item.active .netease-action { display: flex; }
+        .netease-title { font-size: 1.05rem; color: #fff; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
+        .netease-item.active .netease-title { color: var(--theme-primary); font-weight: bold; opacity: 1; }
         
         .music-mode-bar { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; margin-bottom: 10px; }
-        .music-mode-text { font-size: 0.9rem; opacity: 0.8; color: var(--theme-text); cursor: pointer; transition: opacity 0.2s; padding: 5px; border-radius: 8px; }
+        .music-mode-text { font-size: 0.9rem; opacity: 0.8; color: #fff; cursor: pointer; transition: opacity 0.2s; padding: 5px; border-radius: 8px; display: flex; align-items: center; gap: 5px; }
         .music-mode-text:active { opacity: 0.5; background: rgba(255,255,255,0.1); }
+        
+        .heart-icon { font-size: 1.3rem; cursor: pointer; transition: transform 0.2s; }
+        .heart-icon:active { transform: scale(0.8); }
 
         .profile-avatar-zone { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px auto; background-color: var(--theme-input-bg); border: 2px dashed var(--theme-primary); display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; position: relative; box-shadow: 0 8px 20px var(--theme-glass-shadow); }
         .profile-avatar-zone img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .profile-avatar-zone::after { content: '修改头像'; position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; padding: 4px 0; text-align: center; opacity: 0; transition: opacity 0.3s; }
         .profile-avatar-zone:hover::after { opacity: 1; }
-
-        /* 后台音乐分类管理专属按钮 */
-        .btn-type-blue { background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); color: #fff !important; border: none !important; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4); }
 
     </style>
 </head>
@@ -276,13 +218,13 @@
 
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
-<!-- 纯净 Audio 引擎，全站后台不间断托底播放 -->
-<audio id="bgm-player"></audio>
 
+<!-- 左上角主题控制 -->
 <div class="widget-controls" id="theme-widget">
     <div class="theme-toggle-btn" onclick="toggleTheme()" id="btn-theme">🌙</div>
 </div>
 
+<!-- 右上角悬浮工具 -->
 <div class="widget-controls-right">
     <div class="apple-music-player" id="apple-music-box" onclick="showPlayerFromFloat()">
         <div class="music-icon"></div>
@@ -296,8 +238,15 @@
     </div>
 </div>
 
+<!-- 全局进度胶囊 UI -->
 <div class="global-toast" id="global-toast">
     <span id="toast-icon">⏳</span><span id="toast-text">正在同步至云端...</span>
+</div>
+
+<!-- 极速多任务并发上传进度胶囊 -->
+<div class="upload-capsule" id="upload-capsule">
+    <div class="upload-capsule-fill" id="upload-capsule-fill"></div>
+    <span class="upload-capsule-text" id="upload-capsule-text">准备上传...</span>
 </div>
 
 <div id="app-container">
@@ -314,9 +263,9 @@
             <p class="slogan-verse">常常操练，感悟成长</p>
             <input type="text" id="ipt-username" placeholder="账号 或 昵称" autocomplete="off">
             <input type="password" id="ipt-pwd" placeholder="密码" autocomplete="off">
-            <button class="btn-glass btn-primary" style="margin-top: 25px;" onclick="handleLogin()">登 录</button>
-            <button class="btn-glass" onclick="handleRegister()">注 册</button>
-            <span class="link-text" onclick="showModal('qr-modal')">联系站长</span>
+            <button class="btn-glass btn-primary" style="margin-top: 25px;" onclick="window.handleLogin()">登 录</button>
+            <button class="btn-glass" onclick="window.handleRegister()">注 册</button>
+            <span class="link-text" onclick="window.showModal('qr-modal')">联系站长</span>
         </div>
     </div>
 
@@ -325,8 +274,8 @@
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
         
-        <!-- 高定胶囊按钮：印记音律 (直达全局曲库) -->
-        <div class="brand-capsule" onclick="openMusicTypeModal()">
+        <!-- 高定胶囊按钮 -->
+        <div class="brand-capsule" onclick="window.openMusicTypeModal()">
             <img src="apple-touch-icon.png" alt="印记" onerror="this.src='favicon-32x32.png'">
             <span>印记音律</span>
         </div>
@@ -340,23 +289,24 @@
         <p class="slogan-verse" style="margin-bottom: 25px;">常常操练，感悟成长</p>
         
         <div class="stage-admin-bar edit-mode-only">
-            <button class="btn-glass btn-small btn-blue-gradient" onclick="openEditModal(null)">+ 新增卡片</button>
-            <button class="btn-glass btn-small" onclick="manageCategories()">管理大选项</button>
-            <button class="btn-glass btn-small" onclick="editPrepText()">预备提示语</button>
+            <button class="btn-glass btn-small btn-blue-gradient" onclick="window.openEditModal(null)">+ 新增卡片</button>
+            <button class="btn-glass btn-small" onclick="window.manageCategories()">管理大选项</button>
+            <button class="btn-glass btn-small" onclick="window.manageMusicLibrary()">音乐库管理</button>
+            <button class="btn-glass btn-small" onclick="window.editPrepText()">预备提示语</button>
         </div>
 
         <div class="cat-tabs-container" id="cat-tabs-container"></div>
         <div id="card-list-container"></div>
         
-        <button class="btn-glass" style="margin: 30px auto;" onclick="navigateTo('screen-stage')">返回首页</button>
+        <button class="btn-glass" style="margin: 30px auto;" onclick="window.navigateTo('screen-stage')">返回首页</button>
     </div>
 
-    <!-- 3. 预备提醒屏 (去除了强制断点音乐，直接融入大后台) -->
+    <!-- 3. 预备提醒屏 -->
     <div class="screen center-content" id="screen-prep">
         <div class="glass-panel" style="padding: 3.5rem 2rem;">
             <h1 class="text-gradient-blue" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
             <p id="prep-text" style="font-size: 1.2rem; margin: 2rem 0 3.5rem 0; line-height: 2;">...</p>
-            <button class="btn-glass btn-blue-gradient" id="btn-prep-confirm" onclick="confirmPrepAndNavigate()">我们已预备好</button>
+            <button class="btn-glass btn-blue-gradient" id="btn-prep-confirm" onclick="window.confirmPrepAndNavigate()">我们已预备好</button>
         </div>
     </div>
 
@@ -364,8 +314,8 @@
     <div class="screen center-content" id="screen-role">
         <h1 id="role-stage-title">缔结印记</h1>
         <p style="margin-bottom: 3rem;">请选择您的身份<br>随后将两台手机并排平放</p>
-        <button class="btn-glass" style="border-color: #4a90e2; color: #4a90e2; padding: 1.2rem 2rem;" onclick="selectRole('boy')">我是男生 ♂</button>
-        <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81; padding: 1.2rem 2rem;" onclick="selectRole('girl')">我是女生 ♀</button>
+        <button class="btn-glass" style="border-color: #4a90e2; color: #4a90e2; padding: 1.2rem 2rem;" onclick="window.selectRole('boy')">我是男生 ♂</button>
+        <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81; padding: 1.2rem 2rem;" onclick="window.selectRole('girl')">我是女生 ♀</button>
     </div>
 
     <!-- 5. 合并动画屏 -->
@@ -373,7 +323,7 @@
         <h1 id="sync-title" style="font-size: 2.2rem;">双向奔赴</h1>
         <p id="sync-subtitle" style="font-size: 1.1rem;">确认手机贴合后，点击合并</p>
         <div class="sync-container" id="sync-animation-box"></div>
-        <button class="btn-glass btn-primary" id="btn-sync-confirm" onclick="triggerSync()">确 认 合 并</button>
+        <button class="btn-glass btn-primary" id="btn-sync-confirm" onclick="window.triggerSync()">确 认 合 并</button>
     </div>
 
     <!-- 6. 核心内容屏 -->
@@ -388,7 +338,7 @@
         </div>
         
         <div id="action-area" style="width: 100%; min-height: 160px;">
-            <button class="btn-glass btn-primary" id="btn-next-step" onclick="nextContentStep()">进 入 下 一 步</button>
+            <button class="btn-glass btn-primary" id="btn-next-step" onclick="window.nextContentStep()">进 入 下 一 步</button>
             <div class="long-press-area" id="btn-long-press" style="display: none;">
                 <div class="press-text" id="press-text-label">内心宣告<br>(长按)</div>
                 <div class="press-fill" id="press-fill"></div>
@@ -402,7 +352,7 @@
             <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem;">印记已成</h1>
             <p>常常操练，感悟成长。</p>
             <p style="font-size: 1rem; opacity: 0.6; margin-top: 3rem;">静谧的旋律将伴随您，享受此刻的沉淀。</p>
-            <button class="btn-glass" style="margin-top:30px;" onclick="resetToStage()">返回主页</button>
+            <button class="btn-glass" style="margin-top:30px;" onclick="window.resetToStage()">返回主页</button>
         </div>
     </div>
 
@@ -420,41 +370,43 @@
                 <circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path>
             </svg>
         </div>
-        <input type="file" id="profile-avatar-upload" accept="image/*" style="display:none;" onchange="handleProfileAvatar(this)">
+        <input type="file" id="profile-avatar-upload" accept="image/*" style="display:none;" onchange="window.handleProfileAvatar(this)">
         <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称" style="text-align:center;">
         <div style="display: flex; gap: 15px; margin-top: 25px;">
-            <button class="btn-glass btn-blue-gradient" style="margin:0; flex:1;" onclick="saveUserProfile()">保存资料</button>
-            <button class="btn-glass" style="margin:0; flex:1;" onclick="hideModal('user-profile-modal')">取 消</button>
+            <button class="btn-glass btn-blue-gradient" style="margin:0; flex:1;" onclick="window.saveUserProfile()">保存资料</button>
+            <button class="btn-glass" style="margin:0; flex:1;" onclick="window.hideModal('user-profile-modal')">取 消</button>
         </div>
         <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 20px;">
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; padding: 0.8rem;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
-            <!-- 在管理面板注入全局音乐库管理入口 -->
-            <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; padding: 0.8rem; margin-top: 10px;" onclick="hideModal('user-profile-modal'); manageMusicLibrary();">⚙️ 管理全局音律分类库</button>
         </div>
     </div>
 </div>
 
-<!-- 1. 音乐大类选择 (高定暗黑主题，动态加载分类) -->
+<!-- 1. 音乐大类选择 (高定暗黑主题) -->
 <div class="modal-overlay" id="music-type-modal">
     <div class="modal-content music-type-modal-content" style="text-align: center; max-width: 360px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 25px; font-size: 1.6rem; letter-spacing:1px;">选择背景音律</h2>
-        
         <div id="music-type-btn-container" style="display: flex; flex-direction: column; gap: 12px;">
             <!-- JS 动态注入分类按钮 -->
         </div>
-
-        <button class="btn-glass btn-type-dark" style="margin-top: 15px; width: 100%; padding:1rem;" onclick="hideModal('music-type-modal')">取 消</button>
+        <!-- 我的收藏入口 -->
+        <button class="btn-glass btn-type-dark" style="margin:0; width:100%; padding:1rem; border-color:var(--theme-primary) !important;" onclick="window.openVinylPlayer('favorites')">⭐ 我 的 收 藏</button>
+        <button class="btn-glass btn-type-dark" style="margin-top:15px; width: 100%; padding:1rem;" onclick="window.hideModal('music-type-modal')">取 消</button>
     </div>
 </div>
 
-<!-- 2. 网易云风格：黑胶唱片播放器弹窗 -->
+<!-- 2. 网易云风格：黑胶唱片播放器 -->
 <div class="modal-overlay" id="vinyl-player-modal">
     <div class="modal-content vinyl-player-container">
-        <h2 style="color: var(--theme-primary); margin-bottom: 10px; font-size:1.3rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;" id="player-track-name">曲目加载中...</h2>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; padding: 0 5px; margin-bottom:15px;">
+            <h2 style="color: var(--theme-primary); font-size:1.3rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 80%; text-shadow: 0 2px 4px rgba(0,0,0,0.8);" id="player-track-name">曲目加载中...</h2>
+            <div class="heart-icon" id="btn-favorite" onclick="window.toggleFavorite()">🤍</div>
+        </div>
         
         <div class="music-mode-bar">
-            <div class="music-mode-text" id="player-mode-text" onclick="changePlayMode()">🔁 列表循环</div>
-            <div class="music-mode-text" id="player-limit-text" onclick="setTrackLimit()">⏳ 定时/定量</div>
+            <div class="music-mode-text" id="player-mode-text" onclick="window.changePlayMode()">🔁 列表循环</div>
+            <div class="music-mode-text" id="player-limit-text" onclick="window.setTrackLimit()">⏳ 定时/定量</div>
         </div>
         
         <div class="vinyl-disc" id="vinyl-disc-ui">
@@ -462,36 +414,35 @@
         </div>
         
         <div class="player-controls">
-            <div class="ctrl-btn" onclick="prevTrack()">⏮</div>
-            <div class="ctrl-btn play-pause" onclick="togglePlayPause()" id="btn-play-pause">▶️</div>
-            <div class="ctrl-btn" onclick="nextTrack()">⏭</div>
+            <div class="ctrl-btn" onclick="window.prevTrack()">⏮</div>
+            <div class="ctrl-btn play-pause" onclick="window.togglePlayPause()" id="btn-play-pause">▶️</div>
+            <div class="ctrl-btn" onclick="window.nextTrack()">⏭</div>
         </div>
 
-        <input type="search" id="vinyl-search" placeholder="🔍 搜索歌曲名称..." oninput="filterVinylPlaylist()">
+        <input type="search" id="vinyl-search" placeholder="🔍 搜索歌曲名称..." oninput="window.filterVinylPlaylist()" style="border-radius:14px; background:rgba(0,0,0,0.4); border-color:rgba(255,255,255,0.1);">
         
         <div class="playlist-box" id="playlist-ui"></div>
 
         <div style="display: flex; gap: 15px; width: 100%; margin-top: 20px;">
-            <button class="btn-glass btn-blue-gradient" style="margin:0; flex:1;" onclick="closeVinylPlayer()">确 认 收 起</button>
+            <button class="btn-glass btn-blue-gradient" style="margin:0; flex:1;" onclick="window.closeVinylPlayer()">确 认 收 起</button>
         </div>
     </div>
 </div>
 
-<!-- 3. 高定音乐库管理弹窗 (含分类管理、CRUD、云端直传) -->
+<!-- 3. 高定音乐库管理弹窗 -->
 <div class="modal-overlay" id="music-admin-modal">
     <div class="modal-content" style="background: var(--theme-bg-color);">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px; text-align:left;">全局音律库管理</h2>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <p style="font-size: 0.9rem; opacity: 0.8; text-align:left; margin:0;">选择分类库进行管理</p>
-            <button class="btn-glass btn-small" style="margin:0; border: 1px dashed #f59e0b; color:#f59e0b; padding:4px 10px;" onclick="manageMusicCategories()">⚙️ 管理分类</button>
+            <button class="btn-glass btn-small" style="margin:0; border: 1px dashed #f59e0b; color:#f59e0b; padding:4px 10px;" onclick="window.manageMusicCategories()">⚙️ 管理分类</button>
         </div>
 
-        <select id="admin-music-cat" onchange="renderAdminMusicList()" style="margin-bottom: 20px; background:var(--theme-glass-bg);">
-            <!-- JS 动态注入分类 -->
+        <select id="admin-music-cat" onchange="window.renderAdminMusicList()" style="margin-bottom: 20px; background:var(--theme-glass-bg);">
         </select>
         
-        <input type="search" id="admin-music-search" placeholder="🔍 模糊搜索音乐库..." oninput="filterAdminMusicList()" style="margin-bottom:15px;">
+        <input type="search" id="admin-music-search" placeholder="🔍 模糊搜索音乐库..." oninput="window.filterAdminMusicList()" style="margin-bottom:15px;">
 
         <div id="admin-music-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; max-height: 30vh; overflow-y:auto; padding-right:5px;"></div>
         
@@ -499,19 +450,22 @@
             <h4 id="admin-music-action-title" style="margin-bottom: 15px; color:#6366f1; text-align:left;">+ 新增曲目</h4>
             <input type="hidden" id="edit-music-idx" value="">
             <input type="text" id="new-music-name" placeholder="曲目名称" style="margin-bottom:15px; background:var(--theme-glass-bg);">
+            
             <div id="music-upload-zone" style="width:100%; padding:20px; border: 2px dashed #818cf8; border-radius: 14px; text-align: center; cursor: pointer; margin-bottom: 15px; transition: all 0.3s;">
-                <span id="music-upload-text" style="color: #6366f1; font-weight:500;">点击或拖拽音频文件 (直传云端)</span>
-                <input type="file" id="new-music-file" accept="audio/*" style="display: none;">
+                <span id="music-upload-text" style="color: #6366f1; font-weight:500;">点击或拖拽音频文件 (支持多选直传)</span>
+                <!-- 重点：开启多选 multiple -->
+                <input type="file" id="new-music-file" accept="audio/*" multiple style="display: none;">
             </div>
-            <div style="text-align: center; margin-bottom: 15px; opacity: 0.5; font-size: 0.85rem;">或输入云端直链 URL (可选)</div>
+            
+            <div style="text-align: center; margin-bottom: 15px; opacity: 0.5; font-size: 0.85rem;">或输入云端直链 URL (单文件)</div>
             <input type="text" id="new-music-url" placeholder="云端直链 URL" style="margin-bottom:15px; background:var(--theme-glass-bg);">
             
             <div style="display:flex; gap:10px;">
-                <button class="btn-glass btn-blue-gradient" id="btn-admin-music-save" style="flex:1; border-radius:14px; margin:0;" onclick="saveMusicToLibrary()">添 加 到 库</button>
-                <button class="btn-glass" id="btn-admin-music-cancel" style="flex:1; border-radius:14px; margin:0; display:none;" onclick="resetMusicEdit()">取 消 修 改</button>
+                <button class="btn-glass btn-blue-gradient" id="btn-admin-music-save" style="flex:1; border-radius:14px; margin:0;" onclick="window.saveMusicToLibrary()">添 加 到 库</button>
+                <button class="btn-glass" id="btn-admin-music-cancel" style="flex:1; border-radius:14px; margin:0; display:none;" onclick="window.resetMusicEdit()">取 消 修 改</button>
             </div>
         </div>
-        <button class="btn-glass" style="margin-top: 25px; width: 100%;" onclick="hideModal('music-admin-modal')">关闭</button>
+        <button class="btn-glass" style="margin-top: 25px; width: 100%;" onclick="window.hideModal('music-admin-modal')">关闭</button>
     </div>
 </div>
 
@@ -520,18 +474,17 @@
     <div class="modal-content">
         <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理音律分类</h2>
         <div id="music-cat-list-edit" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;"></div>
-        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%; margin-bottom: 10px;" onclick="addMusicCategory()">+ 添加新音律分类</button>
-        <button class="btn-glass btn-primary" style="margin-top: 20px; width:100%;" onclick="saveMusicCategories()">完成并极速保存</button>
+        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%; margin-bottom: 10px;" onclick="window.addMusicCategory()">+ 添加新音律分类</button>
+        <button class="btn-glass btn-primary" style="margin-top: 20px; width:100%;" onclick="window.saveMusicCategories()">完成并极速保存</button>
     </div>
 </div>
 
-
-<!-- 其它基础模态框 -->
+<!-- 其它模态框 -->
 <div class="modal-overlay" id="qr-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px;">
         <h2 style="color: var(--theme-primary);">联系站长</h2>
         <img src="微信二维码.jpg" alt="微信二维码" class="qr-image" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23ddd\'/><text x=\'50\' y=\'50\' text-anchor=\'middle\' dominant-baseline=\'middle\' fill=\'%23666\'>无图片</text></svg>'">
-        <button class="btn-glass" style="margin-top: 20px;" onclick="hideModal('qr-modal')">关 闭</button>
+        <button class="btn-glass" style="margin-top: 20px;" onclick="window.hideModal('qr-modal')">关 闭</button>
     </div>
 </div>
 
@@ -539,8 +492,8 @@
     <div class="modal-content">
         <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理大选项 (阶段分类)</h2>
         <div id="cat-list-edit" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;"></div>
-        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%; margin-bottom: 10px;" onclick="addNewCategory()">+ 添加新分类</button>
-        <button class="btn-glass btn-primary" style="margin-top: 20px; width:100%;" onclick="saveCategories()">完成并极速保存</button>
+        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%; margin-bottom: 10px;" onclick="window.addNewCategory()">+ 添加新分类</button>
+        <button class="btn-glass btn-primary" style="margin-top: 20px; width:100%;" onclick="window.saveCategories()">完成并极速保存</button>
     </div>
 </div>
 
@@ -567,781 +520,14 @@
         <input type="text" id="edit-s3-title" placeholder="步骤标题">
         <textarea id="edit-s3-text" placeholder="内心或同声宣告的内容..."></textarea>
         <div style="display: flex; gap: 15px; margin-top: 35px;">
-            <button class="btn-glass btn-primary" style="margin:0; width: 50%;" onclick="saveCard()">保存并同步</button>
-            <button class="btn-glass" style="margin:0; width: 50%;" onclick="hideModal('edit-modal')">取 消</button>
+            <button class="btn-glass btn-primary" style="margin:0; width: 50%;" onclick="window.saveCard()">保存并同步</button>
+            <button class="btn-glass" style="margin:0; width: 50%;" onclick="window.hideModal('edit-modal')">取 消</button>
         </div>
     </div>
 </div>
 
-<script>
-    /* ================= 1. 高级数据中枢与全栈同步架构 ================= */
-    const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
+<!-- 引入分离的核心业务逻辑 -->
+<script src="app.js"></script>
 
-    const defaultDB = {
-        users: {}, 
-        // v15 架构大升级：全局动态音乐库
-        globalMusicConfig: {
-            categories: [
-                { id: 'mcat_1', name: '纯乐伴奏' },
-                { id: 'mcat_2', name: '歌曲演唱' }
-            ],
-            library: {
-                'mcat_1': [{ name: "宁静钢琴曲", url: "https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3" }],
-                'mcat_2': []
-            }
-        },
-        stages: {
-            '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', type: '心', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
-            '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', type: '脑', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }] },
-            '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', name: '定婚期', prepText: '即将步入婚姻殿堂，回想决定携手的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [] },
-            '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', name: '结婚', prepText: '爱意要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [] },
-            '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', name: '备孕期', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [] },
-            '孕后初期': { themeParams: { dark: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, light: { bg: '#f4f9fd', p: '#0284c7', s: '#7dd3fc' } }, icon: '', name: '孕后初期', prepText: '疲惫需要温柔承托，轻揉肩膀放松。', categories: [{id:'cat_ep1',name:'温柔承托'}], cards: [] },
-            '婚后进阶': { themeParams: { dark: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, light: { bg: '#faf5ff', p: '#7c3aed', s: '#c4b5fd' } }, icon: '', name: '婚后进阶', prepText: '全然接纳此刻真实的彼此。', categories: [{id:'cat_a1',name:'平淡坚守'}], cards: [] }
-        }
-    };
-
-    let db = defaultDB;
-    let toastTimeout;
-    let currentUserAccount = null; 
-
-    function cleanupOldLocalStorage() {
-        const currentVersion = 'sealOfLoveDB_v15';
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
-                localStorage.removeItem(key);
-            }
-        }
-    }
-
-    function showGlobalToast(text, type = 'loading') {
-        const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text');
-        toast.className = `global-toast show ${type}`; msg.innerText = text;
-        if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖';
-        clearTimeout(toastTimeout);
-        if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); }
-    }
-
-    function compressImageFile(file, callback) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas'); const MAX_SIZE = 240; 
-                let width = img.width; let height = img.height;
-                if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
-                canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                callback(canvas.toDataURL('image/webp', 0.75));
-            }; img.src = e.target.result;
-        }; reader.readAsDataURL(file);
-    }
-
-    async function saveDB() {
-        let localSaved = false;
-        try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v15', JSON.stringify(db)); localSaved = true; } catch (e) {}
-        try {
-            showGlobalToast('正在同步至云端...', 'loading');
-            const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }});
-            if(res.ok) { showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功(本地满)', 'success'); } 
-            else { showGlobalToast('云端同步异常', 'error'); }
-        } catch(e) { showGlobalToast('网络异常，数据未保存至云端', 'error'); }
-    }
-
-    function upgradeDBStructure(tempDb) {
-        if (!tempDb) return defaultDB;
-        for (let key in tempDb.users) {
-            if (typeof tempDb.users[key] === 'string') { tempDb.users[key] = { password: tempDb.users[key], nickname: '', avatar: '' }; }
-        }
-        stagesList.forEach(s => {
-            if(!tempDb.stages[s]) tempDb.stages[s] = JSON.parse(JSON.stringify(defaultDB.stages[s]));
-        });
-        
-        // 核心：无损热升级旧版音乐库到 全局动态音乐库 v15
-        if (!tempDb.globalMusicConfig) {
-            tempDb.globalMusicConfig = {
-                categories: [ { id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' } ],
-                library: { 'mcat_1': [], 'mcat_2': [] }
-            };
-            
-            // 尝试把旧版数据打捞合并进新版
-            const tryMigrate = (list, targetCat) => {
-                if(Array.isArray(list)) list.forEach(m => {
-                    if(!tempDb.globalMusicConfig.library[targetCat].find(x => x.url === m.url)) tempDb.globalMusicConfig.library[targetCat].push(m);
-                });
-            };
-            
-            if(tempDb.musicLibrary) {
-                tryMigrate(tempDb.musicLibrary.instrumental, 'mcat_1');
-                tryMigrate(tempDb.musicLibrary.vocal, 'mcat_2');
-                delete tempDb.musicLibrary;
-            }
-            
-            stagesList.forEach(s => {
-                if (tempDb.stages[s].musicLibrary) {
-                    tryMigrate(tempDb.stages[s].musicLibrary.instrumental, 'mcat_1');
-                    tryMigrate(tempDb.stages[s].musicLibrary.vocal, 'mcat_2');
-                    delete tempDb.stages[s].musicLibrary;
-                }
-            });
-        }
-        return tempDb;
-    }
-
-    async function initDB() {
-        try {
-            const res = await fetch('/api/db'); 
-            if (res.ok) {
-                const remoteDb = await res.json();
-                if (remoteDb && remoteDb.stages) {
-                    db = upgradeDBStructure(remoteDb); 
-                    if (currentUserAccount && !db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
-                    try { cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v15', JSON.stringify(db)); } catch(e){} return;
-                }
-            }
-        } catch (e) {}
-        const local = JSON.parse(localStorage.getItem('sealOfLoveDB_v15'));
-        if (local && local.stages) { db = upgradeDBStructure(local); }
-        else saveDB();
-    }
-    initDB();
-
-    /* ================= 2. 状态机与双轨主题引擎 ================= */
-    let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: false };
-
-    function toggleTheme() {
-        state.isLightTheme = !state.isLightTheme; document.getElementById('btn-theme').innerText = state.isLightTheme ? '☀️' : '🌙';
-        if (state.isLightTheme) document.body.classList.add('light-theme'); else document.body.classList.remove('light-theme');
-        if(state.stage) applyStageTheme(state.stage);
-    }
-
-    /* ================= 3. 对称粒子系统 ================= */
-    const canvas = document.getElementById('particle-canvas'); const ctx = canvas.getContext('2d');
-    let particles = []; let animationId;
-    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resizeCanvas); resizeCanvas();
-    class Particle {
-        constructor() { this.x = Math.random() * (canvas.width / 2); this.y = Math.random() * canvas.height; this.size = Math.random() * 1.5 + 0.5; this.speedY = Math.random() * 0.4 - 0.2; this.speedX = Math.random() * 0.2 - 0.1; this.baseAlpha = Math.random() * 0.4 + 0.1; this.pulse = Math.random() * Math.PI; }
-        update() { this.y += this.speedY; this.x += this.speedX; if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; if (this.x < 0) this.x = canvas.width / 2; if (this.x > canvas.width / 2) this.x = 0; this.pulse += 0.02; }
-        draw(colorStr) { const alpha = this.baseAlpha + Math.sin(this.pulse) * 0.2; ctx.fillStyle = colorStr.replace(')', `, ${alpha})`).replace('rgb', 'rgba'); ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(canvas.width - this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
-    }
-    function initParticles() { particles = []; const count = window.innerWidth < 600 ? 25 : 50; for (let i = 0; i < count; i++) particles.push(new Particle()); }
-    function animateParticles() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim();
-        const hexToRgb = hex => { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return isNaN(r) ? 'rgb(212,175,55)' : `rgb(${r},${g},${b})`; };
-        const colorStr = primaryColor.startsWith('#') ? hexToRgb(primaryColor) : 'rgb(212,175,55)';
-        particles.forEach(p => { p.update(); p.draw(colorStr); }); animationId = requestAnimationFrame(animateParticles);
-    }
-    initParticles(); animateParticles();
-
-    /* ================= 4. 安全鉴权引擎与多态登录映射 ================= */
-    async function handleLogin() {
-        const inputU = document.getElementById('ipt-username').value.trim(); 
-        const p = document.getElementById('ipt-pwd').value.trim();
-        if(!inputU || !p) return alert('请输入账号/昵称和密码');
-
-        let baseUsername = inputU; 
-        if (!db.users[inputU]) {
-            for (let key in db.users) {
-                if (db.users[key].nickname === inputU) { baseUsername = key; break; }
-            }
-        }
-
-        try {
-            const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: baseUsername, password: p }) });
-            if (response.ok) { const result = await response.json(); if(result.success) { loginSuccess(baseUsername, true); return; } }
-        } catch (error) { console.log("后端鉴权降级至本地"); }
-
-        if(db.users[baseUsername] && db.users[baseUsername].password === p) { loginSuccess(baseUsername, false); } else alert('账号或密码错误。');
-    }
-
-    function loginSuccess(baseUser, isAdmin) {
-        state.isLoggedIn = true; state.isAdmin = isAdmin; currentUserAccount = baseUser;
-        document.getElementById('user-widget').style.display = 'flex'; updateUserWidgetIcon(); initStageScreen();
-    }
-
-    async function handleRegister() {
-        const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim();
-        if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('原生账号仅限英文数字组合');
-        if(db.users[u]) return alert('账号已存在'); 
-        db.users[u] = { password: p, nickname: '', avatar: '' }; await saveDB(); loginSuccess(u, false);
-    }
-
-    function logout() {
-        state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null;
-        document.getElementById('top-admin-controls').style.display = 'none'; document.getElementById('user-widget').style.display = 'none'; 
-        navigateTo('screen-login');
-        document.body.classList.remove('light-theme'); state.isLightTheme = false; document.getElementById('btn-theme').innerText = '🌙';
-        document.documentElement.style.setProperty('--theme-bg-color', '#1c1d22'); document.documentElement.style.setProperty('--theme-primary', '#d4af37');
-    }
-
-    function openUserProfile() {
-        if(!currentUserAccount) return;
-        if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
-        const userData = db.users[currentUserAccount];
-        const imgEl = document.getElementById('profile-avatar-img'); const svgEl = document.getElementById('profile-svg-placeholder');
-        if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } 
-        else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; }
-        document.getElementById('profile-nickname-input').value = userData.nickname || '';
-        const recoveryWrap = document.getElementById('admin-recovery-btn-wrap');
-        if (state.isAdmin) recoveryWrap.style.display = 'block'; else recoveryWrap.style.display = 'none';
-        showModal('user-profile-modal');
-    }
-
-    function handleProfileAvatar(inputEl) {
-        if(inputEl.files.length > 0) {
-            compressImageFile(inputEl.files[0], (base64) => {
-                const imgEl = document.getElementById('profile-avatar-img'); imgEl.src = base64; imgEl.style.display = 'block'; document.getElementById('profile-svg-placeholder').style.display = 'none';
-            });
-        }
-    }
-
-    async function saveUserProfile() {
-        if(!currentUserAccount) return;
-        const nick = document.getElementById('profile-nickname-input').value.trim(); const imgEl = document.getElementById('profile-avatar-img');
-        for(let key in db.users) { if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) { return alert('该昵称已被使用'); } }
-        if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
-        db.users[currentUserAccount].nickname = nick;
-        if(imgEl.style.display === 'block') db.users[currentUserAccount].avatar = imgEl.src;
-        await saveDB(); updateUserWidgetIcon(); hideModal('user-profile-modal');
-    }
-
-    function updateUserWidgetIcon() {
-        if(!currentUserAccount) return;
-        if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '' };
-        const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('user-widget-avatar'); const svgEl = document.getElementById('user-widget-svg');
-        if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } 
-        else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; }
-    }
-
-    function toggleEditMode() {
-        state.isEditMode = !state.isEditMode;
-        document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑';
-        if(state.isEditMode) document.body.classList.add('edit-mode'); else document.body.classList.remove('edit-mode');
-        if (document.getElementById('screen-stage').classList.contains('active')) initStageScreen(); else if (document.getElementById('screen-card-list').classList.contains('active')) renderCardList();
-    }
-
-    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
-    function navigateTo(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); document.getElementById(screenId).scrollTop = 0; }
-
-    function applyStageTheme(stageName) {
-        if (!stageName || !db.stages[stageName]) return;
-        const t = db.stages[stageName].themeParams; const currentParams = state.isLightTheme ? t.light : t.dark;
-        document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg);
-        document.documentElement.style.setProperty('--theme-primary', currentParams.p);
-        document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
-    }
-
-    /* ================= 5. 主屏：3/4 精确排版 ================= */
-    function initStageScreen() {
-        document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none';
-        const currentParams = state.isLightTheme ? { bg: '#fdfaf3', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' };
-        document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
-
-        const container = document.getElementById('stage-buttons-container'); container.innerHTML = '';
-        const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top';
-        const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom';
-
-        stagesList.forEach((sKey, index) => {
-            const sData = db.stages[sKey]; const iconB64 = sData.icon; const displayName = sData.name || sKey; 
-            const card = document.createElement('div'); card.className = 'stage-card'; card.onclick = (e) => { if(!state.isEditMode) selectStage(sKey); };
-            const iconDiv = document.createElement('div'); iconDiv.className = 'stage-icon-dropzone';
-            if (iconB64) { iconDiv.innerHTML = `<img src="${iconB64}">`; } else { iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; }
-
-            const titleInput = document.createElement('input'); titleInput.className = 'stage-card-title'; titleInput.value = displayName;
-            if (state.isEditMode) {
-                iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) handleIconUpload(ev.target.files[0], sKey)}; input.click(); });
-                titleInput.addEventListener('click', (e) => { e.stopPropagation(); }); titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; saveDB(); });
-            }
-            card.appendChild(iconDiv); card.appendChild(titleInput); 
-            if (index < 3) rowTop.appendChild(card); else rowBottom.appendChild(card);
-        });
-        container.appendChild(rowTop); container.appendChild(rowBottom); navigateTo('screen-stage');
-    }
-    
-    function handleIconUpload(file, stageKey) { compressImageFile(file, async (base64Str) => { db.stages[stageKey].icon = base64Str; await saveDB(); initStageScreen(); }); }
-
-    /* ================= 6. 分类大选项与瀑布流卡片 ================= */
-    function selectStage(sKey) {
-        if(state.isEditMode) return;
-        state.stage = sKey; applyStageTheme(sKey);
-        document.getElementById('list-stage-title').innerText = `${db.stages[sKey].name}`;
-        
-        const cats = db.stages[sKey].categories || [];
-        if(cats.length > 0) state.activeCategoryId = cats[0].id; else state.activeCategoryId = '';
-        renderCardList(); navigateTo('screen-card-list');
-    }
-
-    function renderCardList() {
-        const cats = db.stages[state.stage].categories || [];
-        const tabContainer = document.getElementById('cat-tabs-container'); tabContainer.innerHTML = '';
-        
-        if (cats.length > 1 || state.isEditMode) {
-            cats.forEach(cat => {
-                const tab = document.createElement('div'); tab.className = `cat-tab ${cat.id === state.activeCategoryId ? 'active' : ''}`;
-                tab.innerText = cat.name; tab.onclick = () => { state.activeCategoryId = cat.id; renderCardList(); };
-                tabContainer.appendChild(tab);
-            });
-        }
-
-        const container = document.getElementById('card-list-container'); container.innerHTML = '';
-        const activeCards = db.stages[state.stage].cards.filter(c => c.categoryId === state.activeCategoryId);
-        const modules = ['脑', '心', '手']; let hasRenderedAny = false;
-
-        modules.forEach(modType => {
-            const modCards = activeCards.filter(c => c.type === modType);
-            if(modCards.length > 0 || state.isEditMode) {
-                hasRenderedAny = true;
-                const section = document.createElement('div'); section.className = 'module-section';
-                section.innerHTML = `<div class="module-title">${modType}之连结</div>`;
-                const grid = document.createElement('div'); grid.className = 'content-grid';
-                
-                modCards.forEach((card) => {
-                    const cardDiv = document.createElement('div'); cardDiv.className = 'data-card';
-                    cardDiv.innerHTML = `<h3 class="card-inner-title">${card.title}</h3><span class="card-tag">${modType}板块</span>`;
-                    
-                    if (state.isEditMode) {
-                        const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id);
-                        const actDiv = document.createElement('div'); actDiv.className = 'card-edit-badge';
-                        actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); deleteCard(${globalIndex})">✖</div>`;
-                        cardDiv.appendChild(actDiv);
-                    }
-                    cardDiv.onclick = () => { if(!state.isEditMode) startCardFlow(card); };
-                    grid.appendChild(cardDiv);
-                });
-                if(modCards.length === 0 && state.isEditMode) grid.innerHTML = `<p style="opacity:0.4; font-size:0.85rem; text-align:center; width:100%; grid-column: 1 / -1; padding: 20px;">该板块暂无卡片</p>`;
-                section.appendChild(grid); container.appendChild(section);
-            }
-        });
-        if(!hasRenderedAny) container.innerHTML = '<p style="opacity:0.5; margin-top:30px; text-align:center;">当前分类暂无内容</p>';
-    }
-
-    async function manageCategories() {
-        const listDiv = document.getElementById('cat-list-edit'); listDiv.innerHTML = '';
-        const cats = db.stages[state.stage].categories || [];
-        cats.forEach((cat, idx) => {
-            const div = document.createElement('div'); div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center';
-            div.innerHTML = `<input type="text" style="margin:0; flex:1;" id="cat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:45px; height:45px; margin:0; color:#ef4444; padding:0; border-radius:12px;" onclick="removeCat(${idx})">✖</button>`;
-            listDiv.appendChild(div);
-        }); showModal('cat-modal');
-    }
-    function addNewCategory() { if(!db.stages[state.stage].categories) db.stages[state.stage].categories = []; db.stages[state.stage].categories.push({ id: 'cat_' + Date.now(), name: '新建大选项' }); manageCategories(); }
-    async function removeCat(idx) {
-        const catId = db.stages[state.stage].categories[idx].id; const linkedCards = db.stages[state.stage].cards.filter(c => c.categoryId === catId);
-        if(linkedCards.length > 0 && !confirm(`该分类下有 ${linkedCards.length} 张卡片，确定删除吗？`)) return;
-        db.stages[state.stage].categories.splice(idx, 1); manageCategories();
-    }
-    async function saveCategories() {
-        const cats = db.stages[state.stage].categories || [];
-        cats.forEach((cat, idx) => { const input = document.getElementById(`cat_input_${idx}`); if(input) cat.name = input.value; });
-        await saveDB(); hideModal('cat-modal'); 
-        if(!cats.find(c => c.id === state.activeCategoryId) && cats.length > 0) state.activeCategoryId = cats[0].id; renderCardList();
-    }
-
-    async function editPrepText() { const t = prompt("预备提醒文本：", db.stages[state.stage].prepText); if (t !== null) { db.stages[state.stage].prepText = t; await saveDB(); } }
-    async function deleteCard(index) { if(confirm('确认删除？')) { db.stages[state.stage].cards.splice(index, 1); await saveDB(); renderCardList(); } }
-
-    function openEditModal(index) {
-        const isNew = (index === null); document.getElementById('modal-title').innerText = isNew ? '新增卡片' : '编辑卡片';
-        const catSelect = document.getElementById('edit-card-category'); catSelect.innerHTML = '';
-        const cats = db.stages[state.stage].categories || []; cats.forEach(c => { catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`; });
-
-        let c = isNew ? { id: 'c_'+Date.now(), categoryId: state.activeCategoryId, title:'', type:'心', steps:[{title:'', text:''},{title:'', text:''},{title:'', text:''}] } : db.stages[state.stage].cards[index];
-
-        document.getElementById('edit-card-id').value = index === null ? 'new' : index;
-        document.getElementById('edit-card-category').value = c.categoryId || (cats[0]?cats[0].id:'');
-        document.getElementById('edit-card-type').value = c.type; document.getElementById('edit-card-title').value = c.title;
-        for(let i=1; i<=3; i++) { document.getElementById(`edit-s${i}-title`).value = c.steps[i-1] ? c.steps[i-1].title : ''; document.getElementById(`edit-s${i}-text`).value = c.steps[i-1] ? c.steps[i-1].text : ''; }
-        showModal('edit-modal');
-    }
-
-    async function saveCard() {
-        const idxStr = document.getElementById('edit-card-id').value;
-        const c = { id: idxStr === 'new' ? 'c_' + Date.now() : db.stages[state.stage].cards[parseInt(idxStr)].id, categoryId: document.getElementById('edit-card-category').value, title: document.getElementById('edit-card-title').value || '未命名', type: document.getElementById('edit-card-type').value || '心', steps: [] };
-        for(let i=1; i<=3; i++) c.steps.push({ title: document.getElementById(`edit-s${i}-title`).value, text: document.getElementById(`edit-s${i}-text`).value });
-        if(idxStr === 'new') db.stages[state.stage].cards.push(c); else db.stages[state.stage].cards[parseInt(idxStr)] = c;
-        await saveDB(); hideModal('edit-modal'); renderCardList();
-    }
-
-    /* ================= 7. 动态音乐大库管理与直传 ================= */
-    let audioPlayer = document.getElementById('bgm-player');
-    let musicState = { categoryId: '', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; 
-
-    // 全局防竞态单例化
-    audioPlayer.removeEventListener('ended', handleAudioEnded);
-    audioPlayer.addEventListener('ended', handleAudioEnded);
-
-    function handleAudioEnded() {
-        if(musicState.playlist.length === 0) return;
-        
-        // 倒数计数器拦截机制
-        if (musicState.tracksLimit > 0) {
-            musicState.tracksLimit--;
-            const limitTextEl = document.getElementById('player-limit-text');
-            if(limitTextEl) limitTextEl.innerText = `⏳ 定时关闭 (剩 ${musicState.tracksLimit} 首)`;
-            if (musicState.tracksLimit === 0) {
-                pauseTrack();
-                musicState.tracksLimit = -1;
-                if(limitTextEl) limitTextEl.innerText = `⏳ 定时/定量`;
-                return; // 倒数结束，打断接下来的播放
-            }
-        }
-
-        if(musicState.mode === 'single') { audioPlayer.currentTime = 0; audioPlayer.play(); }
-        else if(musicState.mode === 'random') { musicState.currentIndex = Math.floor(Math.random() * musicState.playlist.length); playCurrentTrack(); }
-        else { musicState.currentIndex = (musicState.currentIndex + 1) % musicState.playlist.length; playCurrentTrack(); }
-    }
-
-    // A. 音乐分类大库管理 (CRUD)
-    function initAdminMusicCatSelect() {
-        const catSel = document.getElementById('admin-music-cat'); catSel.innerHTML = '';
-        const cats = db.globalMusicConfig.categories || [];
-        cats.forEach(c => { catSel.innerHTML += `<option value="${c.id}">${c.name}</option>`; });
-    }
-
-    function manageMusicCategories() {
-        const listDiv = document.getElementById('music-cat-list-edit'); listDiv.innerHTML = '';
-        const cats = db.globalMusicConfig.categories || [];
-        cats.forEach((cat, idx) => {
-            const div = document.createElement('div'); div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center';
-            div.innerHTML = `<input type="text" style="margin:0; flex:1;" id="mcat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:45px; height:45px; margin:0; color:#ef4444; padding:0; border-radius:12px;" onclick="removeMusicCategory(${idx})">✖</button>`;
-            listDiv.appendChild(div);
-        });
-        showModal('music-cat-modal');
-    }
-
-    function addMusicCategory() {
-        if(!db.globalMusicConfig.categories) db.globalMusicConfig.categories = [];
-        const newId = 'mcat_' + Date.now();
-        db.globalMusicConfig.categories.push({ id: newId, name: '新建音乐类' });
-        db.globalMusicConfig.library[newId] = [];
-        manageMusicCategories();
-    }
-
-    async function removeMusicCategory(idx) {
-        const catId = db.globalMusicConfig.categories[idx].id;
-        const linkedMusic = db.globalMusicConfig.library[catId] || [];
-        if(linkedMusic.length > 0 && !confirm(`该分类下有 ${linkedMusic.length} 首音乐，删除分类将清空这些音乐。确定删除吗？`)) return;
-        db.globalMusicConfig.categories.splice(idx, 1);
-        delete db.globalMusicConfig.library[catId];
-        manageMusicCategories();
-    }
-
-    async function saveMusicCategories() {
-        const cats = db.globalMusicConfig.categories || [];
-        cats.forEach((cat, idx) => { const input = document.getElementById(`mcat_input_${idx}`); if(input) cat.name = input.value; });
-        await saveDB(); hideModal('music-cat-modal');
-    }
-
-    // B. 曲目详情管理
-    function manageMusicLibrary() { 
-        initAdminMusicCatSelect();
-        document.getElementById('admin-music-search').value = '';
-        resetMusicEdit();
-        renderAdminMusicList(); 
-        showModal('music-admin-modal'); 
-        bindAudioDragDrop(); 
-    }
-    
-    function filterAdminMusicList() { renderAdminMusicList(); }
-
-    function renderAdminMusicList() {
-        const catId = document.getElementById('admin-music-cat').value;
-        const query = document.getElementById('admin-music-search').value.trim().toLowerCase();
-        const listDiv = document.getElementById('admin-music-list'); listDiv.innerHTML = '';
-        if(!catId) { listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">请先添加音乐分类</div>`; return; }
-
-        const list = db.globalMusicConfig.library[catId] || [];
-        let matchCount = 0;
-        
-        list.forEach((m, idx) => {
-            if (query && !m.name.toLowerCase().includes(query)) return; 
-            matchCount++;
-            const div = document.createElement('div'); 
-            div.style.display='flex'; div.style.background='var(--theme-glass-bg)'; div.style.padding='15px'; div.style.borderRadius='16px'; div.style.alignItems='center'; div.style.justifyContent='space-between'; div.style.border='1px solid var(--theme-glass-border)'; div.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)';
-            div.innerHTML = `
-                <div style="display:flex; flex-direction:column; width:65%; overflow:hidden;">
-                    <span style="font-weight:bold; color:var(--theme-text); font-size:1.05rem; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</span>
-                    <span style="font-size:0.75rem; opacity:0.6; word-break:break-all; color:var(--theme-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.url}</span>
-                </div>
-                <div style="display:flex; gap:8px;">
-                    <div class="action-icon" style="background:#4f46e5;" onclick="editAdminMusic('${catId}', ${idx})">✎</div>
-                    <div class="action-icon del" onclick="deleteAdminMusic('${catId}', ${idx})">✖</div>
-                </div>
-            `; listDiv.appendChild(div);
-        });
-
-        if (matchCount === 0) { listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">暂无匹配曲目</div>`; }
-    }
-
-    let selectedAudioFile = null;
-    function bindAudioDragDrop() {
-        const zone = document.getElementById('music-upload-zone'); const fileInput = document.getElementById('new-music-file'); const text = document.getElementById('music-upload-text');
-        zone.onclick = () => fileInput.click();
-        zone.ondragover = (e) => { e.preventDefault(); zone.style.backgroundColor = 'rgba(99, 102, 241, 0.1)'; };
-        zone.ondragleave = (e) => { e.preventDefault(); zone.style.backgroundColor = 'transparent'; };
-        zone.ondrop = (e) => { e.preventDefault(); zone.style.backgroundColor = 'transparent'; if(e.dataTransfer.files.length>0) handleSelectedAudio(e.dataTransfer.files[0]); };
-        fileInput.onchange = (e) => { if(e.target.files.length>0) handleSelectedAudio(e.target.files[0]); };
-        
-        function handleSelectedAudio(file) {
-            if(!file.type.startsWith('audio/')) return alert('请上传音频文件');
-            if(file.size > 50 * 1024 * 1024) return alert('请保持在 50MB 以内');
-            selectedAudioFile = file;
-            text.innerText = `已选择: ${file.name} (${(file.size/1024/1024).toFixed(2)}MB)`;
-            const nameInput = document.getElementById('new-music-name');
-            if(!nameInput.value) nameInput.value = file.name.replace(/\.[^/.]+$/, "");
-        }
-    }
-
-    function editAdminMusic(catId, idx) {
-        const m = db.globalMusicConfig.library[catId][idx];
-        document.getElementById('new-music-name').value = m.name;
-        document.getElementById('new-music-url').value = m.url;
-        document.getElementById('edit-music-idx').value = idx;
-        
-        document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目";
-        document.getElementById('btn-admin-music-save').innerText = "保 存 修 改";
-        document.getElementById('btn-admin-music-cancel').style.display = "block";
-    }
-
-    function resetMusicEdit() {
-        document.getElementById('new-music-name').value = ''; document.getElementById('new-music-url').value = '';
-        document.getElementById('edit-music-idx').value = '';
-        document.getElementById('admin-music-action-title').innerText = "+ 新增曲目";
-        document.getElementById('btn-admin-music-save').innerText = "添 加 到 库";
-        document.getElementById('btn-admin-music-cancel').style.display = "none";
-        selectedAudioFile = null; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (直传云端)';
-    }
-
-    async function saveMusicToLibrary() {
-        const name = document.getElementById('new-music-name').value.trim();
-        let url = document.getElementById('new-music-url').value.trim();
-        const catId = document.getElementById('admin-music-cat').value;
-        const editIdx = document.getElementById('edit-music-idx').value;
-
-        if(!catId) return alert('请先创建分类');
-        if(!name) return alert('请输入曲目名称');
-        if(!url && !selectedAudioFile) return alert('请拖入音频或填写链接');
-
-        if(selectedAudioFile) {
-            showGlobalToast('正在极速推流至云端...', 'loading');
-            const formData = new FormData(); formData.append('file', selectedAudioFile);
-            try {
-                const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                if(!res.ok) throw new Error('流传输失败');
-                const data = await res.json();
-                url = data.url; showGlobalToast('推流成功', 'success');
-            } catch(e) { showGlobalToast('传输中断，请重试', 'error'); return; }
-        }
-
-        if(!db.globalMusicConfig.library[catId]) db.globalMusicConfig.library[catId] = [];
-        
-        if (editIdx !== '') {
-            db.globalMusicConfig.library[catId][parseInt(editIdx)] = { name, url };
-        } else {
-            db.globalMusicConfig.library[catId].push({name, url});
-        }
-        
-        await saveDB(); resetMusicEdit(); renderAdminMusicList();
-    }
-    
-    async function deleteAdminMusic(catId, idx) { if(confirm('确认删除此曲？')) { db.globalMusicConfig.library[catId].splice(idx, 1); await saveDB(); renderAdminMusicList(); } }
-
-
-    // C. 前台动态网易云风格播放器
-    function openMusicTypeModal() {
-        const container = document.getElementById('music-type-btn-container');
-        container.innerHTML = '';
-        const cats = db.globalMusicConfig.categories || [];
-        
-        if(cats.length === 0) {
-            container.innerHTML = '<p style="opacity:0.5; font-size:0.9rem;">暂无音律分类，请联系管理员添加。</p>';
-        } else {
-            cats.forEach((cat, index) => {
-                const btn = document.createElement('button');
-                // 还原参考图 1: 首选项发光蓝紫，其余深灰质感
-                if (index === 0) { btn.className = 'btn-glass btn-type-blue'; } 
-                else { btn.className = 'btn-glass btn-type-dark'; }
-                btn.style.margin = '0'; btn.style.width = '100%'; btn.style.padding = '1.2rem'; btn.style.fontSize = '1.15rem';
-                btn.innerText = cat.name;
-                btn.onclick = () => openVinylPlayer(cat.id);
-                container.appendChild(btn);
-            });
-        }
-        showModal('music-type-modal');
-    }
-
-    function openVinylPlayer(catId) {
-        hideModal('music-type-modal'); 
-        musicState.categoryId = catId;
-        musicState.playlist = db.globalMusicConfig.library[catId] || [];
-        musicState.currentIndex = 0; musicState.mode = 'sequence'; musicState.tracksLimit = -1;
-        
-        document.getElementById('player-mode-text').innerText = '🔁 列表循环';
-        document.getElementById('player-limit-text').innerText = '⏳ 定时/定量';
-        document.getElementById('vinyl-search').value = '';
-        
-        renderVinylPlaylist(); showModal('vinyl-player-modal');
-        if(musicState.playlist.length > 0) playCurrentTrack(); else pauseTrack();
-    }
-
-    function filterVinylPlaylist() { renderVinylPlaylist(); }
-
-    function renderVinylPlaylist() {
-        const box = document.getElementById('playlist-ui'); box.innerHTML = '';
-        if(musicState.playlist.length === 0) { box.innerHTML = '<p style="padding:15px; opacity:0.5; text-align:center;">暂无音乐，请管理员添加</p>'; return; }
-        
-        const query = document.getElementById('vinyl-search').value.toLowerCase().trim();
-        
-        musicState.playlist.forEach((track, idx) => {
-            const item = document.createElement('div');
-            item.className = `netease-item ${idx === musicState.currentIndex ? 'active' : ''}`;
-            item.id = `track-item-${idx}`; 
-            
-            if(query && !track.name.toLowerCase().includes(query)) { item.style.display = 'none'; }
-            
-            const numPad = (idx + 1).toString().padStart(2, '0');
-            item.innerHTML = `
-                <div class="netease-index">${numPad}</div>
-                <div class="netease-info"><div class="netease-title">${track.name}</div></div>
-                <div class="netease-action">▶</div>
-            `;
-            item.onclick = () => { musicState.currentIndex = idx; playCurrentTrack(); };
-            box.appendChild(item);
-        });
-    }
-
-    function playCurrentTrack() {
-        if(musicState.playlist.length === 0) return;
-        const track = musicState.playlist[musicState.currentIndex];
-        document.getElementById('player-track-name').innerText = track.name;
-        
-        if(audioPlayer.src !== track.url) audioPlayer.src = track.url;
-        audioPlayer.volume = 1; audioPlayer.play().then(() => {
-            document.getElementById('vinyl-disc-ui').classList.add('playing'); 
-            document.getElementById('btn-play-pause').innerText = '⏸️';
-        }).catch(e=>{});
-        
-        renderVinylPlaylist();
-        const activeItem = document.getElementById(`track-item-${musicState.currentIndex}`);
-        if(activeItem) activeItem.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
-    function pauseTrack() { audioPlayer.pause(); document.getElementById('vinyl-disc-ui').classList.remove('playing'); document.getElementById('btn-play-pause').innerText = '▶️'; }
-    function togglePlayPause() { if(audioPlayer.paused) playCurrentTrack(); else pauseTrack(); }
-    function prevTrack() { if(musicState.playlist.length===0)return; musicState.currentIndex = (musicState.currentIndex - 1 + musicState.playlist.length) % musicState.playlist.length; playCurrentTrack(); }
-    function nextTrack() { if(musicState.playlist.length===0)return; musicState.currentIndex = (musicState.currentIndex + 1) % musicState.playlist.length; playCurrentTrack(); }
-    
-    function changePlayMode() {
-        const btn = document.getElementById('btn-play-mode'); const text = document.getElementById('player-mode-text');
-        if(musicState.mode === 'sequence') { musicState.mode = 'random'; btn.innerText = '🔀'; text.innerText = '🔀 随机播放'; }
-        else if(musicState.mode === 'random') { musicState.mode = 'single'; btn.innerText = '🔂'; text.innerText = '🔂 单曲循环'; }
-        else { musicState.mode = 'sequence'; btn.innerText = '🔁'; text.innerText = '🔁 列表循环'; }
-    }
-
-    function setTrackLimit() {
-        let val = prompt("请输入播放几首歌曲后自动暂停？\n(输入数字，留空或0表示无限播放)：", "");
-        if (val === null) return; val = parseInt(val);
-        const limitTextEl = document.getElementById('player-limit-text');
-        if (isNaN(val) || val <= 0) { musicState.tracksLimit = -1; limitTextEl.innerText = "⏳ 定时/定量"; } 
-        else { musicState.tracksLimit = val; limitTextEl.innerText = `⏳ 定时关闭 (剩 ${musicState.tracksLimit} 首)`; }
-    }
-
-    function closeVinylPlayer() { hideModal('vinyl-player-modal'); }
-    function showPlayerFromFloat() { if(state.isLoggedIn && !state.isEditMode && document.getElementById('vinyl-player-modal').style.display !== 'flex') showModal('vinyl-player-modal'); }
-
-
-    /* ================= 8. 用户卡片交互引擎 (彻底解耦背景音乐) ================= */
-    function startCardFlow(card) {
-        state.currentCard = card; document.getElementById('prep-text').innerText = db.stages[state.stage].prepText;
-        
-        // 直接进入预备屏，音乐在后台无损继续播放
-        const prepBtn = document.getElementById('btn-prep-confirm');
-        if (state.stage === '单身期') { prepBtn.innerText = '我已准备好'; } 
-        else { prepBtn.innerText = '我们已预备好'; }
-        navigateTo('screen-prep');
-    }
-
-    function confirmPrepAndNavigate() {
-        if (state.stage === '单身期') {
-            const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged');
-            const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`;
-            
-            document.getElementById('sync-title').innerText = "抬头仰望";
-            const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || '';
-            let subText = "愿你在静谧中得着内心的力量与安宁。";
-            if (catName.includes('不想') || catName.includes('单身')) subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。";
-            else if (catName.includes('想') || catName.includes('进入婚姻')) subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。";
-            
-            document.getElementById('sync-subtitle').innerText = subText;
-            document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望";
-            document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)";
-            
-            syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`;
-            navigateTo('screen-sync');
-        } else {
-            document.getElementById('sync-title').innerText = "双向奔赴"; document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并";
-            document.getElementById('btn-sync-confirm').innerText = "确 认 合 并"; document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)";
-            navigateTo('screen-role');
-        }
-    }
-
-    function selectRole(role) {
-        state.role = role; const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged');
-        const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`;
-        if (role === 'boy') syncBox.innerHTML = `<div class="sync-half boy" style="${bgStyle} background-size: cover;"></div>`;
-        else syncBox.innerHTML = `<div class="sync-half girl" style="${bgStyle} background-size: cover;"></div>`;
-        navigateTo('screen-sync');
-    }
-
-    function triggerSync() {
-        document.getElementById('sync-animation-box').classList.add('merged'); state.currentStep = 0;
-        setTimeout(() => { renderContentStep(); navigateTo('screen-content'); }, 1800);
-    }
-
-    function renderContentStep() {
-        const stepData = state.currentCard.steps[state.currentStep];
-        document.getElementById('content-type-title').innerText = `【${state.currentCard.type}】的连结`;
-        document.getElementById('step-title').innerText = stepData.title;
-        document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>');
-
-        for(let i=1; i<=3; i++) { const dot = document.getElementById(`dot-${i}`); if (i - 1 === state.currentStep) dot.classList.add('active'); else dot.classList.remove('active'); }
-        const nextBtn = document.getElementById('btn-next-step'); const longPressBtn = document.getElementById('btn-long-press');
-        if (state.currentStep < 2) { nextBtn.style.display = 'flex'; longPressBtn.style.display = 'none'; } 
-        else { nextBtn.style.display = 'none'; longPressBtn.style.display = 'flex'; }
-    }
-
-    function nextContentStep() {
-        if (state.currentStep < 2) {
-            state.currentStep++; const t = document.getElementById('step-title'); const p = document.getElementById('step-text');
-            t.style.opacity = 0; p.style.opacity = 0;
-            setTimeout(() => { renderContentStep(); t.style.transition = 'opacity 0.5s'; p.style.transition = 'opacity 0.5s'; t.style.opacity = 1; p.style.opacity = 1; }, 300);
-        }
-    }
-
-    /* ================= 9. 长按宣告与完结 ================= */
-    const longPressBtn = document.getElementById('btn-long-press'); const pressFill = document.getElementById('press-fill');
-    let progress = 0; let pressFrame = null; let isPressing = false;
-
-    function startPress(e) {
-        if(e.type === 'touchstart') e.preventDefault(); if(isPressing) return;
-        isPressing = true; progress = 0; cancelAnimationFrame(pressFrame);
-        function up() { if(!isPressing) return; progress += (100/90); pressFill.style.height = `${Math.min(progress, 100)}%`; if (progress >= 100) { isPressing = false; completeAction(); } else pressFrame = requestAnimationFrame(up); }
-        pressFrame = requestAnimationFrame(up);
-    }
-    function endPress(e) { if(e.type === 'touchend') e.preventDefault(); isPressing = false; cancelAnimationFrame(pressFrame); if (progress < 100) { progress = 0; pressFill.style.height = `0%`; } }
-    function completeAction() { cancelAnimationFrame(pressFrame); navigateTo('screen-finish'); }
-
-    longPressBtn.addEventListener('mousedown', startPress); longPressBtn.addEventListener('mouseup', endPress); longPressBtn.addEventListener('mouseleave', endPress);
-    longPressBtn.addEventListener('touchstart', startPress, {passive: false}); longPressBtn.addEventListener('touchend', endPress, {passive: false}); longPressBtn.addEventListener('touchcancel', endPress, {passive: false});
-
-    function resetToStage() {
-        pressFill.style.height = `0%`;
-        state.currentCard = null; state.role = ''; state.currentStep = 0;
-        initStageScreen();
-    }
-
-</script>
 </body>
 </html>
