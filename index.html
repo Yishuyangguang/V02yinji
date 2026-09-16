@@ -181,9 +181,11 @@
         .sync-half.single-up { width: 100%; height: 100%; left: 0; top: 0; background-position: center; transform: translateY(120%); opacity: 0; border: none; transition: all 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .sync-container.merged .single-up { transform: translateY(0); opacity: 1; }
 
-        .long-press-area { position: relative; width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(135deg, var(--theme-glass-bg), transparent); box-shadow: 0 15px 45px var(--theme-glass-shadow), inset 0 2px 5px var(--theme-glass-inset); display: flex; justify-content: center; align-items: center; margin: 3rem auto; cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border); }
-        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .press-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: var(--theme-primary); opacity: 0.8; transition: height 0.1s linear; z-index: 1; }
+        /* 长按圆点交互深度修复与美化 */
+        .long-press-area { position: relative; width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(135deg, var(--theme-glass-bg), transparent); box-shadow: 0 15px 45px var(--theme-glass-shadow), inset 0 2px 5px var(--theme-glass-inset); display: flex; justify-content: center; align-items: center; margin: 3rem auto; cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border); transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s; }
+        .long-press-area.pressing { transform: scale(0.92); box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 2px 10px rgba(0,0,0,0.1); }
+        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; }
+        .press-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to top, var(--theme-primary), var(--theme-secondary)); opacity: 0.9; z-index: 1; }
 
         /* ================= 模态框通用 ================= */
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; overscroll-behavior-y: none; }
@@ -312,7 +314,7 @@
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
 
-<!-- 纯净 Audio 引擎 -->
+<!-- 纯净 Audio 引擎，增加了 preload 元数据预加载，解决 iOS 长度解析异常 -->
 <audio id="bgm-player" preload="auto"></audio>
 
 <!-- 左上角主题控制 -->
@@ -681,51 +683,109 @@ const defaultDB = {
 
 let db = defaultDB; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true }; let particles = []; let animationId; window.isDraggingProgress = false;
 
-window.cleanupOldLocalStorage = function() { const currentVersion = 'sealOfLoveDB_v32'; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) { localStorage.removeItem(key); } } }
+// 显式声明长按交互所需的全域状态变量，防止在各引擎中抛出 ReferenceError 暗病
+let isPressing = false; 
+let pressProgress = 0; 
+let pressFrame = null;
 
-// 纯正的云端绝对覆盖更新，杜绝本地陈旧数据覆盖云端
-window.upgradeDBStructure = function(source) {
-    let target = JSON.parse(JSON.stringify(defaultDB));
+window.cleanupOldLocalStorage = function() { 
+    const currentVersion = 'sealOfLoveDB_v31'; 
+    for (let i = 0; i < localStorage.length; i++) { 
+        const key = localStorage.key(i); 
+        // 保留 v31，并且不再删除老版本，以便 deepRescueDB() 能顺利打捞
+    } 
+}
+
+// 核心：自研深度数据搜救引擎，将老版本意外遗失的资料重新合并拼接
+window.deepRescueDB = function(target, source) {
     if(!source) return target;
-    
-    if (source.users) { for (let u in source.users) { target.users[u] = source.users[u]; if (!target.users[u].favorites) target.users[u].favorites = []; } }
-    if (source.stages) { stagesList.forEach(s => { if (source.stages[s]) { target.stages[s] = source.stages[s]; } }); }
-    if (source.globalMusicConfig) { target.globalMusicConfig = source.globalMusicConfig; }
-    
+    // 搜救用户资料 (含头像、昵称、收藏)
+    if (source.users) {
+        for (let u in source.users) {
+            if (!target.users[u]) target.users[u] = source.users[u];
+            else {
+                if (source.users[u].avatar && !target.users[u].avatar) target.users[u].avatar = source.users[u].avatar;
+                if (source.users[u].nickname && !target.users[u].nickname) target.users[u].nickname = source.users[u].nickname;
+                if (source.users[u].favorites && source.users[u].favorites.length > 0) target.users[u].favorites = source.users[u].favorites;
+            }
+        }
+    }
+    // 搜救各阶段图标与卡片数据
+    if (source.stages) {
+        stagesList.forEach(s => {
+            if (source.stages[s] && target.stages[s]) {
+                if (source.stages[s].icon && source.stages[s].icon !== '') target.stages[s].icon = source.stages[s].icon;
+                if (source.stages[s].name && target.stages[s].name === s) target.stages[s].name = source.stages[s].name;
+                if (source.stages[s].prepText) target.stages[s].prepText = source.stages[s].prepText;
+                if (source.stages[s].cards && source.stages[s].cards.length > target.stages[s].cards.length) target.stages[s].cards = source.stages[s].cards;
+                if (source.stages[s].categories && source.stages[s].categories.length > target.stages[s].categories.length) target.stages[s].categories = source.stages[s].categories;
+            }
+        });
+    }
+    // 搜救全局音律库
+    if (source.globalMusicConfig) {
+        if (source.globalMusicConfig.categories && source.globalMusicConfig.categories.length > 0) {
+            target.globalMusicConfig.categories = source.globalMusicConfig.categories;
+        }
+        for(let cat in source.globalMusicConfig.library) {
+            if (!target.globalMusicConfig.library[cat]) target.globalMusicConfig.library[cat] = [];
+            source.globalMusicConfig.library[cat].forEach(track => {
+                if (!target.globalMusicConfig.library[cat].find(t => t.url === track.url)) {
+                    target.globalMusicConfig.library[cat].push(track);
+                }
+            });
+        }
+    }
     return target;
 }
 
+// 防御性数据拉取与热升级
 window.initDB = async function() { 
     let cloudDb = null;
-    try { const res = await fetch('/api/db'); if (res.ok) { cloudDb = await res.json(); } } catch (e) {} 
-    
-    let bestLocalDb = null; let maxLen = 0;
+    try { 
+        const res = await fetch('/api/db'); 
+        if (res.ok) { 
+            const remoteDb = await res.json(); 
+            if (remoteDb && remoteDb.stages) { 
+                cloudDb = remoteDb;
+            } 
+        } 
+    } catch (e) {} 
+
+    // 全局打捞本地所有历史版本，寻找最长、最完整的可用数据
+    let bestLocalDb = null;
+    let maxLen = 0;
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('sealOfLoveDB_')) { const val = localStorage.getItem(key); if (val && val.length > maxLen) { maxLen = val.length; try { bestLocalDb = JSON.parse(val); } catch(e){} } }
-    }
-    
-    // 如果云端存在，云端即为绝对真理，彻底抛弃本地旧快照，实现秒级同步
-    if (cloudDb && cloudDb.stages) {
-        db = window.upgradeDBStructure(cloudDb);
-    } else if (bestLocalDb) {
-        db = window.upgradeDBStructure(bestLocalDb);
-    } else {
-        db = JSON.parse(JSON.stringify(defaultDB));
+        if (key && key.startsWith('sealOfLoveDB_')) {
+            const val = localStorage.getItem(key);
+            if (val && val.length > maxLen) {
+                maxLen = val.length;
+                try { bestLocalDb = JSON.parse(val); } catch(e){}
+            }
+        }
     }
 
-    if (!db.users['yishuyangguang']) { db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] }; }
+    // 从最干净的底座开始
+    db = JSON.parse(JSON.stringify(defaultDB));
+
+    // 智能搜救与合并：本地优先补全，云端最终覆盖修正
+    if (bestLocalDb) db = window.deepRescueDB(db, bestLocalDb);
+    if (cloudDb) db = window.deepRescueDB(db, cloudDb);
+
+    // 确保默认超管账户永不掉线
+    if (!db.users['yishuyangguang']) {
+        db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] };
+    }
+
+    // 存入最新的安全版本键中
+    try { localStorage.setItem('sealOfLoveDB_v31', JSON.stringify(db)); } catch(e){} 
     
-    try { localStorage.setItem('sealOfLoveDB_v32', JSON.stringify(db)); } catch(e){} 
-    
-    // 保护网关：如果是已经进入的阶段屏，则热重载UI（用于后台更新后的实时刷新）
-    if (document.getElementById('screen-stage').classList.contains('active')) { window.initStageScreen(); }
-    if (document.getElementById('screen-card-list').classList.contains('active')) { window.renderCardList(); }
-    
+    // 如果云端挂了但本地有数据，才静默上传补救
     if (bestLocalDb && !cloudDb) { window.saveDB(); }
 }
 
-window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v32', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
+window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v31', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
 
 window.showGlobalToast = function(text, type = 'loading') { const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text'); if(!toast) return; toast.className = `global-toast show ${type}`; msg.innerText = text; if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖'; clearTimeout(toastTimeout); if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); } }
 window.compressImageFile = function(file, callback) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 240; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/webp', 0.75)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
@@ -1201,11 +1261,63 @@ window.triggerSync = function() { document.getElementById('sync-animation-box').
 window.renderContentStep = function() { const stepData = state.currentCard.steps[state.currentStep]; document.getElementById('content-type-title').innerText = `【${db.stages[state.stage].categories.find(c => c.id === state.currentCard.categoryId)?.name || '印记'}】的连结`; document.getElementById('step-title').innerText = stepData.title; document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>'); for(let i=1; i<=3; i++) { const dot = document.getElementById(`dot-${i}`); if (i - 1 === state.currentStep) dot.classList.add('active'); else dot.classList.remove('active'); } const nextBtn = document.getElementById('btn-next-step'); const longPressBtn = document.getElementById('btn-long-press'); if (state.currentStep < 2) { nextBtn.style.display = 'flex'; longPressBtn.style.display = 'none'; } else { nextBtn.style.display = 'none'; longPressBtn.style.display = 'flex'; } }
 window.nextContentStep = function() { if (state.currentStep < 2) { state.currentStep++; const t = document.getElementById('step-title'); const p = document.getElementById('step-text'); t.style.opacity = 0; p.style.opacity = 0; setTimeout(() => { window.renderContentStep(); t.style.transition = 'opacity 0.5s'; p.style.transition = 'opacity 0.5s'; t.style.opacity = 1; p.style.opacity = 1; }, 300); } }
 
-window.startPress = function(e) { if(e.type === 'touchstart') e.preventDefault(); if(isPressing) return; const pressFill = document.getElementById('press-fill'); isPressing = true; progress = 0; cancelAnimationFrame(pressFrame); function up() { if(!isPressing) return; progress += (100/90); if(pressFill) pressFill.style.height = `${Math.min(progress, 100)}%`; if (progress >= 100) { isPressing = false; window.completeAction(); } else pressFrame = requestAnimationFrame(up); } pressFrame = requestAnimationFrame(up); }
-window.endPress = function(e) { if(e.type === 'touchend') e.preventDefault(); isPressing = false; cancelAnimationFrame(pressFrame); if (progress < 100) { progress = 0; const pressFill = document.getElementById('press-fill'); if(pressFill) pressFill.style.height = `0%`; } }
-window.completeAction = function() { cancelAnimationFrame(pressFrame); window.navigateTo('screen-finish'); }
-window.resetToStage = function() { const pressFill = document.getElementById('press-fill'); if(pressFill) pressFill.style.height = `0%`; state.currentCard = null; state.role = ''; state.currentStep = 0; window.initStageScreen(); }
+window.startPress = function(e) { 
+    if(e && e.type === 'touchstart') e.preventDefault(); 
+    if(isPressing) return; 
+    const pressArea = document.getElementById('btn-long-press');
+    const pressFill = document.getElementById('press-fill'); 
+    isPressing = true; 
+    pressProgress = 0; 
+    if (pressArea) pressArea.classList.add('pressing');
+    if(pressFrame) cancelAnimationFrame(pressFrame); 
+    
+    function up() { 
+        if(!isPressing) return; 
+        pressProgress += (100/90); 
+        if(pressFill) pressFill.style.height = `${Math.min(pressProgress, 100)}%`; 
+        if (pressProgress >= 100) { 
+            isPressing = false; 
+            if (pressArea) pressArea.classList.remove('pressing');
+            window.completeAction(); 
+        } else { 
+            pressFrame = requestAnimationFrame(up); 
+        } 
+    } 
+    pressFrame = requestAnimationFrame(up); 
+}
 
+window.endPress = function(e) { 
+    if(e && e.type === 'touchend') e.preventDefault(); 
+    isPressing = false; 
+    const pressArea = document.getElementById('btn-long-press');
+    if (pressArea) pressArea.classList.remove('pressing');
+    if(pressFrame) cancelAnimationFrame(pressFrame); 
+    
+    if (pressProgress < 100) { 
+        pressProgress = 0; 
+        const pressFill = document.getElementById('press-fill'); 
+        if(pressFill) {
+            pressFill.style.transition = 'height 0.3s ease-out';
+            pressFill.style.height = `0%`; 
+            setTimeout(() => { if(!isPressing) pressFill.style.transition = ''; }, 300);
+        }
+    } 
+}
+
+window.completeAction = function() { 
+    if(pressFrame) cancelAnimationFrame(pressFrame); 
+    window.navigateTo('screen-finish'); 
+}
+
+window.resetToStage = function() { 
+    const pressFill = document.getElementById('press-fill'); 
+    if(pressFill) {
+        pressFill.style.transition = ''; 
+        pressFill.style.height = `0%`; 
+    }
+    state.currentCard = null; state.role = ''; state.currentStep = 0; 
+    window.initStageScreen(); 
+}
 </script>
 </body>
 </html>
