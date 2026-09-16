@@ -1,10 +1,12 @@
 /**
- * 恒久印记 - 卡片进度追踪与 NEW 标签扩展引擎 (精准变量穿透打通版)
+ * 恒久印记 - 卡片进度追踪 + NEW标签 + iOS深度媒体修复引擎
  * 文件名: card-tracker.js
- * 说明: 通过在 index.html 的 </body> 前引入 <script src="card-tracker.js"></script> 即可激活。
+ * 说明: 通过在 index.html 的 </body> 前引入即可自动激活所有增强功能。
  */
 (function initTracker() {
-    // 1. 动态植入高级流体呼吸感 NEW 标签的 CSS
+    // =====================================================================
+    // 模块一：UI 与 视觉增强 (流体呼吸感 NEW 标签)
+    // =====================================================================
     if (!document.getElementById('tracker-style')) {
         const style = document.createElement('style');
         style.id = 'tracker-style';
@@ -37,12 +39,13 @@
         document.head.appendChild(style);
     }
 
-    // 2. 智能轮询探针：等待主程序的全局 let 变量彻底释放到内存池
+    // =====================================================================
+    // 模块二：智能探针轮询 (等待主程序释放全局变量池)
+    // =====================================================================
     function applyPatches() {
-        // 修复暗病：使用全局变量名本身探测，而不是 window.db (因为 index.html 中是用 let 块级声明在顶层的)
         if (typeof window.renderCardList === 'function' && typeof db !== 'undefined' && typeof state !== 'undefined' && !window.renderCardList.isTrackerPatched) {
             
-            // ============== 核心拦截 1：注入 NEW 标签渲染 ==============
+            // [拦截] 注入 NEW 标签渲染
             window.renderCardList = function() {
                 const cats = db.stages[state.stage].categories || [];
                 const tabContainer = document.getElementById('cat-tabs-container');
@@ -66,12 +69,9 @@
                     const grid = document.createElement('div');
                     grid.className = 'content-grid';
 
-                    // 提取当前用户的已完成进度雷达
                     let userCompleted = [];
                     if (typeof currentUserAccount !== 'undefined' && currentUserAccount && db.users[currentUserAccount]) {
-                        if (!db.users[currentUserAccount].completedCards) {
-                            db.users[currentUserAccount].completedCards = [];
-                        }
+                        if (!db.users[currentUserAccount].completedCards) db.users[currentUserAccount].completedCards = [];
                         userCompleted = db.users[currentUserAccount].completedCards;
                     }
 
@@ -79,7 +79,6 @@
                         const cardDiv = document.createElement('div');
                         cardDiv.className = 'data-card';
                         
-                        // 【核心触发逻辑】：若未在此用户的记录薄中找到该卡片ID，且不在深度编辑模式，挂载NEW红点
                         let badgeHtml = '';
                         if (!userCompleted.includes(card.id) && !state.isEditMode) {
                             badgeHtml = `<div class="card-new-badge">NEW</div>`;
@@ -110,35 +109,27 @@
                     if(container) container.innerHTML = '<p style="opacity:0.5; margin-top:30px; text-align:center;">当前分类暂无内容</p>';
                 }
             };
-            // 打上防冲突印记，避免重复套娃接管
             window.renderCardList.isTrackerPatched = true;
 
-            // ============== 核心拦截 2：长按结束打卡写入 ==============
+            // [拦截] 长按完成打卡进度写入
             const originalCompleteAction = window.completeAction;
             window.completeAction = function() {
-                // 记录完成状态：只有当动画抵达 100% 触发此函数时，打入印记
                 if (typeof currentUserAccount !== 'undefined' && currentUserAccount && state.currentCard && db.users[currentUserAccount]) {
                     let user = db.users[currentUserAccount];
                     if (!user.completedCards) user.completedCards = [];
-                    
                     if (!user.completedCards.includes(state.currentCard.id)) {
                         user.completedCards.push(state.currentCard.id);
                         if(typeof window.saveDB === 'function') window.saveDB(); 
                     }
                 }
-                
-                // 放行：执行主程序原有的重置 UI 与跳转返回逻辑
-                if (typeof originalCompleteAction === 'function') {
-                    originalCompleteAction();
-                }
+                if (typeof originalCompleteAction === 'function') originalCompleteAction();
             };
 
-            // ============== 核心拦截 3：深层云端合并规则扩展 ==============
+            // [拦截] 云端双向合并进度保护
             if (typeof window.deepRescueDB === 'function' && !window.deepRescueDB.isPatched) {
                 const originalDeepRescueDB = window.deepRescueDB;
                 window.deepRescueDB = function(target, source) {
                     target = originalDeepRescueDB(target, source);
-                    // 在云端向下覆盖时，保护并向下融合同步用户的 completedCards 数组
                     if (source && source.users) {
                         for (let u in source.users) {
                             if (target.users[u] && source.users[u].completedCards) {
@@ -156,15 +147,100 @@
                 window.deepRescueDB.isPatched = true;
             }
 
-            // ============== 探针清零：如果用户已在界面停留，强制重渲染激活标签 ==============
+            // =====================================================================
+            // 模块三：苹果设备深层优化 (MediaSession 与 VBR 时长强校验)
+            // =====================================================================
+            
+            // [拦截] 切歌事件：注入苹果系统底层的锁屏卡片元数据
+            const originalPlayCurrentTrack = window.playCurrentTrack;
+            window.playCurrentTrack = function() {
+                if (originalPlayCurrentTrack) {
+                    originalPlayCurrentTrack.apply(this, arguments);
+                }
+                
+                // 向 iOS 锁屏/灵动岛 推送真实歌曲信息
+                if (typeof musicState !== 'undefined' && musicState.playlist && musicState.playlist.length > 0) {
+                    const track = musicState.playlist[musicState.currentIndex];
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.metadata = new MediaMetadata({
+                            title: track.name || '未知曲目',
+                            artist: '恒久印记',
+                            album: '印记音律',
+                            artwork: [
+                                { src: 'apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+                                { src: 'favicon-32x32.png', sizes: '32x32', type: 'image/png' }
+                            ]
+                        });
+
+                        // 挂载硬件控制键回调
+                        try {
+                            navigator.mediaSession.setActionHandler('play', () => { window.playCurrentTrack(); });
+                            navigator.mediaSession.setActionHandler('pause', () => { window.pauseTrack(); });
+                            navigator.mediaSession.setActionHandler('previoustrack', () => { window.prevTrack(); });
+                            navigator.mediaSession.setActionHandler('nexttrack', () => { window.nextTrack(); });
+                        } catch (e) {
+                            // 兼容低版本浏览器静默失败
+                        }
+                    }
+                }
+            };
+
+            // [拦截] 音频生命周期：彻底破除 iOS Safari VBR MP3 时长数十分钟绝症
+            const bgmPlayer = document.getElementById('bgm-player');
+            if (bgmPlayer && !bgmPlayer.isDurationPatched) {
+                
+                // 挂载高优先级原子锁，防止探针测算长度时触发“自动下一首”
+                window.isFixingDuration = false;
+                const originalHandleAudioEnded = window.handleAudioEnded;
+                window.handleAudioEnded = function() {
+                    if (window.isFixingDuration) return; // 若处于修复锁定态，屏蔽跳转事件
+                    if (originalHandleAudioEnded) originalHandleAudioEnded.apply(this, arguments);
+                };
+
+                bgmPlayer.addEventListener('loadedmetadata', function() {
+                    // 当 Safari 解析出现极其荒诞的时长（比如 > 20 分钟），触发强校验机制
+                    // 1200 秒 = 20 分钟，背景音乐通常远小于此数值
+                    if (bgmPlayer.duration === Infinity || bgmPlayer.duration > 1200) {
+                        window.isFixingDuration = true;
+                        
+                        // 强制 WebKit 引擎瞬移至二进制流末尾，逼迫其重新计算真实边界
+                        bgmPlayer.currentTime = Number.MAX_SAFE_INTEGER; 
+                        
+                        const restoreTime = function() {
+                            bgmPlayer.currentTime = 0; // 精准回归开头准备播放
+                            bgmPlayer.removeEventListener('seeked', restoreTime);
+                            // 解除防切歌锁 (设定 150ms 延迟确保事件流安全闭合)
+                            setTimeout(() => { window.isFixingDuration = false; }, 150);
+                        };
+                        bgmPlayer.addEventListener('seeked', restoreTime);
+                    }
+                });
+                
+                // 可选增益：向 iOS 控制中心实时汇报播放进度，让灵动岛进度条准确流动
+                bgmPlayer.addEventListener('timeupdate', () => {
+                    if ('mediaSession' in navigator && !isNaN(bgmPlayer.duration) && bgmPlayer.duration !== Infinity && bgmPlayer.duration < 1200) {
+                        try {
+                            navigator.mediaSession.setPositionState({
+                                duration: bgmPlayer.duration,
+                                playbackRate: bgmPlayer.playbackRate,
+                                position: bgmPlayer.currentTime
+                            });
+                        } catch(e) {}
+                    }
+                });
+                
+                bgmPlayer.isDurationPatched = true;
+            }
+
+            // [强制激活] 刷新驻留界面的 UI
             const cardListScreen = document.getElementById('screen-card-list');
             if (cardListScreen && cardListScreen.classList.contains('active')) {
                 window.renderCardList();
             }
 
-            console.log("卡片生命周期追踪引擎 [已挂载并激活]");
+            console.log("卡片追踪与 iOS 深度媒体修补引擎 [已全面接管挂载]");
 
-        } else {
+        } else if (!window.renderCardList || !window.renderCardList.isTrackerPatched) {
             // 原系统还没就绪，微秒级潜伏轮询 (50ms)，绝不遗漏
             setTimeout(applyPatches, 50);
         }
