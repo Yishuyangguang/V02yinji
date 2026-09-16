@@ -4,7 +4,7 @@
  */
 (function initTracker() {
     // =====================================================================
-    // 模块一：UI 与 视觉增强 (流体呼吸感 NEW 标签)
+    // 模块一：UI 与 视觉增强 (流体呼吸感 NEW 标签 + 修复屏幕横向滑动溢出)
     // =====================================================================
     if (!document.getElementById('tracker-style')) {
         const style = document.createElement('style');
@@ -34,6 +34,18 @@
                 50% { transform: scale(1.08); box-shadow: 0 6px 15px rgba(255, 71, 87, 0.6); }
                 100% { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4); }
             }
+
+            /* [修复BUG]: 彻底锁死音乐弹窗横向溢出，杜绝手机端左右晃动 */
+            #vinyl-player-modal { overflow-x: hidden !important; width: 100vw !important; }
+            .vinyl-player-container.new-layout { 
+                box-sizing: border-box !important; 
+                max-width: 100vw !important; 
+                overflow-x: hidden !important; 
+            }
+            .player-main-content { max-width: 100% !important; overflow-x: hidden !important; }
+            .player-right-panel { max-width: 100% !important; overflow-x: hidden !important; }
+            .playlist-box { max-width: 100% !important; overflow-x: hidden !important; }
+            #player-track-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100% !important; }
         `;
         document.head.appendChild(style);
     }
@@ -147,18 +159,18 @@
             }
 
             // =====================================================================
-            // 模块三：系统级媒体增强与 iOS 时长畸变绝症修复 (无冲突并行包装模式)
+            // 模块三：系统级媒体增强与 iOS 时长畸变绝症修复 (极速直链串流模式)
             // =====================================================================
             
-            // [无损拦截] 切歌事件：直接调用原函数保持秒播速度，只在切面补充苹果锁屏推送
+            // [无损拦截] 切歌事件：废除 Blob 拖慢速度的做法，让主程序继续走直链“秒播”
             const originalPlayCurrentTrack = window.playCurrentTrack;
             window.playCurrentTrack = function() {
-                // 1. 完美放行原生引擎，享受毫无卡顿的极速缓冲串流！
+                // 放行原生逻辑，保证音乐极速加载
                 if (typeof originalPlayCurrentTrack === 'function') {
                     originalPlayCurrentTrack.apply(this, arguments);
                 }
                 
-                // 2. 向 iOS 锁屏/灵动岛 推送真实的背景展示信息
+                // 异步挂载苹果系统底层的锁屏卡片元数据
                 if (typeof musicState !== 'undefined' && musicState.playlist && musicState.playlist.length > 0) {
                     const track = musicState.playlist[musicState.currentIndex];
                     if ('mediaSession' in navigator) {
@@ -172,71 +184,78 @@
                             ]
                         });
 
-                        // 将硬件/耳机控制键，映射到原生函数上
+                        // 挂载硬件线控键回调
                         try {
                             navigator.mediaSession.setActionHandler('play', () => { if(window.togglePlayPause) window.togglePlayPause(); });
                             navigator.mediaSession.setActionHandler('pause', () => { if(window.togglePlayPause) window.togglePlayPause(); });
                             navigator.mediaSession.setActionHandler('previoustrack', () => { if(window.prevTrack) window.prevTrack(); });
                             navigator.mediaSession.setActionHandler('nexttrack', () => { if(window.nextTrack) window.nextTrack(); });
-                        } catch (e) {
-                            // 兼容低版本浏览器
-                        }
+                        } catch (e) {}
                     }
                 }
             };
 
-            // [核心修复] 音频生命周期：强行破除 iOS Safari VBR MP3 时长显示几十分钟的绝症
+            // [核心重构] 音频生命周期：强行破除 iOS Safari VBR MP3 时长数十分钟绝症
             const bgmPlayer = document.getElementById('bgm-player');
             if (bgmPlayer && !bgmPlayer.isDurationPatched) {
                 
-                // 挂载防抖锁：防止探针强行快进时，误触了原有代码里的“播放完毕自动切歌”
+                // 挂载防抖锁：防止探针测算长度时触发“自动下一首”
                 window.isFixingDuration = false;
                 const originalHandleAudioEnded = window.handleAudioEnded;
                 window.handleAudioEnded = function() {
-                    // 如果正在修补时长，拦截自动下一首
+                    // 若正处于探底修复期，死锁阻断，坚决不切歌
                     if (window.isFixingDuration) return; 
                     if (originalHandleAudioEnded) originalHandleAudioEnded.apply(this, arguments);
                 };
 
-                bgmPlayer.addEventListener('loadedmetadata', function() {
-                    // 如果 Safari 解析出 > 20 分钟 (1200秒) 的虚假时长，触发 1e101 探底算法
-                    if (bgmPlayer.duration === Infinity || bgmPlayer.duration > 1200) {
-                        if (window.isFixingDuration) return;
-                        
+                // 核心探测器：监听 meta 载入 和 随时爆发的时长畸变
+                const fixVBRDuration = function() {
+                    // 当 Safari 解析出大于 1200 秒(20分钟) 的荒诞时长时，触发自救！
+                    if ((bgmPlayer.duration === Infinity || bgmPlayer.duration > 1200) && !window.isFixingDuration) {
                         window.isFixingDuration = true;
                         
-                        // 静音掩护，防止跳跃时爆音
+                        const wasPlaying = !bgmPlayer.paused;
+                        const currentTime = bgmPlayer.currentTime;
                         const wasMuted = bgmPlayer.muted;
-                        bgmPlayer.muted = true;
                         
-                        // 强制跳跃至极限，逼迫苹果底层重新计算整首音频流真实的字节数！
-                        bgmPlayer.currentTime = 9999999; 
+                        bgmPlayer.muted = true; // 静音掩护
                         
-                        // 保护兜底超时器：以防网络异常未触发 seeked
-                        let fixTimeout = setTimeout(() => {
-                            if (window.isFixingDuration) {
-                                bgmPlayer.currentTime = 0;
-                                bgmPlayer.muted = wasMuted;
-                                window.isFixingDuration = false;
-                            }
-                        }, 800);
-
+                        // 强制 WebKit 引擎瞬移至流末尾，逼迫其请求并计算真实字节长度
+                        bgmPlayer.currentTime = 1e101; 
+                        
                         const restoreTime = function() {
-                            clearTimeout(fixTimeout);
-                            bgmPlayer.currentTime = 0; // 精准回归开头开始真实播放
-                            bgmPlayer.muted = wasMuted; // 恢复系统原音量
                             bgmPlayer.removeEventListener('seeked', restoreTime);
+                            bgmPlayer.currentTime = currentTime; // 精准回归起点
+                            bgmPlayer.muted = wasMuted; // 恢复系统原音量
                             
-                            // 延迟 150ms 解锁切歌，确保事件流彻底闭合不冒泡
-                            setTimeout(() => { window.isFixingDuration = false; }, 150);
+                            if (wasPlaying) {
+                                bgmPlayer.play().catch(e=>{});
+                            }
+                            
+                            // 延时解除防切歌锁，确保事件冒泡死海干涸
+                            setTimeout(() => { window.isFixingDuration = false; }, 200);
                         };
+                        
                         bgmPlayer.addEventListener('seeked', restoreTime);
+                        
+                        // 安全降级：万一网络卡死没有 seeked，强制放行
+                        setTimeout(() => {
+                            if (window.isFixingDuration) {
+                                bgmPlayer.removeEventListener('seeked', restoreTime);
+                                bgmPlayer.currentTime = currentTime;
+                                bgmPlayer.muted = wasMuted;
+                                if (wasPlaying) bgmPlayer.play().catch(e=>{});
+                                setTimeout(() => { window.isFixingDuration = false; }, 200);
+                            }
+                        }, 1000);
                     }
-                });
+                };
+
+                bgmPlayer.addEventListener('loadedmetadata', fixVBRDuration);
+                bgmPlayer.addEventListener('durationchange', fixVBRDuration);
                 
-                // 增益：向 iOS 控制中心实时汇报播放进度，让锁屏与灵动岛进度条准确流动
+                // 锁屏灵动岛进度条心跳同步
                 bgmPlayer.addEventListener('timeupdate', () => {
-                    // 仅当时间校验处于稳定准确状态时才同步
                     if ('mediaSession' in navigator && !isNaN(bgmPlayer.duration) && bgmPlayer.duration !== Infinity && bgmPlayer.duration < 1200) {
                         try {
                             navigator.mediaSession.setPositionState({
@@ -251,13 +270,13 @@
                 bgmPlayer.isDurationPatched = true;
             }
 
-            // [强制激活] 如果用户正好处于卡片列表页，触发热显影激活 NEW 标签
+            // [强制激活] 刷新驻留界面的 UI
             const cardListScreen = document.getElementById('screen-card-list');
             if (cardListScreen && cardListScreen.classList.contains('active')) {
                 window.renderCardList();
             }
 
-            console.log("卡片追踪器 + iOS媒体深层修复引擎 [已无冲突接管]");
+            console.log("卡片追踪器 + iOS媒体极速修复引擎 [已无冲突接管]");
 
         } else if (!window.renderCardList || !window.renderCardList.isTrackerPatched) {
             // 原系统还没就绪，微秒级潜伏轮询 (50ms)，绝不遗漏
