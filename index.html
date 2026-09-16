@@ -641,7 +641,7 @@
 </div>
 
 <script>
-/* ================= 核心防御性生命周期边界 ================= */
+/* ================= 核心防御性生命周期边界 (DOM Ready Guard) ================= */
 let isPressing = false; 
 let pressProgress = 0; 
 let pressFrame = null;
@@ -744,7 +744,7 @@ window.animateParticles = function(timestamp) {
 
 /* ================= 核心修复：绝对云端同步替换逻辑 ================= */
 window.cleanupOldLocalStorage = function() { 
-    const currentVersion = 'sealOfLoveDB_v33'; 
+    const currentVersion = 'sealOfLoveDB_v34'; 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
@@ -784,7 +784,7 @@ window.initDB = async function() {
         } 
     }
     
-    // 核心修复：绝对以云端为准进行全量覆盖，根除本地僵尸数据导致音乐找回失败的暗病
+    // 核心修复：绝对以云端为准进行全量覆盖，根除本地僵尸数据导致找回失败的暗病
     if (cloudDb) {
         db = window.upgradeDBStructure(cloudDb);
     } else if (bestLocalDb) {
@@ -795,7 +795,7 @@ window.initDB = async function() {
 
     if (!db.users['yishuyangguang']) { db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] }; }
     
-    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v33', JSON.stringify(db)); } catch(e){} 
+    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v34', JSON.stringify(db)); } catch(e){} 
     
     // 核心修复：强力通知视图热重载，防止云端数据到了但 UI 仍然是一片空白！
     if (document.getElementById('screen-stage').classList.contains('active')) { window.initStageScreen(); }
@@ -811,7 +811,15 @@ window.initDB = async function() {
     if (bestLocalDb && !cloudDb) { window.saveDB(); }
 }
 
-window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v33', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
+window.saveDB = async function() { 
+    let localSaved = false; 
+    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v34', JSON.stringify(db)); localSaved = true; } catch (e) {} 
+    try { 
+        window.showGlobalToast('正在同步至云端...', 'loading'); 
+        const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); 
+        if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } 
+    } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } 
+}
 
 window.showGlobalToast = function(text, type = 'loading') { const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text'); if(!toast) return; toast.className = `global-toast show ${type}`; msg.innerText = text; if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖'; clearTimeout(toastTimeout); if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); } }
 window.compressImageFile = function(file, callback) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 240; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/webp', 0.75)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
@@ -836,6 +844,7 @@ window.toggleTheme = function() {
         document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
     }
 }
+window.resizeCanvas = function() { const canvas = document.getElementById('particle-canvas'); if(!canvas) return; canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 
 class Particle { 
     constructor() { 
