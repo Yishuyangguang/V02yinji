@@ -500,25 +500,21 @@
     </div>
 </div>
 
-<!-- 新版防溢出自适应高定播放器 (Responsive Symmetrical Flex) -->
+<!-- 新版防溢出自适应高定播放器 -->
 <div class="modal-overlay" id="vinyl-player-modal">
     <div class="modal-content vinyl-player-container new-layout">
         
-        <!-- 独立的真 3D 玻璃浮岛关闭键 -->
         <div class="close-3d-btn" onclick="window.closeVinylPlayer()">✖</div>
         
         <div class="player-main-content">
-            <!-- 左侧核心面板 -->
             <div class="player-left-panel">
                 <h2 id="player-track-name">曲目加载中...</h2>
                 
-                <!-- 科技感音律波动引擎 -->
                 <div class="tech-wave-container" id="vinyl-disc-ui">
                     <div class="wave-ring"></div><div class="wave-ring"></div><div class="wave-ring"></div>
                     <div class="wave-center"></div>
                 </div>
                 
-                <!-- 【黄金分割全图标控制列，绝对对称】 -->
                 <div class="player-controls-wrapper">
                     <div class="ctrl-group left">
                         <div class="ctrl-btn-small" id="btn-play-mode" onclick="window.changePlayMode()" title="切换播放模式">🔁</div>
@@ -536,14 +532,12 @@
                 </div>
             </div>
 
-            <!-- 右侧列表面板 -->
             <div class="player-right-panel">
                 <input type="search" id="vinyl-search" placeholder="🔍 搜索歌曲名称..." oninput="window.filterVinylPlaylist()" style="border-radius:14px; background:var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color:var(--theme-text); padding:10px 15px; margin-bottom:10px; flex-shrink:0; width:100%;">
                 <div class="playlist-box" id="playlist-ui"></div>
             </div>
         </div>
 
-        <!-- 底部全宽智能滑动进度条 -->
         <div class="player-progress-bar-container">
             <span id="player-time-current">00:00</span>
             <div class="progress-track" id="progress-track">
@@ -647,14 +641,13 @@
 </div>
 
 <script>
-/* ================= 核心防御性生命周期边界 (DOM Ready Guard) ================= */
-// 显式声明长按交互所需的全域状态变量，防止在各引擎中抛出 ReferenceError 暗病
+/* ================= 核心防御性生命周期边界 ================= */
 let isPressing = false; 
 let pressProgress = 0; 
 let pressFrame = null;
 
 let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true, isModalOpen: false };
-let db = null; // db initialized below
+let db = null; 
 let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let particles = []; let animationId; window.isDraggingProgress = false;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -677,14 +670,12 @@ document.addEventListener("DOMContentLoaded", () => {
         longPressBtn.addEventListener('touchstart', (e) => { if(typeof window.startPress === 'function') window.startPress(e); }, {passive: false});
         longPressBtn.addEventListener('touchend', (e) => { if(typeof window.endPress === 'function') window.endPress(e); }, {passive: false});
         longPressBtn.addEventListener('touchcancel', (e) => { if(typeof window.endPress === 'function') window.endPress(e); }, {passive: false});
-        longPressBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); }); // 防御右键菜单弹窗打断长按
+        longPressBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); });
     }
 
-    // 默认开启浅色模式，并同步界面状态
     state.isLightTheme = true;
     document.getElementById('btn-theme').innerText = '☀️';
 
-    // 数据库同步与丝滑拖拽引擎
     window.initDB();
     window.initProgressDrag();
 });
@@ -724,13 +715,12 @@ window.hideModal = function(id) {
 }
 
 let lastParticleTime = 0;
-const particleFPS = 30; // 强制降帧引擎，完美解决手机端高刷发热
+const particleFPS = 30; 
 const particleInterval = 1000 / particleFPS;
 
 window.animateParticles = function(timestamp) { 
     animationId = requestAnimationFrame(window.animateParticles); 
     
-    // 【核心温控】当页面被切到后台，或出现全屏弹窗时，绝对静止粒子运算
     if (document.hidden || state.isModalOpen) return;
 
     if (!timestamp) timestamp = performance.now();
@@ -752,30 +742,76 @@ window.animateParticles = function(timestamp) {
     }
 }
 
-window.cleanupOldLocalStorage = function() { const currentVersion = 'sealOfLoveDB_v32'; for (let i = 0; i < localStorage.length; i++) {} }
+/* ================= 核心修复：绝对云端同步替换逻辑 ================= */
+window.cleanupOldLocalStorage = function() { 
+    const currentVersion = 'sealOfLoveDB_v33'; 
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
+            localStorage.removeItem(key);
+        }
+    } 
+}
 
-window.deepRescueDB = function(target, source) {
+window.upgradeDBStructure = function(source) {
+    let target = JSON.parse(JSON.stringify(defaultDB));
     if(!source) return target;
-    if (source.users) { for (let u in source.users) { if (!target.users[u]) target.users[u] = source.users[u]; else { if (source.users[u].avatar && !target.users[u].avatar) target.users[u].avatar = source.users[u].avatar; if (source.users[u].nickname && !target.users[u].nickname) target.users[u].nickname = source.users[u].nickname; if (source.users[u].favorites && source.users[u].favorites.length > 0) target.users[u].favorites = source.users[u].favorites; } } }
-    if (source.stages) { stagesList.forEach(s => { if (source.stages[s] && target.stages[s]) { if (source.stages[s].icon && source.stages[s].icon !== '') target.stages[s].icon = source.stages[s].icon; if (source.stages[s].name && target.stages[s].name === s) target.stages[s].name = source.stages[s].name; if (source.stages[s].prepText) target.stages[s].prepText = source.stages[s].prepText; if (source.stages[s].cards && source.stages[s].cards.length > target.stages[s].cards.length) target.stages[s].cards = source.stages[s].cards; if (source.stages[s].categories && source.stages[s].categories.length > target.stages[s].categories.length) target.stages[s].categories = source.stages[s].categories; } }); }
-    if (source.globalMusicConfig) { if (source.globalMusicConfig.categories && source.globalMusicConfig.categories.length > 0) { target.globalMusicConfig.categories = source.globalMusicConfig.categories; } for(let cat in source.globalMusicConfig.library) { if (!target.globalMusicConfig.library[cat]) target.globalMusicConfig.library[cat] = []; source.globalMusicConfig.library[cat].forEach(track => { if (!target.globalMusicConfig.library[cat].find(t => t.url === track.url)) { target.globalMusicConfig.library[cat].push(track); } }); } }
+    
+    if (source.users) { for (let u in source.users) { target.users[u] = source.users[u]; if (!target.users[u].favorites) target.users[u].favorites = []; } }
+    if (source.stages) { stagesList.forEach(s => { if (source.stages[s]) { target.stages[s] = source.stages[s]; } }); }
+    if (source.globalMusicConfig) { target.globalMusicConfig = source.globalMusicConfig; }
+    
     return target;
 }
 
 window.initDB = async function() { 
     let cloudDb = null;
-    try { const res = await fetch('/api/db'); if (res.ok) { const remoteDb = await res.json(); if (remoteDb && remoteDb.stages) { cloudDb = remoteDb; } } } catch (e) {} 
+    try { 
+        // 核心修复：加入时间戳彻底打穿缓存，确保极速拿取最新云端编辑记录
+        const res = await fetch('/api/db?t=' + Date.now()); 
+        if (res.ok) { 
+            const remoteDb = await res.json(); 
+            if (remoteDb && remoteDb.stages) { cloudDb = remoteDb; } 
+        } 
+    } catch (e) {} 
+    
     let bestLocalDb = null; let maxLen = 0;
-    for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key && key.startsWith('sealOfLoveDB_')) { const val = localStorage.getItem(key); if (val && val.length > maxLen) { maxLen = val.length; try { bestLocalDb = JSON.parse(val); } catch(e){} } } }
-    db = JSON.parse(JSON.stringify(defaultDB));
-    if (bestLocalDb) db = window.deepRescueDB(db, bestLocalDb);
-    if (cloudDb) db = window.deepRescueDB(db, cloudDb);
+    for (let i = 0; i < localStorage.length; i++) { 
+        const key = localStorage.key(i); 
+        if (key && key.startsWith('sealOfLoveDB_')) { 
+            const val = localStorage.getItem(key); 
+            if (val && val.length > maxLen) { maxLen = val.length; try { bestLocalDb = JSON.parse(val); } catch(e){} } 
+        } 
+    }
+    
+    // 核心修复：绝对以云端为准进行全量覆盖，根除本地僵尸数据导致音乐找回失败的暗病
+    if (cloudDb) {
+        db = window.upgradeDBStructure(cloudDb);
+    } else if (bestLocalDb) {
+        db = window.upgradeDBStructure(bestLocalDb);
+    } else {
+        db = JSON.parse(JSON.stringify(defaultDB));
+    }
+
     if (!db.users['yishuyangguang']) { db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] }; }
-    try { localStorage.setItem('sealOfLoveDB_v31', JSON.stringify(db)); } catch(e){} 
+    
+    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v33', JSON.stringify(db)); } catch(e){} 
+    
+    // 核心修复：强力通知视图热重载，防止云端数据到了但 UI 仍然是一片空白！
+    if (document.getElementById('screen-stage').classList.contains('active')) { window.initStageScreen(); }
+    if (document.getElementById('screen-card-list').classList.contains('active')) { window.renderCardList(); }
+    
+    if (document.getElementById('vinyl-player-modal').style.display === 'flex' && musicState.type !== 'favorites') {
+        if (db.globalMusicConfig && db.globalMusicConfig.library[musicState.type]) {
+            musicState.playlist = db.globalMusicConfig.library[musicState.type];
+            window.renderVinylPlaylist();
+        }
+    }
+    
     if (bestLocalDb && !cloudDb) { window.saveDB(); }
 }
 
-window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v31', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
+window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v33', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
 
 window.showGlobalToast = function(text, type = 'loading') { const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text'); if(!toast) return; toast.className = `global-toast show ${type}`; msg.innerText = text; if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖'; clearTimeout(toastTimeout); if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); } }
 window.compressImageFile = function(file, callback) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 240; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/webp', 0.75)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
