@@ -37,11 +37,12 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
         
-        /* 强制全局与HTML防溢出、防果冻回弹 */
+        /* 强制全局与HTML防溢出、防果冻回弹：加入 position: fixed 彻底锁死屏幕外沿 */
         body, html { 
-            width: 100%; max-width: 100vw; height: 100%; 
+            width: 100vw; max-width: 100vw; height: 100%; 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             overflow: hidden; 
-            overscroll-behavior-y: none; 
+            overscroll-behavior: none; 
             background-color: var(--theme-bg-color); color: var(--theme-text); 
             font-family: var(--font-main); transition: background-color 0.8s ease, color 0.8s ease; 
         }
@@ -264,7 +265,7 @@
         }
         #player-time-current, #player-time-total { font-size: 0.9rem; opacity: 0.6; color: #fff; width: 48px; text-align: center; font-family: monospace; }
         .progress-track { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative; cursor: pointer; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #d4af37, #ebd373); border-radius: 4px; width: 0%; pointer-events: none; } /* 去除了 transition 以确保丝滑跟随 */
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #d4af37, #ebd373); border-radius: 4px; width: 0%; pointer-events: none; }
         .progress-thumb { width: 16px; height: 16px; position: absolute; top: 50%; transform: translate(-50%, -50%); left: 0%; display: flex; justify-content: center; align-items: center; font-size: 14px; line-height: 1; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
         /* 高级科技感音乐波动引擎 */
@@ -319,17 +320,17 @@
 
     </style>
 </head>
-<body>
+<body class="light-theme">
 
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
 
 <!-- 纯净 Audio 引擎，增加了 preload 元数据预加载，解决 iOS 长度解析异常 -->
-<audio id="bgm-player" preload="metadata"></audio>
+<audio id="bgm-player" preload="auto"></audio>
 
 <!-- 左上角主题控制 -->
 <div class="widget-controls" id="theme-widget">
-    <div class="theme-toggle-btn" onclick="window.toggleTheme()" id="btn-theme">🌙</div>
+    <div class="theme-toggle-btn" onclick="window.toggleTheme()" id="btn-theme">☀️</div>
 </div>
 
 <!-- 右上角悬浮工具 -->
@@ -693,7 +694,7 @@ const defaultDB = {
     }
 };
 
-let db = defaultDB; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: false }; let particles = []; let animationId; window.isDraggingProgress = false;
+let db = defaultDB; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true }; let particles = []; let animationId; window.isDraggingProgress = false;
 
 /* ================= 声明并提升所有的全局功能函数 (Hoisted Functions) ================= */
 
@@ -800,7 +801,7 @@ window.saveDB = async function() { let localSaved = false; try { localStorage.se
 window.showGlobalToast = function(text, type = 'loading') { const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text'); if(!toast) return; toast.className = `global-toast show ${type}`; msg.innerText = text; if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖'; clearTimeout(toastTimeout); if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); } }
 window.compressImageFile = function(file, callback) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 240; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/webp', 0.75)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
 
-window.toggleTheme = function() { state.isLightTheme = !state.isLightTheme; document.getElementById('btn-theme').innerText = state.isLightTheme ? '☀️' : '🌙'; if (state.isLightTheme) document.body.classList.add('light-theme'); else document.body.classList.remove('light-theme'); if(state.stage) window.applyStageTheme(state.stage); }
+window.toggleTheme = function() { state.isLightTheme = !state.isLightTheme; document.getElementById('btn-theme').innerText = state.isLightTheme ? '☀️' : '🌙'; if (!state.isLightTheme) document.body.classList.add('dark-theme'); else document.body.classList.remove('dark-theme'); if(state.stage) window.applyStageTheme(state.stage); }
 window.resizeCanvas = function() { const canvas = document.getElementById('particle-canvas'); if(!canvas) return; canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 
 class Particle { constructor() { const canvas = document.getElementById('particle-canvas'); this.x = Math.random() * (canvas ? canvas.width / 2 : 300); this.y = Math.random() * (canvas ? canvas.height : 600); this.size = Math.random() * 1.5 + 0.5; this.speedY = Math.random() * 0.4 - 0.2; this.speedX = Math.random() * 0.2 - 0.1; this.baseAlpha = Math.random() * 0.4 + 0.1; this.pulse = Math.random() * Math.PI; } update() { const canvas = document.getElementById('particle-canvas'); if(!canvas) return; this.y += this.speedY; this.x += this.speedX; if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; if (this.x < 0) this.x = canvas.width / 2; if (this.x > canvas.width / 2) this.x = 0; this.pulse += 0.02; } draw(colorStr) { if(!window.ctx) return; const canvas = document.getElementById('particle-canvas'); const alpha = this.baseAlpha + Math.sin(this.pulse) * 0.2; window.ctx.fillStyle = colorStr.replace(')', `, ${alpha})`).replace('rgb', 'rgba'); window.ctx.beginPath(); window.ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); window.ctx.fill(); window.ctx.beginPath(); window.ctx.arc(canvas.width - this.x, this.y, this.size, 0, Math.PI * 2); window.ctx.fill(); } }
@@ -827,7 +828,7 @@ window.loginSuccess = function(baseUser, isAdmin) { state.isLoggedIn = true; sta
 
 window.handleRegister = async function() { const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim(); if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('原生账号仅限英文数字组合'); if(db.users[u]) return alert('账号已存在'); db.users[u] = { password: p, nickname: '', avatar: '', favorites: [] }; await window.saveDB(); window.loginSuccess(u, false); }
 
-window.logout = function() { state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null; document.getElementById('top-admin-controls').style.display = 'none'; document.getElementById('user-widget').style.display = 'none'; window.navigateTo('screen-login'); document.body.classList.remove('light-theme'); state.isLightTheme = false; document.getElementById('btn-theme').innerText = '🌙'; document.documentElement.style.setProperty('--theme-bg-color', '#1c1d22'); document.documentElement.style.setProperty('--theme-primary', '#d4af37'); }
+window.logout = function() { state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null; document.getElementById('top-admin-controls').style.display = 'none'; document.getElementById('user-widget').style.display = 'none'; window.navigateTo('screen-login'); document.body.classList.remove('dark-theme'); state.isLightTheme = true; document.getElementById('btn-theme').innerText = '☀️'; document.documentElement.style.setProperty('--theme-bg-color', '#f8f6f0'); document.documentElement.style.setProperty('--theme-primary', '#d99a29'); document.documentElement.style.setProperty('--theme-secondary', '#f4c453'); }
 
 window.openUserProfile = function() { if(!currentUserAccount) return; if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('profile-avatar-img'); const svgEl = document.getElementById('profile-svg-placeholder'); if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } document.getElementById('profile-nickname-input').value = userData.nickname || ''; const recoveryWrap = document.getElementById('admin-recovery-btn-wrap'); if (state.isAdmin) recoveryWrap.style.display = 'block'; else recoveryWrap.style.display = 'none'; window.showModal('user-profile-modal'); }
 
@@ -1065,6 +1066,7 @@ window.playCurrentTrack = function() {
     
     if(audioPlayer.src !== track.url) {
         audioPlayer.src = track.url;
+        audioPlayer.load(); // 强制iOS重载音频头，修复时长计算
         const fill = document.getElementById('progress-fill'); const thumb = document.getElementById('progress-thumb');
         if(fill) fill.style.width = `0%`; if(thumb) thumb.style.left = `0%`;
         document.getElementById('player-time-current').innerText = "00:00";
