@@ -111,8 +111,10 @@
         .apple-music-player { background: var(--theme-glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); border: 1px solid var(--theme-glass-border); opacity: 0; pointer-events: none; transition: opacity 0.5s; cursor: pointer; height: 44px; }
         .apple-music-player.playing { opacity: 1; pointer-events: auto; }
         .music-icon { width: 22px; height: 22px; border-radius: 6px; background-size: cover; background-position: center; background-image: url('music-artwork.png'); }
+        
+        /* [温控优化]: 废除 CPU 排版重绘属性，纯 GPU transform 动画计算 */
         .music-bars { display: flex; gap: 3px; align-items: flex-end; height: 16px; }
-        .bar { width: 3px; background: var(--theme-primary); border-radius: 2px; transform-origin: bottom; animation: bounce 1s infinite alternate; }
+        .bar { width: 3px; height: 16px; background: var(--theme-primary); border-radius: 2px; transform-origin: bottom; animation: bounce 1s infinite alternate; }
         .bar:nth-child(2) { animation-delay: 0.2s; } .bar:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0% { transform: scaleY(0.25); } 100% { transform: scaleY(1); } }
 
@@ -183,10 +185,29 @@
         .sync-half.single-up { width: 100%; height: 100%; left: 0; top: 0; background-position: center; transform: translateY(120%); opacity: 0; border: none; transition: all 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .sync-container.merged .single-up { transform: translateY(0); opacity: 1; }
 
-        .long-press-area { position: relative; width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(135deg, var(--theme-glass-bg), transparent); box-shadow: 0 15px 45px var(--theme-glass-shadow), inset 0 2px 5px var(--theme-glass-inset); display: flex; justify-content: center; align-items: center; margin: 3rem auto; cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border); transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s; }
+        /* 长按圆点交互深度修复与美化 */
+        .long-press-area { 
+            position: relative; width: 160px; height: 160px; border-radius: 50%; 
+            background: linear-gradient(135deg, var(--theme-glass-bg), transparent); 
+            box-shadow: 0 15px 45px var(--theme-glass-shadow), inset 0 2px 5px var(--theme-glass-inset); 
+            display: flex; justify-content: center; align-items: center; margin: 3rem auto; 
+            cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border); 
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s; 
+            /* === 修复长按失效的根源：阻止系统级默认手势与菜单 === */
+            touch-action: none; 
+            -webkit-user-select: none; 
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
         .long-press-area.pressing { transform: scale(0.92); box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 2px 10px rgba(0,0,0,0.1); }
-        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; }
-        .press-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to top, var(--theme-primary), var(--theme-secondary)); opacity: 0.9; z-index: 1; }
+        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; pointer-events: none; }
+        .press-fill { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
+            background: linear-gradient(to top, var(--theme-primary), var(--theme-secondary)); 
+            opacity: 0.95; z-index: 1; 
+            box-shadow: inset 0 3px 5px rgba(255,255,255,0.4); /* 液面高光感 */
+            pointer-events: none;
+        }
 
         /* ================= 模态框通用 ================= */
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; overscroll-behavior-y: none; }
@@ -656,6 +677,7 @@ document.addEventListener("DOMContentLoaded", () => {
         longPressBtn.addEventListener('touchstart', (e) => { if(typeof window.startPress === 'function') window.startPress(e); }, {passive: false});
         longPressBtn.addEventListener('touchend', (e) => { if(typeof window.endPress === 'function') window.endPress(e); }, {passive: false});
         longPressBtn.addEventListener('touchcancel', (e) => { if(typeof window.endPress === 'function') window.endPress(e); }, {passive: false});
+        longPressBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); }); // 防御右键菜单弹窗打断长按
     }
 
     // 默认开启浅色模式，并同步界面状态
@@ -730,8 +752,6 @@ window.animateParticles = function(timestamp) {
     }
 }
 
-// 其余核心逻辑不变... 
-// （在此省略重复的 initDB, API Fetch, renderCardList 等，确保完全保留不精简）
 window.cleanupOldLocalStorage = function() { const currentVersion = 'sealOfLoveDB_v32'; for (let i = 0; i < localStorage.length; i++) {} }
 
 window.deepRescueDB = function(target, source) {
@@ -1219,12 +1239,24 @@ window.startPress = function(e) {
     isPressing = true; 
     pressProgress = 0; 
     if (pressArea) pressArea.classList.add('pressing');
+    
+    if(pressFill) {
+        pressFill.style.transition = 'none'; // 确保强制切断遗留的下落动画
+        pressFill.style.height = '0%';
+    }
     if(pressFrame) cancelAnimationFrame(pressFrame); 
     
-    function up() { 
+    let startTime = null;
+    const duration = 1500; // 锁定长按时间 1.5 秒
+    
+    function up(timestamp) { 
         if(!isPressing) return; 
-        pressProgress += (100/90); 
-        if(pressFill) pressFill.style.height = `${Math.min(pressProgress, 100)}%`; 
+        if(!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        
+        pressProgress = Math.min((elapsed / duration) * 100, 100); 
+        if(pressFill) pressFill.style.height = `${pressProgress}%`; 
+        
         if (pressProgress >= 100) { 
             isPressing = false; 
             if (pressArea) pressArea.classList.remove('pressing');
