@@ -142,7 +142,7 @@
         .stage-icon-dropzone img { width: 100%; height: 100%; object-fit: cover; }
         .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
-        /* ================= 详情编辑顶部栏与瀑布流 (Flex居中修复) ================= */
+        /* ================= 详情编辑顶部栏与瀑布流 ================= */
         .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
 
@@ -265,7 +265,7 @@
         }
         #player-time-current, #player-time-total { font-size: 0.9rem; opacity: 0.6; color: #fff; width: 48px; text-align: center; font-family: monospace; }
         .progress-track { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative; cursor: pointer; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #d4af37, #ebd373); border-radius: 4px; width: 0%; pointer-events: none; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #d4af37, #ebd373); border-radius: 4px; width: 0%; pointer-events: none; } /* 去除了 transition 以确保丝滑跟随 */
         .progress-thumb { width: 16px; height: 16px; position: absolute; top: 50%; transform: translate(-50%, -50%); left: 0%; display: flex; justify-content: center; align-items: center; font-size: 14px; line-height: 1; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
         /* 高级科技感音乐波动引擎 */
@@ -669,6 +669,10 @@ document.addEventListener("DOMContentLoaded", () => {
         longPressBtn.addEventListener('touchcancel', (e) => { if(typeof window.endPress === 'function') window.endPress(e); }, {passive: false});
     }
 
+    // 默认开启浅色模式，并同步界面状态
+    state.isLightTheme = true;
+    document.getElementById('btn-theme').innerText = '☀️';
+
     // 数据库同步与丝滑拖拽引擎
     window.initDB();
     window.initProgressDrag();
@@ -801,11 +805,92 @@ window.saveDB = async function() { let localSaved = false; try { localStorage.se
 window.showGlobalToast = function(text, type = 'loading') { const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text'); if(!toast) return; toast.className = `global-toast show ${type}`; msg.innerText = text; if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖'; clearTimeout(toastTimeout); if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); } }
 window.compressImageFile = function(file, callback) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 240; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/webp', 0.75)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
 
-window.toggleTheme = function() { state.isLightTheme = !state.isLightTheme; document.getElementById('btn-theme').innerText = state.isLightTheme ? '☀️' : '🌙'; if (!state.isLightTheme) document.body.classList.add('dark-theme'); else document.body.classList.remove('dark-theme'); if(state.stage) window.applyStageTheme(state.stage); }
+window.toggleTheme = function() { 
+    state.isLightTheme = !state.isLightTheme; 
+    document.getElementById('btn-theme').innerText = state.isLightTheme ? '☀️' : '🌙'; 
+    if (!state.isLightTheme) {
+        document.body.classList.add('dark-theme');
+        document.body.classList.remove('light-theme');
+    } else {
+        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+    } 
+    
+    if(state.stage) {
+        window.applyStageTheme(state.stage); 
+    } else {
+        const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' };
+        document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); 
+        document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
+        document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
+    }
+}
 window.resizeCanvas = function() { const canvas = document.getElementById('particle-canvas'); if(!canvas) return; canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 
-class Particle { constructor() { const canvas = document.getElementById('particle-canvas'); this.x = Math.random() * (canvas ? canvas.width / 2 : 300); this.y = Math.random() * (canvas ? canvas.height : 600); this.size = Math.random() * 1.5 + 0.5; this.speedY = Math.random() * 0.4 - 0.2; this.speedX = Math.random() * 0.2 - 0.1; this.baseAlpha = Math.random() * 0.4 + 0.1; this.pulse = Math.random() * Math.PI; } update() { const canvas = document.getElementById('particle-canvas'); if(!canvas) return; this.y += this.speedY; this.x += this.speedX; if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; if (this.x < 0) this.x = canvas.width / 2; if (this.x > canvas.width / 2) this.x = 0; this.pulse += 0.02; } draw(colorStr) { if(!window.ctx) return; const canvas = document.getElementById('particle-canvas'); const alpha = this.baseAlpha + Math.sin(this.pulse) * 0.2; window.ctx.fillStyle = colorStr.replace(')', `, ${alpha})`).replace('rgb', 'rgba'); window.ctx.beginPath(); window.ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); window.ctx.fill(); window.ctx.beginPath(); window.ctx.arc(canvas.width - this.x, this.y, this.size, 0, Math.PI * 2); window.ctx.fill(); } }
-window.initParticles = function() { particles = []; const count = window.innerWidth < 600 ? 25 : 50; for (let i = 0; i < count; i++) particles.push(new Particle()); }
+class Particle { 
+    constructor() { 
+        const canvas = document.getElementById('particle-canvas'); 
+        this.x = Math.random() * (canvas ? canvas.width : 600); 
+        this.y = Math.random() * (canvas ? canvas.height : 600); 
+        this.size = Math.random() * 1.5 + 0.5; 
+        this.speedY = Math.random() * 0.4 - 0.2; 
+        this.speedX = Math.random() * 0.2 - 0.1; 
+        this.baseAlpha = Math.random() * 0.4 + 0.1; 
+        this.pulse = Math.random() * Math.PI; 
+    } 
+    update() { 
+        const canvas = document.getElementById('particle-canvas'); if(!canvas) return; 
+        if (state.isLightTheme) {
+            // 白天心形粒子平滑上浮
+            this.y -= Math.abs(this.speedY) + 0.3; 
+            this.x += Math.sin(this.pulse) * 0.5; 
+            if (this.y < -20) { this.y = canvas.height + 20; this.x = Math.random() * (canvas.width / 2); }
+        } else {
+            // 夜间萤火虫不规则游荡
+            this.y += this.speedY * 0.8; 
+            this.x += this.speedX + (Math.random() * 0.4 - 0.2); 
+            if (this.y < 0) this.y = canvas.height; 
+            if (this.y > canvas.height) this.y = 0; 
+            if (this.x < 0) this.x = canvas.width / 2; 
+            if (this.x > canvas.width / 2) this.x = 0; 
+        }
+        this.pulse += 0.02; 
+    } 
+    draw(colorStr) { 
+        if(!window.ctx) return; 
+        const canvas = document.getElementById('particle-canvas'); 
+        const alpha = Math.max(0, this.baseAlpha + Math.sin(this.pulse) * 0.3);
+        
+        const renderShape = (x, y) => {
+            window.ctx.save();
+            window.ctx.translate(x, y);
+            if (state.isLightTheme) {
+                // 浅色模式：画出浪漫心形曲线
+                const s = this.size * 0.8;
+                window.ctx.scale(s, s);
+                window.ctx.fillStyle = colorStr.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+                window.ctx.beginPath();
+                window.ctx.moveTo(0, 0);
+                window.ctx.bezierCurveTo(-3, -3, -6, 3, 0, 9);
+                window.ctx.bezierCurveTo(6, 3, 3, -3, 0, 0);
+                window.ctx.fill();
+            } else {
+                // 深色模式：高斯模糊萤火虫
+                window.ctx.fillStyle = `rgba(180, 255, 100, ${alpha})`;
+                window.ctx.shadowBlur = this.size * 5;
+                window.ctx.shadowColor = `rgba(180, 255, 100, ${alpha})`;
+                window.ctx.beginPath();
+                window.ctx.arc(0, 0, this.size * 0.7, 0, Math.PI * 2);
+                window.ctx.fill();
+            }
+            window.ctx.restore();
+        };
+
+        renderShape(this.x, this.y);
+        renderShape(canvas.width - this.x, this.y); // 对称镜面绘制
+    } 
+}
+window.initParticles = function() { particles = []; const count = window.innerWidth < 600 ? 20 : 40; for (let i = 0; i < count; i++) particles.push(new Particle()); }
 window.animateParticles = function() { const canvas = document.getElementById('particle-canvas'); if(!canvas || !window.ctx) return; window.ctx.clearRect(0, 0, canvas.width, canvas.height); const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim(); const hexToRgb = hex => { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return isNaN(r) ? 'rgb(212,175,55)' : `rgb(${r},${g},${b})`; }; const colorStr = primaryColor.startsWith('#') ? hexToRgb(primaryColor) : 'rgb(212,175,55)'; particles.forEach(p => { p.update(); p.draw(colorStr); }); animationId = requestAnimationFrame(window.animateParticles); }
 
 window.handleLogin = async function() { 
@@ -828,7 +913,7 @@ window.loginSuccess = function(baseUser, isAdmin) { state.isLoggedIn = true; sta
 
 window.handleRegister = async function() { const u = document.getElementById('ipt-username').value.trim(); const p = document.getElementById('ipt-pwd').value.trim(); if(!u || !p) return alert('请填写完整'); if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('原生账号仅限英文数字组合'); if(db.users[u]) return alert('账号已存在'); db.users[u] = { password: p, nickname: '', avatar: '', favorites: [] }; await window.saveDB(); window.loginSuccess(u, false); }
 
-window.logout = function() { state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null; document.getElementById('top-admin-controls').style.display = 'none'; document.getElementById('user-widget').style.display = 'none'; window.navigateTo('screen-login'); document.body.classList.remove('dark-theme'); state.isLightTheme = true; document.getElementById('btn-theme').innerText = '☀️'; document.documentElement.style.setProperty('--theme-bg-color', '#f8f6f0'); document.documentElement.style.setProperty('--theme-primary', '#d99a29'); document.documentElement.style.setProperty('--theme-secondary', '#f4c453'); }
+window.logout = function() { state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null; document.getElementById('top-admin-controls').style.display = 'none'; document.getElementById('user-widget').style.display = 'none'; window.navigateTo('screen-login'); document.body.classList.remove('dark-theme'); document.body.classList.add('light-theme'); state.isLightTheme = true; document.getElementById('btn-theme').innerText = '☀️'; document.documentElement.style.setProperty('--theme-bg-color', '#f8f6f0'); document.documentElement.style.setProperty('--theme-primary', '#d99a29'); document.documentElement.style.setProperty('--theme-secondary', '#f4c453'); }
 
 window.openUserProfile = function() { if(!currentUserAccount) return; if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('profile-avatar-img'); const svgEl = document.getElementById('profile-svg-placeholder'); if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } document.getElementById('profile-nickname-input').value = userData.nickname || ''; const recoveryWrap = document.getElementById('admin-recovery-btn-wrap'); if (state.isAdmin) recoveryWrap.style.display = 'block'; else recoveryWrap.style.display = 'none'; window.showModal('user-profile-modal'); }
 
@@ -912,7 +997,7 @@ window.resetMusicEdit = function() { document.getElementById('new-music-name').v
 window.saveMusicToLibrary = async function() { const name = document.getElementById('new-music-name').value.trim(); let url = document.getElementById('new-music-url').value.trim(); const catId = document.getElementById('admin-music-cat').value; const editIdx = document.getElementById('edit-music-idx').value; if(!catId) return alert('请先创建分类'); if (editIdx !== '' || (url && selectedAudioFiles.length === 0)) { if(!name) return alert('请输入曲目名称'); if(!db.globalMusicConfig.library[catId]) db.globalMusicConfig.library[catId] = []; if (editIdx !== '') db.globalMusicConfig.library[catId][parseInt(editIdx)] = { name, url }; else db.globalMusicConfig.library[catId].push({name, url}); await window.saveDB(); window.resetMusicEdit(); window.renderAdminMusicList(); return; } if(selectedAudioFiles.length > 0) { selectedAudioFiles.forEach(file => { let taskName = name === "自动取名模式" || !name ? file.name.replace(/\.[^/.]+$/, "") : name; uploadQueue.push({ file: file, catId: catId, name: taskName }); }); window.resetMusicEdit(); window.hideModal('music-admin-modal'); window.processUploadQueue(); } else { alert('请拖入音频或填写链接'); } }
 window.deleteAdminMusic = async function(catId, idx) { if(confirm('确认删除此曲？')) { db.globalMusicConfig.library[catId].splice(idx, 1); await window.saveDB(); window.renderAdminMusicList(); } }
 
-/* ================= 9. 智能防滑锁死与音乐播放引擎 ================= */
+/* ================= 9. 智能防滑锁死与音乐播放引擎 (包含 iOS 时长终极修正) ================= */
 window.initProgressDrag = function() {
     const track = document.getElementById('progress-track');
     if (!track) return;
@@ -930,7 +1015,7 @@ window.initProgressDrag = function() {
 
     const finalizeDrag = (clientX) => {
         const audio = document.getElementById('bgm-player');
-        if (audio && !isNaN(audio.duration) && audio.duration > 0) {
+        if (audio && !isNaN(audio.duration) && audio.duration > 0 && isFinite(audio.duration)) {
             audio.currentTime = updatePos(clientX) * audio.duration;
         }
     };
@@ -1054,24 +1139,50 @@ window.toggleFavorite = async function() {
     favDebounce = setTimeout(async () => { await window.saveDB(); if (musicState.type === 'favorites') { musicState.playlist = db.users[currentUserAccount].favorites; window.renderVinylPlaylist(); } }, 1000); 
 }
 
-window.playCurrentTrack = function() { 
+// 核心：Blob 化预载拦截，斩断 iOS 报 49分钟 的时长绝症
+window.playCurrentTrack = async function() { 
     const audioPlayer = document.getElementById('bgm-player'); if(musicState.playlist.length === 0 || !audioPlayer) return; 
     const track = musicState.playlist[musicState.currentIndex]; 
-    document.getElementById('player-track-name').innerText = track.name; 
+    const trackNameEl = document.getElementById('player-track-name');
     
     if (currentUserAccount && db.users[currentUserAccount].favorites) { 
         const isFav = db.users[currentUserAccount].favorites.findIndex(f => f.url === track.url) > -1; 
         document.getElementById('btn-favorite').innerText = isFav ? '❤️' : '🤍'; 
     } else { document.getElementById('btn-favorite').innerText = '🤍'; } 
     
-    if(audioPlayer.src !== track.url) {
-        audioPlayer.src = track.url;
-        audioPlayer.load(); // 强制iOS重载音频头，修复时长计算
+    // 强制使用 Blob 解析流，绕过 iOS 对 Chunked VBR 的荒唐估算
+    if(audioPlayer.dataset.originalUrl !== track.url) {
+        audioPlayer.pause();
+        trackNameEl.innerText = "缓冲解析中...";
+        
+        try {
+            const res = await fetch(track.url);
+            if(!res.ok) throw new Error();
+            const blob = await res.blob();
+            
+            // 并发打断防御：如果用户在极速切歌，废弃过期的 fetch 返回
+            if(musicState.playlist[musicState.currentIndex].url !== track.url) return;
+
+            // 销毁旧内存，严防 OOM (Out Of Memory)
+            if(audioPlayer.dataset.blobUrl) URL.revokeObjectURL(audioPlayer.dataset.blobUrl);
+            const blobUrl = URL.createObjectURL(blob);
+            
+            audioPlayer.src = blobUrl;
+            audioPlayer.dataset.blobUrl = blobUrl;
+            audioPlayer.dataset.originalUrl = track.url;
+        } catch(e) {
+            // 回退到直链播放
+            audioPlayer.src = track.url;
+            audioPlayer.dataset.originalUrl = track.url;
+        }
+        
+        audioPlayer.load(); 
         const fill = document.getElementById('progress-fill'); const thumb = document.getElementById('progress-thumb');
         if(fill) fill.style.width = `0%`; if(thumb) thumb.style.left = `0%`;
         document.getElementById('player-time-current').innerText = "00:00";
     } 
     
+    trackNameEl.innerText = track.name; 
     audioPlayer.volume = 1; 
     audioPlayer.play().then(() => { 
         document.getElementById('vinyl-disc-ui').classList.add('playing'); document.getElementById('btn-play-pause').innerText = '⏸️'; 
