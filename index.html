@@ -79,12 +79,12 @@
         /* 专属黄金高定收藏按钮 */
         .btn-favorite-cat { background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%) !important; border: 1px solid var(--theme-primary) !important; color: var(--theme-primary) !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; font-weight: bold !important; box-shadow: 0 8px 25px rgba(212,175,55,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important; letter-spacing: 2px; }
 
-        /* 登录界面的冰蓝框 */
-        #screen-login .glass-panel { background: rgba(35, 35, 40, 0.9); border-radius: 24px; padding: 3.5rem 2.5rem; max-width: 380px; box-shadow: 0 25px 60px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.03); }
-        #screen-login input { background: #f0f4f8; color: #111; border-radius: 14px; padding: 16px 20px; font-weight: 600; border: none; margin-bottom: 20px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); }
-        #screen-login input::placeholder { color: #666; font-weight: 500; }
+        /* 登录界面的流式玻璃面板设计，全面接驳全局主题变量，彻底修复浅色模式字迹不清 */
+        #screen-login .glass-panel { background: var(--theme-glass-bg); border-radius: 24px; padding: 3.5rem 2.5rem; max-width: 380px; box-shadow: 0 25px 60px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); border: 1px solid var(--theme-glass-border); }
+        #screen-login input { background: var(--theme-input-bg); color: var(--theme-text); border-radius: 14px; padding: 16px 20px; font-weight: 600; border: 1px solid var(--theme-glass-border); margin-bottom: 20px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); }
+        #screen-login input::placeholder { color: var(--theme-text); opacity: 0.6; font-weight: 500; }
         #screen-login .btn-primary { background: linear-gradient(180deg, #ebd373 0%, #d4af37 100%); border-radius: 14px; color: #111 !important; font-weight: bold; margin-top: 15px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(212,175,55,0.2); width: 100%; }
-        #screen-login .btn-glass:not(.btn-primary) { background: #2d3748; border-radius: 14px; border: none; color: #fff; width: 100%; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        #screen-login .btn-glass:not(.btn-primary) { background: var(--theme-input-bg); border-radius: 14px; border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 100%; font-weight: 600; box-shadow: 0 4px 15px var(--theme-glass-shadow); }
 
         input, textarea, select { width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); padding: 14px 18px; border-radius: 16px; margin-bottom: 14px; font-size: 1rem; outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
         input[type="search"] { padding: 10px 18px; border-radius: 20px; margin-bottom: 12px; font-size: 0.95rem; }
@@ -142,7 +142,7 @@
         .stage-icon-dropzone img { width: 100%; height: 100%; object-fit: cover; }
         .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
-        /* ================= 详情编辑顶部栏与瀑布流 ================= */
+        /* ================= 详情编辑顶部栏与瀑布流 (Flex居中修复) ================= */
         .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
 
@@ -288,9 +288,6 @@
         .netease-info { flex: 1; margin-left: 10px; display: flex; flex-direction: column; overflow: hidden; }
         .netease-title { font-size: 1.05rem; color: #fff; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
         .netease-item.active .netease-title { color: var(--theme-primary); font-weight: bold; opacity: 1; text-shadow: 0 0 8px rgba(212,175,55,0.3); }
-
-        /* ================= 专属高定金框收藏按钮 ================= */
-        .btn-favorite-cat { background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%) !important; border: 1px solid var(--theme-primary) !important; color: var(--theme-primary) !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; font-weight: bold !important; box-shadow: 0 8px 25px rgba(212,175,55,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important; letter-spacing: 2px; }
 
         /* 移动端绝对防溢出折叠架构 (Strict Mobile Boundaries) */
         @media (max-width: 768px) {
@@ -866,13 +863,13 @@ class Particle {
             window.ctx.translate(x, y);
             if (state.isLightTheme) {
                 // 浅色模式：画出浪漫心形曲线
-                const s = this.size * 0.8;
+                const s = this.size * 0.6;
                 window.ctx.scale(s, s);
                 window.ctx.fillStyle = colorStr.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
                 window.ctx.beginPath();
                 window.ctx.moveTo(0, 0);
-                window.ctx.bezierCurveTo(-3, -3, -6, 3, 0, 9);
-                window.ctx.bezierCurveTo(6, 3, 3, -3, 0, 0);
+                window.ctx.bezierCurveTo(-5, -6, -12, 4, 0, 14);
+                window.ctx.bezierCurveTo(12, 4, 5, -6, 0, 0);
                 window.ctx.fill();
             } else {
                 // 深色模式：高斯模糊萤火虫
@@ -992,7 +989,7 @@ window.filterAdminMusicList = function() { window.renderAdminMusicList(); }
 window.renderAdminMusicList = function() { const catId = document.getElementById('admin-music-cat').value; const query = document.getElementById('admin-music-search').value.trim().toLowerCase(); const listDiv = document.getElementById('admin-music-list'); listDiv.innerHTML = ''; if(!catId) { listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">请先添加音乐分类</div>`; return; } const list = db.globalMusicConfig.library[catId] || []; let matchCount = 0; list.forEach((m, idx) => { if (query && !m.name.toLowerCase().includes(query)) return; matchCount++; const div = document.createElement('div'); div.style.display='flex'; div.style.background='var(--theme-glass-bg)'; div.style.padding='15px'; div.style.borderRadius='16px'; div.style.alignItems='center'; div.style.justifyContent='space-between'; div.style.border='1px solid var(--theme-glass-border)'; div.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)'; div.innerHTML = `<div style="display:flex; flex-direction:column; width:65%; overflow:hidden;"><span style="font-weight:bold; color:var(--theme-text); font-size:1.05rem; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</span><span style="font-size:0.75rem; opacity:0.6; word-break:break-all; color:var(--theme-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.url}</span></div><div style="display:flex; gap:8px;"><div class="action-icon" style="background:#4f46e5;" onclick="window.editAdminMusic('${catId}', ${idx})">✎</div><div class="action-icon del" onclick="window.deleteAdminMusic('${catId}', ${idx})">✖</div></div>`; listDiv.appendChild(div); }); if (matchCount === 0) { listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">暂无匹配曲目</div>`; } }
 
 window.bindAudioDragDrop = function() { const zone = document.getElementById('music-upload-zone'); const fileInput = document.getElementById('new-music-file'); const text = document.getElementById('music-upload-text'); zone.onclick = () => fileInput.click(); zone.ondragover = (e) => { e.preventDefault(); zone.style.backgroundColor = 'rgba(99, 102, 241, 0.1)'; }; zone.ondragleave = (e) => { e.preventDefault(); zone.style.backgroundColor = 'transparent'; }; zone.ondrop = (e) => { e.preventDefault(); zone.style.backgroundColor = 'transparent'; if(e.dataTransfer.files.length>0) handleSelectedAudios(e.dataTransfer.files); }; fileInput.onchange = (e) => { if(e.target.files.length>0) handleSelectedAudios(e.target.files); }; function handleSelectedAudios(files) { selectedAudioFiles = Array.from(files).filter(f => f.type.startsWith('audio/')); if(selectedAudioFiles.length === 0) return alert('请选择有效的音频文件'); if (selectedAudioFiles.length === 1) { text.innerText = `已选择: ${selectedAudioFiles[0].name} (${(selectedAudioFiles[0].size/1024/1024).toFixed(2)}MB)`; const nameInput = document.getElementById('new-music-name'); if(!nameInput.value) nameInput.value = selectedAudioFiles[0].name.replace(/\.[^/.]+$/, ""); } else { text.innerText = `已选择 ${selectedAudioFiles.length} 个音频，批量直传中...`; document.getElementById('new-music-name').value = "自动取名模式"; document.getElementById('new-music-name').disabled = true; } } }
-window.editAdminMusic = function(catId, idx) { const m = db.globalMusicConfig.library[catId][idx]; document.getElementById('new-music-name').value = m.name; document.getElementById('new-music-url').value = m.url; document.getElementById('edit-music-idx').value = idx; document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目"; document.getElementById('btn-admin-music-save').innerText = "保 存 修 改"; document.getElementById('btn-admin-music-cancel').style.display = "block"; document.getElementById('music-upload-zone').style.display = "none"; }
+window.editAdminMusic = function(catId, idx) { const m = db.globalMusicConfig.library[catId][idx]; document.getElementById('new-music-name').value = m.name; document.getElementById('new-music-url').value = m.url; document.getElementById('edit-music-idx').value = idx; document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目"; document.getElementById('btn-admin-music-save').innerText = "保 存 修 修改"; document.getElementById('btn-admin-music-cancel').style.display = "block"; document.getElementById('music-upload-zone').style.display = "none"; }
 window.resetMusicEdit = function() { document.getElementById('new-music-name').value = ''; document.getElementById('new-music-url').value = ''; document.getElementById('edit-music-idx').value = ''; document.getElementById('new-music-name').disabled = false; document.getElementById('admin-music-action-title').innerText = "+ 新增曲目"; document.getElementById('btn-admin-music-save').innerText = "添 加 到 库"; document.getElementById('btn-admin-music-cancel').style.display = "none"; document.getElementById('music-upload-zone').style.display = "block"; selectedAudioFiles = []; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (支持多选直传)'; }
 window.saveMusicToLibrary = async function() { const name = document.getElementById('new-music-name').value.trim(); let url = document.getElementById('new-music-url').value.trim(); const catId = document.getElementById('admin-music-cat').value; const editIdx = document.getElementById('edit-music-idx').value; if(!catId) return alert('请先创建分类'); if (editIdx !== '' || (url && selectedAudioFiles.length === 0)) { if(!name) return alert('请输入曲目名称'); if(!db.globalMusicConfig.library[catId]) db.globalMusicConfig.library[catId] = []; if (editIdx !== '') db.globalMusicConfig.library[catId][parseInt(editIdx)] = { name, url }; else db.globalMusicConfig.library[catId].push({name, url}); await window.saveDB(); window.resetMusicEdit(); window.renderAdminMusicList(); return; } if(selectedAudioFiles.length > 0) { selectedAudioFiles.forEach(file => { let taskName = name === "自动取名模式" || !name ? file.name.replace(/\.[^/.]+$/, "") : name; uploadQueue.push({ file: file, catId: catId, name: taskName }); }); window.resetMusicEdit(); window.hideModal('music-admin-modal'); window.processUploadQueue(); } else { alert('请拖入音频或填写链接'); } }
 window.deleteAdminMusic = async function(catId, idx) { if(confirm('确认删除此曲？')) { db.globalMusicConfig.library[catId].splice(idx, 1); await window.saveDB(); window.renderAdminMusicList(); } }
