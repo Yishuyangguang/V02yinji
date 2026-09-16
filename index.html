@@ -151,14 +151,11 @@
 
         #card-list-container { width: 100%; display: flex; flex-direction: column; flex: 1; }
         .module-section { width: 100%; text-align: left; margin-bottom: 35px; }
-        .module-title { font-size: 1.25rem; margin-top: 20px; margin-bottom: 20px; color: var(--theme-primary); font-family: var(--font-title); display: flex; align-items: center; gap: 10px; font-weight: bold; }
-        .module-title::before { content: ''; width: 5px; height: 18px; background: currentColor; border-radius: 4px; }
 
         .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; padding: 5px; }
         .data-card { position: relative; background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--theme-glass-border); border-radius: 24px; padding: 1.8rem 1.2rem; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); aspect-ratio: 1 / 1.05; }
         .data-card:active { transform: scale(0.95); box-shadow: 0 4px 12px var(--theme-glass-shadow); }
-        .card-inner-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 18px; text-align: center; line-height: 1.5; color: var(--theme-text); font-family: var(--font-title); }
-        .card-tag { font-size: 0.85rem; background: var(--theme-input-bg); padding: 5px 15px; border-radius: 15px; opacity: 0.9; color: var(--theme-text); font-weight: 500; }
+        .card-inner-title { font-size: 1.15rem; font-weight: 600; text-align: center; line-height: 1.5; color: var(--theme-text); font-family: var(--font-title); }
 
         .edit-mode .data-card { border: 2px dashed var(--theme-primary); background: rgba(255,255,255,0.05); }
         .card-edit-badge { position: absolute; top: -8px; right: -8px; display: none; gap: 8px; flex-direction: column; z-index: 5; }
@@ -236,7 +233,7 @@
             padding: 0 10px; box-sizing: border-box;
         }
 
-        /* 极致对称黄金 6 键控制栏 (使用 space-between 实现全端完美对称) */
+        /* 极致对称黄金 6 键控制栏 */
         .player-controls-wrapper {
             display: flex; width: 100%; max-width: 380px; justify-content: space-between; align-items: center; margin: 15px auto 0; gap: 8px;
         }
@@ -315,7 +312,7 @@
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
 
-<!-- 纯净 Audio 引擎，增加了 preload 元数据预加载，解决 iOS 长度解析异常 -->
+<!-- 纯净 Audio 引擎 -->
 <audio id="bgm-player" preload="auto"></audio>
 
 <!-- 左上角主题控制 -->
@@ -612,12 +609,6 @@
         <input type="hidden" id="edit-card-id">
         <label style="font-size: 0.9rem; opacity: 0.8; margin-left: 8px;">所属大选项 (分类)</label>
         <select id="edit-card-category" style="margin-bottom: 20px;"></select>
-        <label style="font-size: 0.9rem; opacity: 0.8; margin-left: 8px;">所属模块</label>
-        <select id="edit-card-type" style="margin-bottom: 20px;">
-            <option value="脑">脑 (认知与理念)</option>
-            <option value="心">心 (情感与渴望)</option>
-            <option value="手">手 (行动与操练)</option>
-        </select>
         <input type="text" id="edit-card-title" placeholder="卡片标题">
         <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 1: 认知 / 行为意义</h4>
         <input type="text" id="edit-s1-title" placeholder="步骤标题">
@@ -678,8 +669,8 @@ const defaultDB = {
     }, 
     globalMusicConfig: { categories: [{ id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' }], library: { 'mcat_1': [], 'mcat_2': [] } },
     stages: {
-        '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', type: '心', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
-        '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', type: '脑', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }] },
+        '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
+        '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }] },
         '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', name: '定婚期', prepText: '即将步入婚姻殿堂，回想决定携手的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [] },
         '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', name: '结婚初阶', prepText: '爱意要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [] },
         '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', name: '备孕时期', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [] },
@@ -869,7 +860,39 @@ window.handleIconUpload = function(file, stageKey) { window.compressImageFile(fi
 
 /* ================= 6. 分类大选项与瀑布流卡片 ================= */
 window.selectStage = function(sKey) { if(state.isEditMode) return; state.stage = sKey; window.applyStageTheme(sKey); document.getElementById('list-stage-title').innerText = `${db.stages[sKey].name}`; const cats = db.stages[sKey].categories || []; if(cats.length > 0) state.activeCategoryId = cats[0].id; else state.activeCategoryId = ''; window.renderCardList(); window.navigateTo('screen-card-list'); }
-window.renderCardList = function() { const cats = db.stages[state.stage].categories || []; const tabContainer = document.getElementById('cat-tabs-container'); tabContainer.innerHTML = ''; if (cats.length > 1 || state.isEditMode) { cats.forEach(cat => { const tab = document.createElement('div'); tab.className = `cat-tab ${cat.id === state.activeCategoryId ? 'active' : ''}`; tab.innerText = cat.name; tab.onclick = () => { state.activeCategoryId = cat.id; window.renderCardList(); }; tabContainer.appendChild(tab); }); } const container = document.getElementById('card-list-container'); container.innerHTML = ''; const activeCards = db.stages[state.stage].cards.filter(c => c.categoryId === state.activeCategoryId); const modules = ['脑', '心', '手']; let hasRenderedAny = false; modules.forEach(modType => { const modCards = activeCards.filter(c => c.type === modType); if(modCards.length > 0 || state.isEditMode) { hasRenderedAny = true; const section = document.createElement('div'); section.className = 'module-section'; section.innerHTML = `<div class="module-title">${modType}之连结</div>`; const grid = document.createElement('div'); grid.className = 'content-grid'; modCards.forEach((card) => { const cardDiv = document.createElement('div'); cardDiv.className = 'data-card'; cardDiv.innerHTML = `<h3 class="card-inner-title">${card.title}</h3><span class="card-tag">${modType}板块</span>`; if (state.isEditMode) { const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id); const actDiv = document.createElement('div'); actDiv.className = 'card-edit-badge'; actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); window.openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); window.deleteCard(${globalIndex})">✖</div>`; cardDiv.appendChild(actDiv); } cardDiv.onclick = () => { if(!state.isEditMode) window.startCardFlow(card); }; grid.appendChild(cardDiv); }); if(modCards.length === 0 && state.isEditMode) grid.innerHTML = `<p style="opacity:0.4; font-size:0.85rem; text-align:center; width:100%; grid-column: 1 / -1; padding: 20px;">该板块暂无卡片</p>`; section.appendChild(grid); container.appendChild(section); } }); if(!hasRenderedAny) container.innerHTML = '<p style="opacity:0.5; margin-top:30px; text-align:center;">当前分类暂无内容</p>'; }
+window.renderCardList = function() { const cats = db.stages[state.stage].categories || []; const tabContainer = document.getElementById('cat-tabs-container'); tabContainer.innerHTML = ''; if (cats.length > 1 || state.isEditMode) { cats.forEach(cat => { const tab = document.createElement('div'); tab.className = `cat-tab ${cat.id === state.activeCategoryId ? 'active' : ''}`; tab.innerText = cat.name; tab.onclick = () => { state.activeCategoryId = cat.id; window.renderCardList(); }; tabContainer.appendChild(tab); }); } const container = document.getElementById('card-list-container'); container.innerHTML = ''; const activeCards = db.stages[state.stage].cards.filter(c => c.categoryId === state.activeCategoryId); 
+
+        if (activeCards.length > 0 || state.isEditMode) {
+            const grid = document.createElement('div');
+            grid.className = 'content-grid';
+            activeCards.forEach((card) => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'data-card';
+                cardDiv.innerHTML = `<h3 class="card-inner-title">${card.title}</h3>`;
+                
+                if (state.isEditMode) {
+                    const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id);
+                    const actDiv = document.createElement('div');
+                    actDiv.className = 'card-edit-badge';
+                    actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); window.openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); window.deleteCard(${globalIndex})">✖</div>`;
+                    cardDiv.appendChild(actDiv);
+                }
+                cardDiv.onclick = () => { if(!state.isEditMode) window.startCardFlow(card); };
+                grid.appendChild(cardDiv);
+            });
+            
+            if (activeCards.length === 0 && state.isEditMode) {
+                grid.innerHTML = `<p style="opacity:0.4; font-size:0.85rem; text-align:center; width:100%; grid-column: 1 / -1; padding: 20px;">该板块暂无卡片</p>`;
+            }
+            
+            const section = document.createElement('div');
+            section.className = 'module-section';
+            section.appendChild(grid);
+            container.appendChild(section);
+        } else {
+            container.innerHTML = '<p style="opacity:0.5; margin-top:30px; text-align:center;">当前分类暂无内容</p>';
+        }
+    }
 
 window.manageCategories = async function() { const listDiv = document.getElementById('cat-list-edit'); listDiv.innerHTML = ''; const cats = db.stages[state.stage].categories || []; cats.forEach((cat, idx) => { const div = document.createElement('div'); div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center'; div.innerHTML = `<input type="text" style="margin:0; flex:1;" id="cat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:45px; height:45px; margin:0; color:#ef4444; padding:0; border-radius:12px;" onclick="window.removeCat(${idx})">✖</button>`; listDiv.appendChild(div); }); window.showModal('cat-modal'); }
 window.addNewCategory = function() { if(!db.stages[state.stage].categories) db.stages[state.stage].categories = []; db.stages[state.stage].categories.push({ id: 'cat_' + Date.now(), name: '新建大选项' }); window.manageCategories(); }
@@ -878,8 +901,8 @@ window.saveCategories = async function() { const cats = db.stages[state.stage].c
 
 window.editPrepText = async function() { const t = prompt("预备提醒文本：", db.stages[state.stage].prepText); if (t !== null) { db.stages[state.stage].prepText = t; await window.saveDB(); } }
 window.deleteCard = async function(index) { if(confirm('确认删除？')) { db.stages[state.stage].cards.splice(index, 1); await window.saveDB(); window.renderCardList(); } }
-window.openEditModal = function(index) { const isNew = (index === null); document.getElementById('modal-title').innerText = isNew ? '新增卡片' : '编辑卡片'; const catSelect = document.getElementById('edit-card-category'); catSelect.innerHTML = ''; const cats = db.stages[state.stage].categories || []; cats.forEach(c => { catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`; }); let c = isNew ? { id: 'c_'+Date.now(), categoryId: state.activeCategoryId, title:'', type:'心', steps:[{title:'', text:''},{title:'', text:''},{title:'', text:''}] } : db.stages[state.stage].cards[index]; document.getElementById('edit-card-id').value = index === null ? 'new' : index; document.getElementById('edit-card-category').value = c.categoryId || (cats[0]?cats[0].id:''); document.getElementById('edit-card-type').value = c.type; document.getElementById('edit-card-title').value = c.title; for(let i=1; i<=3; i++) { document.getElementById(`edit-s${i}-title`).value = c.steps[i-1] ? c.steps[i-1].title : ''; document.getElementById(`edit-s${i}-text`).value = c.steps[i-1] ? c.steps[i-1].text : ''; } window.showModal('edit-modal'); }
-window.saveCard = async function() { const idxStr = document.getElementById('edit-card-id').value; const c = { id: idxStr === 'new' ? 'c_' + Date.now() : db.stages[state.stage].cards[parseInt(idxStr)].id, categoryId: document.getElementById('edit-card-category').value, title: document.getElementById('edit-card-title').value || '未命名', type: document.getElementById('edit-card-type').value || '心', steps: [] }; for(let i=1; i<=3; i++) c.steps.push({ title: document.getElementById(`edit-s${i}-title`).value, text: document.getElementById(`edit-s${i}-text`).value }); if(idxStr === 'new') db.stages[state.stage].cards.push(c); else db.stages[state.stage].cards[parseInt(idxStr)] = c; await window.saveDB(); window.hideModal('edit-modal'); window.renderCardList(); }
+window.openEditModal = function(index) { const isNew = (index === null); document.getElementById('modal-title').innerText = isNew ? '新增卡片' : '编辑卡片'; const catSelect = document.getElementById('edit-card-category'); catSelect.innerHTML = ''; const cats = db.stages[state.stage].categories || []; cats.forEach(c => { catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`; }); let c = isNew ? { id: 'c_'+Date.now(), categoryId: state.activeCategoryId, title:'', steps:[{title:'', text:''},{title:'', text:''},{title:'', text:''}] } : db.stages[state.stage].cards[index]; document.getElementById('edit-card-id').value = index === null ? 'new' : index; document.getElementById('edit-card-category').value = c.categoryId || (cats[0]?cats[0].id:''); document.getElementById('edit-card-title').value = c.title; for(let i=1; i<=3; i++) { document.getElementById(`edit-s${i}-title`).value = c.steps[i-1] ? c.steps[i-1].title : ''; document.getElementById(`edit-s${i}-text`).value = c.steps[i-1] ? c.steps[i-1].text : ''; } window.showModal('edit-modal'); }
+window.saveCard = async function() { const idxStr = document.getElementById('edit-card-id').value; const c = { id: idxStr === 'new' ? 'c_' + Date.now() : db.stages[state.stage].cards[parseInt(idxStr)].id, categoryId: document.getElementById('edit-card-category').value, title: document.getElementById('edit-card-title').value || '未命名', steps: [] }; for(let i=1; i<=3; i++) c.steps.push({ title: document.getElementById(`edit-s${i}-title`).value, text: document.getElementById(`edit-s${i}-text`).value }); if(idxStr === 'new') db.stages[state.stage].cards.push(c); else db.stages[state.stage].cards[parseInt(idxStr)] = c; await window.saveDB(); window.hideModal('edit-modal'); window.renderCardList(); }
 
 /* ================= 7. R2 并发上传队列进度胶囊 ================= */
 window.processUploadQueue = async function() { 
@@ -1175,7 +1198,7 @@ window.startCardFlow = function(card) { state.currentCard = card; document.getEl
 window.confirmPrepAndNavigate = function() { if (state.stage === '单身期') { const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged'); const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; document.getElementById('sync-title').innerText = "抬头仰望"; const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || ''; let subText = "愿你在静谧中得着内心的力量与安宁。"; if (catName.includes('不想') || catName.includes('单身')) subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。"; else if (catName.includes('想') || catName.includes('进入婚姻')) subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。"; document.getElementById('sync-subtitle').innerText = subText; document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望"; document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)"; syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`; window.navigateTo('screen-sync'); } else { document.getElementById('sync-title').innerText = "双向奔赴"; document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并"; document.getElementById('btn-sync-confirm').innerText = "确 认 合 并"; document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)"; window.navigateTo('screen-role'); } }
 window.selectRole = function(role) { state.role = role; const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged'); const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; if (role === 'boy') syncBox.innerHTML = `<div class="sync-half boy" style="${bgStyle} background-size: cover;"></div>`; else syncBox.innerHTML = `<div class="sync-half girl" style="${bgStyle} background-size: cover;"></div>`; window.navigateTo('screen-sync'); }
 window.triggerSync = function() { document.getElementById('sync-animation-box').classList.add('merged'); state.currentStep = 0; setTimeout(() => { window.renderContentStep(); window.navigateTo('screen-content'); }, 1800); }
-window.renderContentStep = function() { const stepData = state.currentCard.steps[state.currentStep]; document.getElementById('content-type-title').innerText = `【${state.currentCard.type}】的连结`; document.getElementById('step-title').innerText = stepData.title; document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>'); for(let i=1; i<=3; i++) { const dot = document.getElementById(`dot-${i}`); if (i - 1 === state.currentStep) dot.classList.add('active'); else dot.classList.remove('active'); } const nextBtn = document.getElementById('btn-next-step'); const longPressBtn = document.getElementById('btn-long-press'); if (state.currentStep < 2) { nextBtn.style.display = 'flex'; longPressBtn.style.display = 'none'; } else { nextBtn.style.display = 'none'; longPressBtn.style.display = 'flex'; } }
+window.renderContentStep = function() { const stepData = state.currentCard.steps[state.currentStep]; document.getElementById('content-type-title').innerText = `【${db.stages[state.stage].categories.find(c => c.id === state.currentCard.categoryId)?.name || '印记'}】的连结`; document.getElementById('step-title').innerText = stepData.title; document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>'); for(let i=1; i<=3; i++) { const dot = document.getElementById(`dot-${i}`); if (i - 1 === state.currentStep) dot.classList.add('active'); else dot.classList.remove('active'); } const nextBtn = document.getElementById('btn-next-step'); const longPressBtn = document.getElementById('btn-long-press'); if (state.currentStep < 2) { nextBtn.style.display = 'flex'; longPressBtn.style.display = 'none'; } else { nextBtn.style.display = 'none'; longPressBtn.style.display = 'flex'; } }
 window.nextContentStep = function() { if (state.currentStep < 2) { state.currentStep++; const t = document.getElementById('step-title'); const p = document.getElementById('step-text'); t.style.opacity = 0; p.style.opacity = 0; setTimeout(() => { window.renderContentStep(); t.style.transition = 'opacity 0.5s'; p.style.transition = 'opacity 0.5s'; t.style.opacity = 1; p.style.opacity = 1; }, 300); } }
 
 window.startPress = function(e) { if(e.type === 'touchstart') e.preventDefault(); if(isPressing) return; const pressFill = document.getElementById('press-fill'); isPressing = true; progress = 0; cancelAnimationFrame(pressFrame); function up() { if(!isPressing) return; progress += (100/90); if(pressFill) pressFill.style.height = `${Math.min(progress, 100)}%`; if (progress >= 100) { isPressing = false; window.completeAction(); } else pressFrame = requestAnimationFrame(up); } pressFrame = requestAnimationFrame(up); }
