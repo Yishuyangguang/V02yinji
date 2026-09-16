@@ -106,11 +106,11 @@
         .theme-toggle-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); font-size: 1.2rem; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: all 0.3s; }
         .theme-toggle-btn:active { transform: scale(0.9); }
 
-        .apple-music-player { background: rgba(15,15,18,0.9); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); opacity: 0; pointer-events: none; transition: opacity 0.5s; cursor: pointer; height: 44px; }
+        .apple-music-player { background: var(--theme-glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); border: 1px solid var(--theme-glass-border); opacity: 0; pointer-events: none; transition: opacity 0.5s; cursor: pointer; height: 44px; }
         .apple-music-player.playing { opacity: 1; pointer-events: auto; }
         .music-icon { width: 22px; height: 22px; border-radius: 6px; background-size: cover; background-position: center; background-image: url('music-artwork.png'); }
         .music-bars { display: flex; gap: 3px; align-items: flex-end; height: 16px; }
-        .bar { width: 3px; background: #d4af37; border-radius: 2px; animation: bounce 1s infinite alternate; }
+        .bar { width: 3px; background: var(--theme-primary); border-radius: 2px; animation: bounce 1s infinite alternate; }
         .bar:nth-child(2) { animation-delay: 0.2s; } .bar:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0% { height: 4px; } 100% { height: 16px; } }
 
@@ -121,8 +121,7 @@
         .link-text { color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block; }
 
         /* ================= 主屏：胶囊按钮与阵列排版 ================= */
-        .brand-capsule { display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: rgba(45, 45, 48, 0.5); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--theme-glass-border); border-radius: 50px; padding: 6px 20px 6px 6px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); margin: 0 auto 1.5rem auto; color: var(--theme-text); }
-        .light-theme .brand-capsule { background: rgba(255,255,255,0.9); box-shadow: 0 8px 25px rgba(150, 160, 180, 0.15); border-color: rgba(200,200,200,0.5); }
+        .brand-capsule { display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--theme-glass-border); border-radius: 50px; padding: 6px 20px 6px 6px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); margin: 0 auto 1.5rem auto; color: var(--theme-text); }
         .brand-capsule:active { transform: scale(0.95); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .brand-capsule img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
         .brand-capsule span { font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; font-family: var(--font-title); white-space: nowrap; }
@@ -131,8 +130,7 @@
         .stage-row-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(10px, 2.5vw, 18px); width: 100%; }
         .stage-row-bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(8px, 2vw, 14px); width: 100%; }
         
-        .stage-card { background: rgba(45, 45, 48, 0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--theme-glass-border); border-radius: 18px; padding: clamp(15px, 4vw, 25px) 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.05); cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; }
-        .light-theme .stage-card { background: rgba(255,255,255,0.9); box-shadow: 0 8px 25px rgba(150, 160, 180, 0.15); }
+        .stage-card { background: var(--theme-glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--theme-glass-border); border-radius: 18px; padding: clamp(15px, 4vw, 25px) 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; }
         .stage-card:active { transform: translateY(2px) scale(0.96); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
         .stage-card-title { margin-top: 15px; font-weight: bold; font-size: clamp(0.85rem, 3vw, 1.05rem); color: var(--theme-text); letter-spacing: 1px; text-align: center; width: 90%; background: transparent; border: none; outline: none; pointer-events: none; }
@@ -149,25 +147,24 @@
         .cat-tabs-container { display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 5px 5px 20px 5px; scrollbar-width: none; flex-shrink: 0; justify-content: center; flex-wrap: wrap; }
         .cat-tabs-container::-webkit-scrollbar { display: none; }
         .cat-tab { padding: 10px 24px; border-radius: 25px; font-size: 1.05rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); opacity: 0.8; transition: all 0.3s; cursor: pointer; box-shadow: 0 4px 12px var(--theme-glass-shadow); }
-        .cat-tab.active { opacity: 1; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border-color: transparent; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4); }
+        .cat-tab.active { opacity: 1; background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); color: #111; border-color: transparent; box-shadow: 0 6px 18px var(--theme-glass-shadow); }
 
         #card-list-container { width: 100%; display: flex; flex-direction: column; flex: 1; }
         .module-section { width: 100%; text-align: left; margin-bottom: 35px; }
-        .module-title { font-size: 1.25rem; margin-top: 20px; margin-bottom: 20px; color: #f59e0b; font-family: var(--font-title); display: flex; align-items: center; gap: 10px; font-weight: bold; }
-        .light-theme .module-title { color: #d97706; }
+        .module-title { font-size: 1.25rem; margin-top: 20px; margin-bottom: 20px; color: var(--theme-primary); font-family: var(--font-title); display: flex; align-items: center; gap: 10px; font-weight: bold; }
         .module-title::before { content: ''; width: 5px; height: 18px; background: currentColor; border-radius: 4px; }
 
         .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; padding: 5px; }
         .data-card { position: relative; background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--theme-glass-border); border-radius: 24px; padding: 1.8rem 1.2rem; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 8px 24px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); aspect-ratio: 1 / 1.05; }
         .data-card:active { transform: scale(0.95); box-shadow: 0 4px 12px var(--theme-glass-shadow); }
         .card-inner-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 18px; text-align: center; line-height: 1.5; color: var(--theme-text); font-family: var(--font-title); }
-        .card-tag { font-size: 0.85rem; background: rgba(128,128,128,0.15); padding: 5px 15px; border-radius: 15px; opacity: 0.9; color: var(--theme-text); font-weight: 500; }
+        .card-tag { font-size: 0.85rem; background: var(--theme-input-bg); padding: 5px 15px; border-radius: 15px; opacity: 0.9; color: var(--theme-text); font-weight: 500; }
 
-        .edit-mode .data-card { border: 2px dashed #f59e0b; background: rgba(255,255,255,0.05); }
+        .edit-mode .data-card { border: 2px dashed var(--theme-primary); background: rgba(255,255,255,0.05); }
         .card-edit-badge { position: absolute; top: -8px; right: -8px; display: none; gap: 8px; flex-direction: column; z-index: 5; }
         .edit-mode .card-edit-badge { display: flex; }
-        .action-icon { width: 34px; height: 34px; border-radius: 50%; background: #4b5563; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 2px solid var(--theme-bg-color); transition: transform 0.2s; cursor: pointer; }
-        .action-icon.del { background: #ef4444; }
+        .action-icon { width: 34px; height: 34px; border-radius: 50%; background: var(--theme-glass-bg); color: var(--theme-text); display: flex; justify-content: center; align-items: center; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid var(--theme-glass-border); transition: transform 0.2s; cursor: pointer; }
+        .action-icon.del { background: #ef4444; color: #fff; border-color: transparent; }
         .action-icon:active { transform: scale(0.85); }
 
         .admin-controls { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 15px); left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 95%; }
@@ -195,22 +192,18 @@
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; overscroll-behavior-y: none; }
         .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 25px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
         .modal-content::-webkit-scrollbar { display: none; }
-        .light-theme .modal-content { background: #fdfdfd; box-shadow: 0 30px 60px rgba(0,0,0,0.15); }
         .qr-image { width: 200px; height: auto; border-radius: 16px; margin: 20px auto; display: block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
 
-        /* ================= 3D 黑金高级控制弹窗 ================= */
-        .modal-content.gold-3d { background: #151515; border: 1px solid rgba(212,175,55,0.4); box-shadow: 0 35px 70px rgba(0,0,0,0.95), inset 0 2px 10px rgba(212,175,55,0.15); }
-
         /* ================= 新版全端自适应响应式音乐播放器 (Flex Layout) ================= */
-        .music-type-modal-content { background: #1c1d22 !important; border-radius: 28px !important; border: 1px solid rgba(255,255,255,0.05) !important; padding: 20px !important; }
+        .music-type-modal-content { background: var(--theme-bg-color) !important; border-radius: 28px !important; border: 1px solid var(--theme-glass-border) !important; padding: 20px !important; box-shadow: 0 20px 50px var(--theme-glass-shadow) !important; }
         
         .vinyl-player-container.new-layout {
-            width: 90vw; max-width: 950px; /* 放开宽度以解决电脑端截断 */
-            height: 85vh; max-height: 650px; /* 强制高度限制边界 */
+            width: 90vw; max-width: 950px; 
+            height: 85vh; max-height: 650px; 
             display: flex; flex-direction: column; padding: 30px;
-            background: #1a1a1f !important; border-radius: 28px !important;
-            border: 1px solid rgba(255,255,255,0.05) !important;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.1) !important;
+            background: var(--theme-bg-color) !important; border-radius: 28px !important;
+            border: 1px solid var(--theme-glass-border) !important;
+            box-shadow: 0 40px 80px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset) !important;
             position: relative;
         }
 
@@ -218,11 +211,11 @@
         .close-3d-btn {
             position: absolute; top: 15px; right: 15px;
             width: 36px; height: 36px; border-radius: 50%;
-            background: linear-gradient(135deg, rgba(60,60,65,0.9), rgba(30,30,35,0.9));
+            background: var(--theme-glass-bg);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 2px 3px rgba(255,255,255,0.3);
-            color: #fff; display: flex; justify-content: center; align-items: center;
+            border: 1px solid var(--theme-glass-border);
+            box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
+            color: var(--theme-text); display: flex; justify-content: center; align-items: center;
             cursor: pointer; font-size: 1.1rem; z-index: 999; transition: transform 0.2s, box-shadow 0.2s;
         }
         .close-3d-btn:active { transform: scale(0.9); box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
@@ -239,7 +232,7 @@
             width: 100%; max-width: 320px; text-align: center;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
             margin-bottom: 25px; font-size: 1.25rem; font-weight: bold;
-            color: var(--theme-primary); text-shadow: 0 2px 5px rgba(212,175,55,0.4);
+            color: var(--theme-primary); text-shadow: 0 2px 5px var(--theme-glass-shadow);
             padding: 0 10px; box-sizing: border-box;
         }
 
@@ -252,42 +245,42 @@
         .ctrl-group.center { flex: 0; justify-content: center; gap: 18px; }
         .ctrl-group.right { flex: 1; justify-content: flex-end; gap: 15px; }
 
-        .ctrl-btn-small { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.15rem; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .ctrl-btn-small { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.15rem; transition: all 0.2s; box-shadow: 0 4px 10px var(--theme-glass-shadow); }
         .ctrl-btn-small:active { transform: scale(0.85); }
-        .ctrl-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); color: #fff; width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.3rem; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .ctrl-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.3rem; transition: all 0.2s; box-shadow: 0 4px 10px var(--theme-glass-shadow); }
         .ctrl-btn:active { transform: scale(0.9); }
-        .ctrl-btn.play-pause { width: 62px; height: 62px; font-size: 1.7rem; background: var(--theme-primary); color: #111; border: none; box-shadow: 0 8px 20px rgba(212,175,55,0.3); }
+        .ctrl-btn.play-pause { width: 62px; height: 62px; font-size: 1.7rem; background: var(--theme-primary); color: #111; border: none; box-shadow: 0 8px 20px var(--theme-glass-shadow); }
 
         /* 底部全宽进度条 */
         .player-progress-bar-container { 
             width: 100%; display: flex; align-items: center; gap: 15px; margin-top: 20px; 
-            padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; 
+            padding-top: 20px; border-top: 1px solid var(--theme-glass-border); flex-shrink: 0; 
         }
-        #player-time-current, #player-time-total { font-size: 0.9rem; opacity: 0.6; color: #fff; width: 48px; text-align: center; font-family: monospace; }
-        .progress-track { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative; cursor: pointer; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #d4af37, #ebd373); border-radius: 4px; width: 0%; pointer-events: none; } /* 去除了 transition 以确保丝滑跟随 */
+        #player-time-current, #player-time-total { font-size: 0.9rem; opacity: 0.6; color: var(--theme-text); width: 48px; text-align: center; font-family: monospace; }
+        .progress-track { flex: 1; height: 8px; background: var(--theme-glass-border); border-radius: 4px; position: relative; cursor: pointer; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--theme-primary), var(--theme-secondary)); border-radius: 4px; width: 0%; pointer-events: none; } 
         .progress-thumb { width: 16px; height: 16px; position: absolute; top: 50%; transform: translate(-50%, -50%); left: 0%; display: flex; justify-content: center; align-items: center; font-size: 14px; line-height: 1; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 
         /* 高级科技感音乐波动引擎 */
         .tech-wave-container { position: relative; width: 200px; height: 200px; display: flex; justify-content: center; align-items: center; margin: 10px auto; }
-        .wave-center { width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle, #fcd34d 0%, var(--theme-primary) 80%); border: 2px solid #000; box-shadow: 0 0 30px rgba(212,175,55,0.8), inset 0 2px 5px rgba(255,255,255,0.4); z-index: 10; display: flex; justify-content: center; align-items: center; }
+        .wave-center { width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle, var(--theme-secondary) 0%, var(--theme-primary) 80%); border: 2px solid var(--theme-glass-border); box-shadow: 0 0 30px var(--theme-glass-shadow), inset 0 2px 5px var(--theme-glass-inset); z-index: 10; display: flex; justify-content: center; align-items: center; }
         .wave-center::after { content: ''; width: 16px; height: 16px; border-radius: 50%; background: #111; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
-        .wave-ring { position: absolute; width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--theme-primary); opacity: 0; box-shadow: 0 0 15px rgba(212,175,55,0.4), inset 0 0 15px rgba(212,175,55,0.2); }
+        .wave-ring { position: absolute; width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--theme-primary); opacity: 0; box-shadow: 0 0 15px var(--theme-glass-shadow), inset 0 0 15px var(--theme-glass-inset); }
         .tech-wave-container.playing .wave-ring { animation: techWavePulse 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
         .tech-wave-container.playing .wave-ring:nth-child(1) { animation-delay: 0s; }
         .tech-wave-container.playing .wave-ring:nth-child(2) { animation-delay: 0.8s; }
         .tech-wave-container.playing .wave-ring:nth-child(3) { animation-delay: 1.6s; }
         @keyframes techWavePulse { 0% { transform: scale(1); opacity: 1; border-width: 3px; } 100% { transform: scale(3.5); opacity: 0; border-width: 0px; } }
         
-        .playlist-box { flex: 1; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 16px; padding: 5px; border: 1px solid rgba(255,255,255,0.05); text-align: left; scroll-behavior: smooth; min-height: 0; margin-bottom: 0; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+        .playlist-box { flex: 1; overflow-y: auto; background: var(--theme-input-bg); border-radius: 16px; padding: 5px; border: 1px solid var(--theme-glass-border); text-align: left; scroll-behavior: smooth; min-height: 0; margin-bottom: 0; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
         .netease-item { display: flex; align-items: center; padding: 12px 10px; border-radius: 12px; cursor: pointer; transition: background 0.3s; margin-bottom: 5px; }
-        .netease-item:hover { background: rgba(255,255,255,0.08); }
+        .netease-item:hover { background: var(--theme-glass-border); }
         .netease-item.active { background: rgba(212, 175, 55, 0.15); border-left: 3px solid var(--theme-primary); }
-        .netease-index { width: 35px; font-size: 1rem; color: #fff; opacity: 0.5; font-weight: bold; text-align: center; }
+        .netease-index { width: 35px; font-size: 1rem; color: var(--theme-text); opacity: 0.5; font-weight: bold; text-align: center; }
         .netease-item.active .netease-index { color: var(--theme-primary); opacity: 1; }
         .netease-info { flex: 1; margin-left: 10px; display: flex; flex-direction: column; overflow: hidden; }
-        .netease-title { font-size: 1.05rem; color: #fff; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
-        .netease-item.active .netease-title { color: var(--theme-primary); font-weight: bold; opacity: 1; text-shadow: 0 0 8px rgba(212,175,55,0.3); }
+        .netease-title { font-size: 1.05rem; color: var(--theme-text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
+        .netease-item.active .netease-title { color: var(--theme-primary); font-weight: bold; opacity: 1; text-shadow: 0 0 8px var(--theme-glass-shadow); }
 
         /* 移动端绝对防溢出折叠架构 (Strict Mobile Boundaries) */
         @media (max-width: 768px) {
@@ -528,7 +521,7 @@
 
             <!-- 右侧列表面板 -->
             <div class="player-right-panel">
-                <input type="search" id="vinyl-search" placeholder="🔍 搜索歌曲名称..." oninput="window.filterVinylPlaylist()" style="border-radius:14px; background:rgba(0,0,0,0.4); border-color:rgba(255,255,255,0.1); padding:10px 15px; margin-bottom:10px; flex-shrink:0;">
+                <input type="search" id="vinyl-search" placeholder="🔍 搜索歌曲名称..." oninput="window.filterVinylPlaylist()" style="border-radius:14px; background:var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color:var(--theme-text); padding:10px 15px; margin-bottom:10px; flex-shrink:0; width:100%;">
                 <div class="playlist-box" id="playlist-ui"></div>
             </div>
         </div>
@@ -697,107 +690,51 @@ const defaultDB = {
 
 let db = defaultDB; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true }; let particles = []; let animationId; window.isDraggingProgress = false;
 
-/* ================= 声明并提升所有的全局功能函数 (Hoisted Functions) ================= */
+window.cleanupOldLocalStorage = function() { const currentVersion = 'sealOfLoveDB_v32'; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) { localStorage.removeItem(key); } } }
 
-// 绝不直接暴力清空 localStorage，仅清除特定过期快照，确保数据可被搜救
-window.cleanupOldLocalStorage = function() { 
-    const currentVersion = 'sealOfLoveDB_v31'; 
-    for (let i = 0; i < localStorage.length; i++) { 
-        const key = localStorage.key(i); 
-        // 保留 v31，并且不再删除老版本，以便 deepRescueDB() 能顺利打捞
-    } 
-}
-
-// 核心：自研深度数据搜救引擎，将老版本意外遗失的资料重新合并拼接
-window.deepRescueDB = function(target, source) {
+// 纯正的云端绝对覆盖更新，杜绝本地陈旧数据覆盖云端
+window.upgradeDBStructure = function(source) {
+    let target = JSON.parse(JSON.stringify(defaultDB));
     if(!source) return target;
-    // 搜救用户资料 (含头像、昵称、收藏)
-    if (source.users) {
-        for (let u in source.users) {
-            if (!target.users[u]) target.users[u] = source.users[u];
-            else {
-                if (source.users[u].avatar && !target.users[u].avatar) target.users[u].avatar = source.users[u].avatar;
-                if (source.users[u].nickname && !target.users[u].nickname) target.users[u].nickname = source.users[u].nickname;
-                if (source.users[u].favorites && source.users[u].favorites.length > 0) target.users[u].favorites = source.users[u].favorites;
-            }
-        }
-    }
-    // 搜救各阶段图标与卡片数据
-    if (source.stages) {
-        stagesList.forEach(s => {
-            if (source.stages[s] && target.stages[s]) {
-                if (source.stages[s].icon && source.stages[s].icon !== '') target.stages[s].icon = source.stages[s].icon;
-                if (source.stages[s].name && target.stages[s].name === s) target.stages[s].name = source.stages[s].name;
-                if (source.stages[s].prepText) target.stages[s].prepText = source.stages[s].prepText;
-                if (source.stages[s].cards && source.stages[s].cards.length > target.stages[s].cards.length) target.stages[s].cards = source.stages[s].cards;
-                if (source.stages[s].categories && source.stages[s].categories.length > target.stages[s].categories.length) target.stages[s].categories = source.stages[s].categories;
-            }
-        });
-    }
-    // 搜救全局音律库
-    if (source.globalMusicConfig) {
-        if (source.globalMusicConfig.categories && source.globalMusicConfig.categories.length > 0) {
-            target.globalMusicConfig.categories = source.globalMusicConfig.categories;
-        }
-        for(let cat in source.globalMusicConfig.library) {
-            if (!target.globalMusicConfig.library[cat]) target.globalMusicConfig.library[cat] = [];
-            source.globalMusicConfig.library[cat].forEach(track => {
-                if (!target.globalMusicConfig.library[cat].find(t => t.url === track.url)) {
-                    target.globalMusicConfig.library[cat].push(track);
-                }
-            });
-        }
-    }
+    
+    if (source.users) { for (let u in source.users) { target.users[u] = source.users[u]; if (!target.users[u].favorites) target.users[u].favorites = []; } }
+    if (source.stages) { stagesList.forEach(s => { if (source.stages[s]) { target.stages[s] = source.stages[s]; } }); }
+    if (source.globalMusicConfig) { target.globalMusicConfig = source.globalMusicConfig; }
+    
     return target;
 }
 
-// 防御性数据拉取与热升级
 window.initDB = async function() { 
     let cloudDb = null;
-    try { 
-        const res = await fetch('/api/db'); 
-        if (res.ok) { 
-            const remoteDb = await res.json(); 
-            if (remoteDb && remoteDb.stages) { 
-                cloudDb = remoteDb;
-            } 
-        } 
-    } catch (e) {} 
-
-    // 全局打捞本地所有历史版本，寻找最长、最完整的可用数据
-    let bestLocalDb = null;
-    let maxLen = 0;
+    try { const res = await fetch('/api/db'); if (res.ok) { cloudDb = await res.json(); } } catch (e) {} 
+    
+    let bestLocalDb = null; let maxLen = 0;
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('sealOfLoveDB_')) {
-            const val = localStorage.getItem(key);
-            if (val && val.length > maxLen) {
-                maxLen = val.length;
-                try { bestLocalDb = JSON.parse(val); } catch(e){}
-            }
-        }
+        if (key && key.startsWith('sealOfLoveDB_')) { const val = localStorage.getItem(key); if (val && val.length > maxLen) { maxLen = val.length; try { bestLocalDb = JSON.parse(val); } catch(e){} } }
     }
-
-    // 从最干净的底座开始
-    db = JSON.parse(JSON.stringify(defaultDB));
-
-    // 智能搜救与合并：本地优先补全，云端最终覆盖修正
-    if (bestLocalDb) db = window.deepRescueDB(db, bestLocalDb);
-    if (cloudDb) db = window.deepRescueDB(db, cloudDb);
-
-    // 确保默认超管账户永不掉线
-    if (!db.users['yishuyangguang']) {
-        db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] };
-    }
-
-    // 存入最新的安全版本键中
-    try { localStorage.setItem('sealOfLoveDB_v31', JSON.stringify(db)); } catch(e){} 
     
-    // 如果云端挂了但本地有数据，才静默上传补救
+    // 如果云端存在，云端即为绝对真理，彻底抛弃本地旧快照，实现秒级同步
+    if (cloudDb && cloudDb.stages) {
+        db = window.upgradeDBStructure(cloudDb);
+    } else if (bestLocalDb) {
+        db = window.upgradeDBStructure(bestLocalDb);
+    } else {
+        db = JSON.parse(JSON.stringify(defaultDB));
+    }
+
+    if (!db.users['yishuyangguang']) { db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [] }; }
+    
+    try { localStorage.setItem('sealOfLoveDB_v32', JSON.stringify(db)); } catch(e){} 
+    
+    // 保护网关：如果是已经进入的阶段屏，则热重载UI（用于后台更新后的实时刷新）
+    if (document.getElementById('screen-stage').classList.contains('active')) { window.initStageScreen(); }
+    if (document.getElementById('screen-card-list').classList.contains('active')) { window.renderCardList(); }
+    
     if (bestLocalDb && !cloudDb) { window.saveDB(); }
 }
 
-window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v31', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
+window.saveDB = async function() { let localSaved = false; try { localStorage.setItem('sealOfLoveDB_v32', JSON.stringify(db)); localSaved = true; } catch (e) {} try { window.showGlobalToast('正在同步至云端...', 'loading'); const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers: { 'Content-Type': 'application/json' }}); if(res.ok) { window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); } else { window.showGlobalToast('云端同步异常', 'error'); } } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } }
 
 window.showGlobalToast = function(text, type = 'loading') { const toast = document.getElementById('global-toast'); const icon = document.getElementById('toast-icon'); const msg = document.getElementById('toast-text'); if(!toast) return; toast.className = `global-toast show ${type}`; msg.innerText = text; if(type === 'loading') icon.innerText = '⏳'; if(type === 'success') icon.innerText = '✓'; if(type === 'error') icon.innerText = '✖'; clearTimeout(toastTimeout); if(type !== 'loading') { toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); } }
 window.compressImageFile = function(file, callback) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); const MAX_SIZE = 240; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/webp', 0.75)); }; img.src = e.target.result; }; reader.readAsDataURL(file); }
@@ -989,7 +926,7 @@ window.filterAdminMusicList = function() { window.renderAdminMusicList(); }
 window.renderAdminMusicList = function() { const catId = document.getElementById('admin-music-cat').value; const query = document.getElementById('admin-music-search').value.trim().toLowerCase(); const listDiv = document.getElementById('admin-music-list'); listDiv.innerHTML = ''; if(!catId) { listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">请先添加音乐分类</div>`; return; } const list = db.globalMusicConfig.library[catId] || []; let matchCount = 0; list.forEach((m, idx) => { if (query && !m.name.toLowerCase().includes(query)) return; matchCount++; const div = document.createElement('div'); div.style.display='flex'; div.style.background='var(--theme-glass-bg)'; div.style.padding='15px'; div.style.borderRadius='16px'; div.style.alignItems='center'; div.style.justifyContent='space-between'; div.style.border='1px solid var(--theme-glass-border)'; div.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)'; div.innerHTML = `<div style="display:flex; flex-direction:column; width:65%; overflow:hidden;"><span style="font-weight:bold; color:var(--theme-text); font-size:1.05rem; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</span><span style="font-size:0.75rem; opacity:0.6; word-break:break-all; color:var(--theme-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.url}</span></div><div style="display:flex; gap:8px;"><div class="action-icon" style="background:#4f46e5;" onclick="window.editAdminMusic('${catId}', ${idx})">✎</div><div class="action-icon del" onclick="window.deleteAdminMusic('${catId}', ${idx})">✖</div></div>`; listDiv.appendChild(div); }); if (matchCount === 0) { listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">暂无匹配曲目</div>`; } }
 
 window.bindAudioDragDrop = function() { const zone = document.getElementById('music-upload-zone'); const fileInput = document.getElementById('new-music-file'); const text = document.getElementById('music-upload-text'); zone.onclick = () => fileInput.click(); zone.ondragover = (e) => { e.preventDefault(); zone.style.backgroundColor = 'rgba(99, 102, 241, 0.1)'; }; zone.ondragleave = (e) => { e.preventDefault(); zone.style.backgroundColor = 'transparent'; }; zone.ondrop = (e) => { e.preventDefault(); zone.style.backgroundColor = 'transparent'; if(e.dataTransfer.files.length>0) handleSelectedAudios(e.dataTransfer.files); }; fileInput.onchange = (e) => { if(e.target.files.length>0) handleSelectedAudios(e.target.files); }; function handleSelectedAudios(files) { selectedAudioFiles = Array.from(files).filter(f => f.type.startsWith('audio/')); if(selectedAudioFiles.length === 0) return alert('请选择有效的音频文件'); if (selectedAudioFiles.length === 1) { text.innerText = `已选择: ${selectedAudioFiles[0].name} (${(selectedAudioFiles[0].size/1024/1024).toFixed(2)}MB)`; const nameInput = document.getElementById('new-music-name'); if(!nameInput.value) nameInput.value = selectedAudioFiles[0].name.replace(/\.[^/.]+$/, ""); } else { text.innerText = `已选择 ${selectedAudioFiles.length} 个音频，批量直传中...`; document.getElementById('new-music-name').value = "自动取名模式"; document.getElementById('new-music-name').disabled = true; } } }
-window.editAdminMusic = function(catId, idx) { const m = db.globalMusicConfig.library[catId][idx]; document.getElementById('new-music-name').value = m.name; document.getElementById('new-music-url').value = m.url; document.getElementById('edit-music-idx').value = idx; document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目"; document.getElementById('btn-admin-music-save').innerText = "保 存 修 修改"; document.getElementById('btn-admin-music-cancel').style.display = "block"; document.getElementById('music-upload-zone').style.display = "none"; }
+window.editAdminMusic = function(catId, idx) { const m = db.globalMusicConfig.library[catId][idx]; document.getElementById('new-music-name').value = m.name; document.getElementById('new-music-url').value = m.url; document.getElementById('edit-music-idx').value = idx; document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目"; document.getElementById('btn-admin-music-save').innerText = "保 存 修 改"; document.getElementById('btn-admin-music-cancel').style.display = "block"; document.getElementById('music-upload-zone').style.display = "none"; }
 window.resetMusicEdit = function() { document.getElementById('new-music-name').value = ''; document.getElementById('new-music-url').value = ''; document.getElementById('edit-music-idx').value = ''; document.getElementById('new-music-name').disabled = false; document.getElementById('admin-music-action-title').innerText = "+ 新增曲目"; document.getElementById('btn-admin-music-save').innerText = "添 加 到 库"; document.getElementById('btn-admin-music-cancel').style.display = "none"; document.getElementById('music-upload-zone').style.display = "block"; selectedAudioFiles = []; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (支持多选直传)'; }
 window.saveMusicToLibrary = async function() { const name = document.getElementById('new-music-name').value.trim(); let url = document.getElementById('new-music-url').value.trim(); const catId = document.getElementById('admin-music-cat').value; const editIdx = document.getElementById('edit-music-idx').value; if(!catId) return alert('请先创建分类'); if (editIdx !== '' || (url && selectedAudioFiles.length === 0)) { if(!name) return alert('请输入曲目名称'); if(!db.globalMusicConfig.library[catId]) db.globalMusicConfig.library[catId] = []; if (editIdx !== '') db.globalMusicConfig.library[catId][parseInt(editIdx)] = { name, url }; else db.globalMusicConfig.library[catId].push({name, url}); await window.saveDB(); window.resetMusicEdit(); window.renderAdminMusicList(); return; } if(selectedAudioFiles.length > 0) { selectedAudioFiles.forEach(file => { let taskName = name === "自动取名模式" || !name ? file.name.replace(/\.[^/.]+$/, "") : name; uploadQueue.push({ file: file, catId: catId, name: taskName }); }); window.resetMusicEdit(); window.hideModal('music-admin-modal'); window.processUploadQueue(); } else { alert('请拖入音频或填写链接'); } }
 window.deleteAdminMusic = async function(catId, idx) { if(confirm('确认删除此曲？')) { db.globalMusicConfig.library[catId].splice(idx, 1); await window.saveDB(); window.renderAdminMusicList(); } }
@@ -1136,50 +1073,24 @@ window.toggleFavorite = async function() {
     favDebounce = setTimeout(async () => { await window.saveDB(); if (musicState.type === 'favorites') { musicState.playlist = db.users[currentUserAccount].favorites; window.renderVinylPlaylist(); } }, 1000); 
 }
 
-// 核心：Blob 化预载拦截，斩断 iOS 报 49分钟 的时长绝症
-window.playCurrentTrack = async function() { 
+window.playCurrentTrack = function() { 
     const audioPlayer = document.getElementById('bgm-player'); if(musicState.playlist.length === 0 || !audioPlayer) return; 
     const track = musicState.playlist[musicState.currentIndex]; 
-    const trackNameEl = document.getElementById('player-track-name');
+    document.getElementById('player-track-name').innerText = track.name; 
     
     if (currentUserAccount && db.users[currentUserAccount].favorites) { 
         const isFav = db.users[currentUserAccount].favorites.findIndex(f => f.url === track.url) > -1; 
         document.getElementById('btn-favorite').innerText = isFav ? '❤️' : '🤍'; 
     } else { document.getElementById('btn-favorite').innerText = '🤍'; } 
     
-    // 强制使用 Blob 解析流，绕过 iOS 对 Chunked VBR 的荒唐估算
-    if(audioPlayer.dataset.originalUrl !== track.url) {
-        audioPlayer.pause();
-        trackNameEl.innerText = "缓冲解析中...";
-        
-        try {
-            const res = await fetch(track.url);
-            if(!res.ok) throw new Error();
-            const blob = await res.blob();
-            
-            // 并发打断防御：如果用户在极速切歌，废弃过期的 fetch 返回
-            if(musicState.playlist[musicState.currentIndex].url !== track.url) return;
-
-            // 销毁旧内存，严防 OOM (Out Of Memory)
-            if(audioPlayer.dataset.blobUrl) URL.revokeObjectURL(audioPlayer.dataset.blobUrl);
-            const blobUrl = URL.createObjectURL(blob);
-            
-            audioPlayer.src = blobUrl;
-            audioPlayer.dataset.blobUrl = blobUrl;
-            audioPlayer.dataset.originalUrl = track.url;
-        } catch(e) {
-            // 回退到直链播放
-            audioPlayer.src = track.url;
-            audioPlayer.dataset.originalUrl = track.url;
-        }
-        
-        audioPlayer.load(); 
+    if(audioPlayer.src !== track.url) {
+        audioPlayer.src = track.url;
+        audioPlayer.load(); // 强制iOS重载音频头，修复时长计算
         const fill = document.getElementById('progress-fill'); const thumb = document.getElementById('progress-thumb');
         if(fill) fill.style.width = `0%`; if(thumb) thumb.style.left = `0%`;
         document.getElementById('player-time-current').innerText = "00:00";
     } 
     
-    trackNameEl.innerText = track.name; 
     audioPlayer.volume = 1; 
     audioPlayer.play().then(() => { 
         document.getElementById('vinyl-disc-ui').classList.add('playing'); document.getElementById('btn-play-pause').innerText = '⏸️'; 
