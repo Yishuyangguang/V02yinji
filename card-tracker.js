@@ -1,5 +1,5 @@
 /**
- * 恒久印记 - 卡片追踪 + NEW标签 + iOS深度媒体与时长修复引擎 (纯净无冲突版)
+ * 恒久印记 - 卡片追踪 + NEW标签 + iOS深度媒体与时长修复引擎 (极速串流无冲突版)
  * 文件名: card-tracker.js
  */
 (function initTracker() {
@@ -147,67 +147,20 @@
             }
 
             // =====================================================================
-            // 模块三：彻底重构播放核心 (破除 iOS 时长畸变 + 苹果锁屏映射)
+            // 模块三：系统级媒体增强与 iOS 时长畸变绝症修复 (无冲突并行包装模式)
             // =====================================================================
             
-            // 彻底废除原系统可能引起冲突的直链请求，引入安全的 Blob 缓冲桥接
-            window.playCurrentTrack = async function() { 
-                const audioPlayer = document.getElementById('bgm-player'); 
-                if(!musicState || musicState.playlist.length === 0 || !audioPlayer) return; 
+            // [无损拦截] 切歌事件：直接调用原函数保持秒播速度，只在切面补充苹果锁屏推送
+            const originalPlayCurrentTrack = window.playCurrentTrack;
+            window.playCurrentTrack = function() {
+                // 1. 完美放行原生引擎，享受毫无卡顿的极速缓冲串流！
+                if (typeof originalPlayCurrentTrack === 'function') {
+                    originalPlayCurrentTrack.apply(this, arguments);
+                }
                 
-                const track = musicState.playlist[musicState.currentIndex]; 
-                const trackNameEl = document.getElementById('player-track-name');
-                
-                // 1. 爱心 UI 更新
-                if (typeof currentUserAccount !== 'undefined' && currentUserAccount && db.users[currentUserAccount].favorites) { 
-                    const isFav = db.users[currentUserAccount].favorites.findIndex(f => f.url === track.url) > -1; 
-                    document.getElementById('btn-favorite').innerText = isFav ? '❤️' : '🤍'; 
-                } else { 
-                    document.getElementById('btn-favorite').innerText = '🤍'; 
-                } 
-                
-                // 2. Blob 解析引擎 (强迫苹果 iOS 准确拿到文件体积，断绝49分钟错乱乱象)
-                if (audioPlayer.dataset.originalUrl !== track.url) {
-                    audioPlayer.pause();
-                    trackNameEl.innerText = "音律解析重载中..."; // 缓冲提示
-                    
-                    try {
-                        const res = await fetch(track.url);
-                        if (!res.ok) throw new Error('流媒体解析阻断');
-                        const blob = await res.blob();
-                        
-                        // 防并发竞争：如果用户手速极快切了另一首歌，丢弃这个包
-                        if (musicState.playlist[musicState.currentIndex].url !== track.url) return;
-
-                        // 销毁上个内存地址，彻底杜绝切歌导致手机内存溢出（OOM）发热
-                        if (audioPlayer.dataset.blobUrl) URL.revokeObjectURL(audioPlayer.dataset.blobUrl);
-                        const blobUrl = URL.createObjectURL(blob);
-                        
-                        audioPlayer.src = blobUrl;
-                        audioPlayer.dataset.blobUrl = blobUrl;
-                        audioPlayer.dataset.originalUrl = track.url;
-                    } catch(e) {
-                        // 兜底方案：如果跨域或者获取失败，优雅降级走直链播放
-                        audioPlayer.src = track.url;
-                        audioPlayer.dataset.originalUrl = track.url;
-                    }
-                    
-                    audioPlayer.load(); 
-                    const fill = document.getElementById('progress-fill'); 
-                    const thumb = document.getElementById('progress-thumb');
-                    if(fill) fill.style.width = `0%`; 
-                    if(thumb) thumb.style.left = `0%`;
-                    document.getElementById('player-time-current').innerText = "00:00";
-                } 
-                
-                trackNameEl.innerText = track.name; 
-                audioPlayer.volume = 1; 
-                audioPlayer.play().then(() => { 
-                    document.getElementById('vinyl-disc-ui').classList.add('playing'); 
-                    document.getElementById('btn-play-pause').innerText = '⏸️'; 
-                    document.getElementById('apple-music-box').classList.add('playing'); 
-                    
-                    // 3. Apple MediaSession API (灵动岛及锁屏后台信息映射)
+                // 2. 向 iOS 锁屏/灵动岛 推送真实的背景展示信息
+                if (typeof musicState !== 'undefined' && musicState.playlist && musicState.playlist.length > 0) {
+                    const track = musicState.playlist[musicState.currentIndex];
                     if ('mediaSession' in navigator) {
                         navigator.mediaSession.metadata = new MediaMetadata({
                             title: track.name || '未知曲目',
@@ -219,46 +172,92 @@
                             ]
                         });
 
+                        // 将硬件/耳机控制键，映射到原生函数上
                         try {
-                            // 将手机系统级后台按键，打通到我们网页的原生函数上！
-                            navigator.mediaSession.setActionHandler('play', () => { window.togglePlayPause(); });
-                            navigator.mediaSession.setActionHandler('pause', () => { window.togglePlayPause(); });
-                            navigator.mediaSession.setActionHandler('previoustrack', () => { window.prevTrack(); });
-                            navigator.mediaSession.setActionHandler('nexttrack', () => { window.nextTrack(); });
-                        } catch (e) {}
+                            navigator.mediaSession.setActionHandler('play', () => { if(window.togglePlayPause) window.togglePlayPause(); });
+                            navigator.mediaSession.setActionHandler('pause', () => { if(window.togglePlayPause) window.togglePlayPause(); });
+                            navigator.mediaSession.setActionHandler('previoustrack', () => { if(window.prevTrack) window.prevTrack(); });
+                            navigator.mediaSession.setActionHandler('nexttrack', () => { if(window.nextTrack) window.nextTrack(); });
+                        } catch (e) {
+                            // 兼容低版本浏览器
+                        }
                     }
-                }).catch(e=>{}); 
-                
-                // 4. 列表滚动归位
-                window.renderVinylPlaylist(); 
-                const activeItem = document.getElementById(`track-item-${musicState.currentIndex}`); 
-                if(activeItem) { activeItem.scrollIntoView({ behavior: "smooth", block: "center" }); } 
+                }
             };
 
-            // 挂载时间状态到系统锁屏进度条 (防止息屏时进度条卡死不动)
+            // [核心修复] 音频生命周期：强行破除 iOS Safari VBR MP3 时长显示几十分钟的绝症
             const bgmPlayer = document.getElementById('bgm-player');
-            if (bgmPlayer && !bgmPlayer.isMediaSessionPatched) {
+            if (bgmPlayer && !bgmPlayer.isDurationPatched) {
+                
+                // 挂载防抖锁：防止探针强行快进时，误触了原有代码里的“播放完毕自动切歌”
+                window.isFixingDuration = false;
+                const originalHandleAudioEnded = window.handleAudioEnded;
+                window.handleAudioEnded = function() {
+                    // 如果正在修补时长，拦截自动下一首
+                    if (window.isFixingDuration) return; 
+                    if (originalHandleAudioEnded) originalHandleAudioEnded.apply(this, arguments);
+                };
+
+                bgmPlayer.addEventListener('loadedmetadata', function() {
+                    // 如果 Safari 解析出 > 20 分钟 (1200秒) 的虚假时长，触发 1e101 探底算法
+                    if (bgmPlayer.duration === Infinity || bgmPlayer.duration > 1200) {
+                        if (window.isFixingDuration) return;
+                        
+                        window.isFixingDuration = true;
+                        
+                        // 静音掩护，防止跳跃时爆音
+                        const wasMuted = bgmPlayer.muted;
+                        bgmPlayer.muted = true;
+                        
+                        // 强制跳跃至极限，逼迫苹果底层重新计算整首音频流真实的字节数！
+                        bgmPlayer.currentTime = 9999999; 
+                        
+                        // 保护兜底超时器：以防网络异常未触发 seeked
+                        let fixTimeout = setTimeout(() => {
+                            if (window.isFixingDuration) {
+                                bgmPlayer.currentTime = 0;
+                                bgmPlayer.muted = wasMuted;
+                                window.isFixingDuration = false;
+                            }
+                        }, 800);
+
+                        const restoreTime = function() {
+                            clearTimeout(fixTimeout);
+                            bgmPlayer.currentTime = 0; // 精准回归开头开始真实播放
+                            bgmPlayer.muted = wasMuted; // 恢复系统原音量
+                            bgmPlayer.removeEventListener('seeked', restoreTime);
+                            
+                            // 延迟 150ms 解锁切歌，确保事件流彻底闭合不冒泡
+                            setTimeout(() => { window.isFixingDuration = false; }, 150);
+                        };
+                        bgmPlayer.addEventListener('seeked', restoreTime);
+                    }
+                });
+                
+                // 增益：向 iOS 控制中心实时汇报播放进度，让锁屏与灵动岛进度条准确流动
                 bgmPlayer.addEventListener('timeupdate', () => {
-                    if ('mediaSession' in navigator && !isNaN(bgmPlayer.duration) && isFinite(bgmPlayer.duration)) {
+                    // 仅当时间校验处于稳定准确状态时才同步
+                    if ('mediaSession' in navigator && !isNaN(bgmPlayer.duration) && bgmPlayer.duration !== Infinity && bgmPlayer.duration < 1200) {
                         try {
                             navigator.mediaSession.setPositionState({
                                 duration: bgmPlayer.duration,
-                                playbackRate: bgmPlayer.playbackRate,
+                                playbackRate: bgmPlayer.playbackRate || 1,
                                 position: bgmPlayer.currentTime
                             });
                         } catch(e) {}
                     }
                 });
-                bgmPlayer.isMediaSessionPatched = true;
+                
+                bgmPlayer.isDurationPatched = true;
             }
 
-            // [强制激活] 刷新驻留界面的 UI
+            // [强制激活] 如果用户正好处于卡片列表页，触发热显影激活 NEW 标签
             const cardListScreen = document.getElementById('screen-card-list');
             if (cardListScreen && cardListScreen.classList.contains('active')) {
                 window.renderCardList();
             }
 
-            console.log("卡片追踪与 iOS 媒体解析引擎 [已挂载并激活]");
+            console.log("卡片追踪器 + iOS媒体深层修复引擎 [已无冲突接管]");
 
         } else if (!window.renderCardList || !window.renderCardList.isTrackerPatched) {
             // 原系统还没就绪，微秒级潜伏轮询 (50ms)，绝不遗漏
