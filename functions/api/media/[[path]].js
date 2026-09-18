@@ -13,7 +13,6 @@ export async function onRequest(context) {
         return new Response(null, { headers: corsHeaders });
     }
 
-    // 【新增】处理物理删除文件的 DELETE 请求
     if (request.method === "DELETE") {
         try {
             await env.MY_BUCKET.delete(path);
@@ -43,9 +42,24 @@ export async function onRequest(context) {
         const headers = new Headers(corsHeaders);
         object.writeHttpMetadata(headers);
         headers.set("etag", object.httpEtag);
+        
+        // 核心修复点：告诉浏览器支持断点续传
         headers.set("Accept-Ranges", "bytes");
 
-        const status = object.range ? 206 : 200;
+        let status = 200;
+        
+        // 【致命错误修复点】：补齐 HTTP 206 协议强制要求的切片范围与长度响应头！
+        if (object.range) {
+            status = 206;
+            // 必须告诉浏览器：当前发给你的是从哪到哪的字节，以及总文件有多大
+            headers.set("Content-Range", `bytes ${object.range.offset}-${object.range.offset + object.range.length - 1}/${object.size}`);
+            headers.set("Content-Length", object.range.length.toString());
+        } else {
+            headers.set("Content-Length", object.size.toString());
+        }
+
+        // 让浏览器缓存音频文件一年，实现物理秒开
+        headers.set("Cache-Control", "public, max-age=31536000, immutable");
 
         return new Response(object.body, { 
             status, 
