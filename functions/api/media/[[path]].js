@@ -4,13 +4,23 @@ export async function onRequest(context) {
 
     const corsHeaders = {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS, DELETE", 
         "Access-Control-Allow-Headers": "Content-Type, Range", 
         "Access-Control-Expose-Headers": "Accept-Ranges, Content-Range, Content-Length"
     };
 
     if (request.method === "OPTIONS") {
         return new Response(null, { headers: corsHeaders });
+    }
+
+    // 【新增】处理物理删除文件的 DELETE 请求
+    if (request.method === "DELETE") {
+        try {
+            await env.MY_BUCKET.delete(path);
+            return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: corsHeaders });
+        }
     }
 
     try {
