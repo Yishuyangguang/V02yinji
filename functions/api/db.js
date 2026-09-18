@@ -1,62 +1,70 @@
 export async function onRequest(context) {
-  const { request, env } = context;
+    const { request, env } = context;
 
-  // 防御 1：检测存储桶是否正确挂载
-  if (!env.MY_BUCKET) {
-    return new Response(JSON.stringify({ error: "R2 存储桶 (MY_BUCKET) 未正确挂载，请检查后台绑定配置" }), { 
-        status: 500,
-        headers: { "Content-Type": "application/json" }
-    });
-  }
+    // 跨域与通信头支持（为跨环境搬家做绝对兼容）
+    const corsHeaders = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+    };
 
-  // 处理前端拉取数据的 GET 请求
-  if (request.method === "GET") {
+    if (request.method === "OPTIONS") {
+        return new Response(null, { headers: corsHeaders });
+    }
+
     try {
-      const object = await env.MY_BUCKET.get("db.json");
-      
-      // 防御 2：如果旧桶里没有 db.json，或者由于迁移导致读取不到，坚决不崩溃！
-      // 返回一个空对象 {} 让前端的 initDB 自动重置，而不是抛出 500
-      if (object === null) {
-        return new Response(JSON.stringify({}), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
+        // 【终极防线 1】拦截空绑定异常：如果环境没挂载成功，优雅返回空对象让前端存活，而不是崩溃
+        if (!env.MY_BUCKET) {
+            return new Response(JSON.stringify({}), { 
+                status: 200, 
+                headers: { "Content-Type": "application/json", ...corsHeaders } 
+            });
+        }
+
+        // 【终极防线 2】处理 GET 拉取数据
+        if (request.method === "GET") {
+            const object = await env.MY_BUCKET.get("db.json");
+            
+            // 如果旧桶是空的或者文件不存在，返回空初始化状态
+            if (!object) {
+                return new Response(JSON.stringify({}), { 
+                    status: 200, 
+                    headers: { "Content-Type": "application/json", ...corsHeaders } 
+                });
+            }
+            
+            // 修复数据流锁死 BUG：强制转换为文本体再返回，确保 100% 吐出数据
+            const text = await object.text();
+            return new Response(text, { 
+                status: 200, 
+                headers: { "Content-Type": "application/json", ...corsHeaders } 
+            });
+        }
+
+        // 【终极防线 3】处理 POST 保存数据
+        if (request.method === "POST") {
+            const data = await request.json();
+            await env.MY_BUCKET.put("db.json", JSON.stringify(data));
+            return new Response(JSON.stringify({ success: true }), { 
+                status: 200, 
+                headers: { "Content-Type": "application/json", ...corsHeaders } 
+            });
+        }
+
+        // 非法请求方法拦截
+        return new Response(JSON.stringify({ error: "Method Not Allowed" }), { 
+            status: 405, 
+            headers: corsHeaders 
         });
-      }
-      
-      // 正常返回数据
-      return new Response(object.body, {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (e) {
-      // 捕获系统级异常并返回明确的 JSON 格式错误，防止前端解析炸裂
-      return new Response(JSON.stringify({ error: "读取数据异常: " + e.message }), { 
-          status: 500,
-          headers: { "Content-Type": "application/json" }
-      });
-    }
-  }
 
-  // 处理前端保存数据的 POST 请求
-  if (request.method === "POST") {
-    try {
-      const data = await request.json();
-      await env.MY_BUCKET.put("db.json", JSON.stringify(data));
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (e) {
-      return new Response(JSON.stringify({ error: "保存数据异常: " + e.message }), { 
-          status: 500,
-          headers: { "Content-Type": "application/json" }
-      });
+    } catch (err) {
+        // 【绝对保活机制】即使遇到极端未知错误，也包装成 JSON 返回，绝对不抛出 500 导致前端红屏
+        return new Response(JSON.stringify({ 
+            error: err.message || "后端发生未知崩溃",
+            isError: true 
+        }), { 
+            status: 500, 
+            headers: { "Content-Type": "application/json", ...corsHeaders } 
+        });
     }
-  }
-
-  // 防御 3：拦截非预期的请求方法
-  return new Response(JSON.stringify({ error: "请求方法不被允许" }), { 
-      status: 405,
-      headers: { "Content-Type": "application/json" }
-  });
 }
