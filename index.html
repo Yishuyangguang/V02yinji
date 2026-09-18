@@ -1021,7 +1021,26 @@ window.bindAudioDragDrop = function() { const zone = document.getElementById('mu
 window.editAdminMusic = function(catId, idx) { const m = db.globalMusicConfig.library[catId][idx]; document.getElementById('new-music-name').value = m.name; document.getElementById('new-music-url').value = m.url; document.getElementById('edit-music-idx').value = idx; document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目"; document.getElementById('btn-admin-music-save').innerText = "保 存 修 改"; document.getElementById('btn-admin-music-cancel').style.display = "block"; document.getElementById('music-upload-zone').style.display = "none"; }
 window.resetMusicEdit = function() { document.getElementById('new-music-name').value = ''; document.getElementById('new-music-url').value = ''; document.getElementById('edit-music-idx').value = ''; document.getElementById('new-music-name').disabled = false; document.getElementById('admin-music-action-title').innerText = "+ 新增曲目"; document.getElementById('btn-admin-music-save').innerText = "添 加 到 库"; document.getElementById('btn-admin-music-cancel').style.display = "none"; document.getElementById('music-upload-zone').style.display = "block"; selectedAudioFiles = []; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (支持多选直传)'; }
 window.saveMusicToLibrary = async function() { const name = document.getElementById('new-music-name').value.trim(); let url = document.getElementById('new-music-url').value.trim(); const catId = document.getElementById('admin-music-cat').value; const editIdx = document.getElementById('edit-music-idx').value; if(!catId) return alert('请先创建分类'); if (editIdx !== '' || (url && selectedAudioFiles.length === 0)) { if(!name) return alert('请输入曲目名称'); if(!db.globalMusicConfig.library[catId]) db.globalMusicConfig.library[catId] = []; if (editIdx !== '') db.globalMusicConfig.library[catId][parseInt(editIdx)] = { name, url }; else db.globalMusicConfig.library[catId].push({name, url}); await window.saveDB(); window.resetMusicEdit(); window.renderAdminMusicList(); return; } if(selectedAudioFiles.length > 0) { selectedAudioFiles.forEach(file => { let taskName = name === "自动取名模式" || !name ? file.name.replace(/\.[^/.]+$/, "") : name; uploadQueue.push({ file: file, catId: catId, name: taskName }); }); window.resetMusicEdit(); window.hideModal('music-admin-modal'); window.processUploadQueue(); } else { alert('请拖入音频或填写链接'); } }
-window.deleteAdminMusic = async function(catId, idx) { if(confirm('确认删除此曲？')) { db.globalMusicConfig.library[catId].splice(idx, 1); await window.saveDB(); window.renderAdminMusicList(); } }
+window.deleteAdminMusic = async function(catId, idx) { 
+    if(confirm('确认彻底删除此曲（将同时从云端存储桶物理移除）？')) { 
+        const track = db.globalMusicConfig.library[catId][idx];
+        
+        // 1. 【新增核心逻辑】向云端发送物理删除指令
+        if (track && track.url) {
+            try {
+                // 直接对着音频的 url 发送 DELETE 请求，精准击中 [[path]].js
+                await fetch(track.url, { method: 'DELETE' });
+            } catch (e) {
+                console.error("云端物理删除失败", e);
+            }
+        }
+        
+        // 2. 原有逻辑：删除数据库里的文本记录并同步
+        db.globalMusicConfig.library[catId].splice(idx, 1); 
+        await window.saveDB(); 
+        window.renderAdminMusicList(); 
+    } 
+}
 
 let lastTimeUpdate = 0;
 window.initProgressDrag = function() {
@@ -1347,6 +1366,5 @@ window.resetToStage = function() {
 }
 </script>
 <script src="card-tracker.js"></script>
-<script src="card-purifier.js"></script>
 </body>
 </html>
