@@ -602,9 +602,12 @@
 
 <div class="modal-overlay" id="qr-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px;">
-        <h2 style="color: var(--theme-primary);">联系站长</h2>
-        <img src="微信二维码.jpg" alt="微信二维码" class="qr-image" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23ddd\'/><text x=\'50\' y=\'50\' text-anchor=\'middle\' dominant-baseline=\'middle\' fill=\'%23666\'>无图片</text></svg>'">
-        <button class="btn-glass" style="margin-top: 20px;" onclick="window.hideModal('qr-modal')">关 闭</button>
+        <h2 style="color: var(--theme-primary); margin-bottom: 20px;">联系站长邮箱</h2>
+        <a href="mailto:yg@3927521.xyz" style="display: block; background: var(--theme-glass-bg); border: 1px dashed var(--theme-primary); padding: 15px; border-radius: 16px; color: var(--theme-text); font-size: 1.15rem; font-weight: bold; text-decoration: none; margin-bottom: 15px; transition: all 0.3s;">
+            yg@3927521.xyz
+        </a>
+        <p style="font-size: 0.85rem; opacity: 0.6; margin-bottom: 20px;">点击上方邮箱地址即可直接发送邮件</p>
+        <button class="btn-glass" style="margin-top: 10px;" onclick="window.hideModal('qr-modal')">关 闭</button>
     </div>
 </div>
 
@@ -1021,6 +1024,7 @@ window.bindAudioDragDrop = function() { const zone = document.getElementById('mu
 window.editAdminMusic = function(catId, idx) { const m = db.globalMusicConfig.library[catId][idx]; document.getElementById('new-music-name').value = m.name; document.getElementById('new-music-url').value = m.url; document.getElementById('edit-music-idx').value = idx; document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目"; document.getElementById('btn-admin-music-save').innerText = "保 存 修 改"; document.getElementById('btn-admin-music-cancel').style.display = "block"; document.getElementById('music-upload-zone').style.display = "none"; }
 window.resetMusicEdit = function() { document.getElementById('new-music-name').value = ''; document.getElementById('new-music-url').value = ''; document.getElementById('edit-music-idx').value = ''; document.getElementById('new-music-name').disabled = false; document.getElementById('admin-music-action-title').innerText = "+ 新增曲目"; document.getElementById('btn-admin-music-save').innerText = "添 加 到 库"; document.getElementById('btn-admin-music-cancel').style.display = "none"; document.getElementById('music-upload-zone').style.display = "block"; selectedAudioFiles = []; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (支持多选直传)'; }
 window.saveMusicToLibrary = async function() { const name = document.getElementById('new-music-name').value.trim(); let url = document.getElementById('new-music-url').value.trim(); const catId = document.getElementById('admin-music-cat').value; const editIdx = document.getElementById('edit-music-idx').value; if(!catId) return alert('请先创建分类'); if (editIdx !== '' || (url && selectedAudioFiles.length === 0)) { if(!name) return alert('请输入曲目名称'); if(!db.globalMusicConfig.library[catId]) db.globalMusicConfig.library[catId] = []; if (editIdx !== '') db.globalMusicConfig.library[catId][parseInt(editIdx)] = { name, url }; else db.globalMusicConfig.library[catId].push({name, url}); await window.saveDB(); window.resetMusicEdit(); window.renderAdminMusicList(); return; } if(selectedAudioFiles.length > 0) { selectedAudioFiles.forEach(file => { let taskName = name === "自动取名模式" || !name ? file.name.replace(/\.[^/.]+$/, "") : name; uploadQueue.push({ file: file, catId: catId, name: taskName }); }); window.resetMusicEdit(); window.hideModal('music-admin-modal'); window.processUploadQueue(); } else { alert('请拖入音频或填写链接'); } }
+
 window.deleteAdminMusic = async function(catId, idx) { 
     if(confirm('确认彻底删除此曲（将同时从云端存储桶物理移除）？')) { 
         const track = db.globalMusicConfig.library[catId][idx];
@@ -1366,5 +1370,6 @@ window.resetToStage = function() {
 }
 </script>
 <script src="card-tracker.js"></script>
+<script src="card-purifier.js"></script>
 </body>
 </html>
