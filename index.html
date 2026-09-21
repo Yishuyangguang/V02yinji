@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <!-- 🛡️ 强制清除浏览器缓存，保证用户总是看到最新时间段 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <title>印记</title>
+
+  <!-- 🍎 原汁原味继承您系统底层的 PWA 高奢配置，确保桌面图标完美显示 -->
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoi5oGS5LmF5Y2w6K6wIiwic2hvcnRfbmFtZSI6IuWNsOiusCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwic3RhcnRfdXJsIjoiLiIsImJhY2tncm91bmRfY29sb3ciOiIjMWMxZDIyIiwidGhlbWVfY29sb3ciOiIjZDRhZjM3IiwiaWNvbnMiOlt7InNyYyI6ImFwcGxlLXRvdWNoLWljb24ucG5nIiwic2l6ZXMiOiIxODB4MTgwIiwidHlwZSI6ImltYWdlL3BuZyJ9XX0=">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
+  <style>
+    :root {
+      --bg-color-1: #0f172a;
+      --bg-color-2: #020617;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body, html {
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, var(--bg-color-1) 0%, var(--bg-color-2) 100%);
+      transition: background 2.5s ease-in-out;
+      cursor: pointer;
+    }
+
+    /* 🌟 核心视觉：避开刘海屏的神圣太阳 */
+    .sun {
+      position: fixed;
+      top: max(40px, env(safe-area-inset-top));
+      left: max(40px, env(safe-area-inset-left));
+      width: clamp(55px, 8vw, 85px);
+      height: clamp(55px, 8vw, 85px);
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 
+        0 0 25px #ffffff,
+        0 0 70px rgba(253, 230, 138, 0.85),
+        0 0 140px rgba(245, 158, 11, 0.65),
+        0 0 220px rgba(217, 119, 6, 0.45);
+      z-index: 2;
+      animation: sunBreathe 4s infinite alternate ease-in-out;
+    }
+    @keyframes sunBreathe { 0% { transform: scale(0.95); opacity: 0.9; } 100% { transform: scale(1.05); opacity: 1; } }
+
+    /* 🌟 核心视觉：自适应屏幕中心的丁达尔光束 */
+    .god-ray {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(253, 230, 138, 0.15) 35%, transparent 65%);
+      clip-path: polygon(0 0, 30% 0, 100% 70%, 100% 100%, 0 40%);
+      filter: blur(25px); z-index: 3; pointer-events: none; mix-blend-mode: overlay;
+      animation: rayShimmer 5s infinite alternate ease-in-out;
+    }
+    @keyframes rayShimmer { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+
+    /* 🌟 黄金排版：毛玻璃文字容器 */
+    .main-container {
+      position: relative; z-index: 10; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: max(20px, env(safe-area-inset-top)) 20px max(80px, env(safe-area-inset-bottom));
+    }
+
+    .glass-panel {
+      width: 90%; max-width: 680px; min-height: 400px;
+      padding: clamp(30px, 6vw, 50px);
+      border-radius: 24px;
+      background: rgba(15, 20, 30, 0.35);
+      backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      transition: opacity 1.5s ease, transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .glass-panel.fade-out { opacity: 0; transform: translateY(15px) scale(0.98); }
+
+    .icon-display { font-size: clamp(38px, 8vw, 52px); margin-bottom: 20px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
+    
+    .time-badge {
+      font-size: 14px; font-weight: bold; letter-spacing: 2px; color: #fde68a;
+      background: rgba(0, 0, 0, 0.4); padding: 6px 18px; border-radius: 50px; margin-bottom: 28px;
+      border: 1px solid rgba(253, 230, 138, 0.3); box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    
+    .text-content {
+      color: #f8fafc; font-size: clamp(1.05rem, 3.8vw, 1.15rem); line-height: 2.2;
+      text-align: justify; text-align-last: center; letter-spacing: 1.5px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 15px rgba(0,0,0,0.7);
+    }
+
+    /* 视觉引导 */
+    .touch-hint {
+      position: absolute; bottom: max(35px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+      font-size: 13px; color: rgba(255,255,255,0.6); letter-spacing: 3px; z-index: 20; pointer-events: none;
+      animation: pulseHint 2.5s infinite;
+    }
+    @keyframes pulseHint { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+  </style>
+</head>
+<body>
+
+  <div class="sun"></div>
+  <div class="god-ray"></div>
+
+  <div class="main-container">
+    <div class="glass-panel fade-out" id="content-panel">
+      <div class="icon-display" id="icon-display">✨</div>
+      <div class="time-badge" id="time-badge">-- : --</div>
+      <div class="text-content" id="text-content">时光流转中...</div>
+    </div>
+  </div>
+
+  <div class="touch-hint">✨ 轻触屏幕，进入印记 ✨</div>
+
+  <script>
+    /* ================= 数据驱动与时间调度引擎 ================= */
+    const periods = [
+      { start: "17:30", end: "20:59", icon: "🌇", color1: "#2d1b2e", color2: "#1a1025", text: "“古老的时间秩序提醒我们：新的一天并非始于早晨的咬牙坚持，而是始于傍晚祂所预备的安息。在这个卸下工作、准备用餐的时段，请将今日的得失算盘彻底放下。你的价值从来不在于你今天做成了多少业绩，而在于祂早已将你毫无保留地接纳。今晚，不必再用加班和焦虑去争取存在的资格，仰望祂所赐的平静，在晚间的修养中舒展身心。”" },
+      { start: "21:00", end: "23:29", icon: "🌙", color1: "#0f172a", color2: "#020617", text: "“脱下这一整天为了向世界证明自己而穿上的铠甲吧。我们在世俗的法庭里辩护、挣扎了一整天，急于证明自己是个‘对的人’，这太累了。此刻准备入睡时，请退出那个评判的擂台。你的破绽与疲惫不必掩饰，因为祂早已替你站在了审判面前，承受了一切重担。注视祂那不摇动的大爱，你可以坦然卸下防备，在祂温柔的背负中安心入睡。”" },
+      { start: "23:30", end: "03:00", icon: "🌌", color1: "#000000", color2: "#0a0a1a", text: "“在最深沉的黑夜里，当掌控感退去、失控的焦虑袭来时，请把目光从未知的明天移开，定睛于祂。祂从不打盹，也从未停止对你的看顾。你无法掌控未来，但祂早已将所有的风浪握在手中。真正的安全感，从来不是因为你足够强大，而是因为在看不见的深处，祂那双充满能力与恩慈的手，始终在为你承担一切重量。”" },
+      { start: "03:00", end: "05:59", icon: "🐔", color1: "#1e1b4b", color2: "#0f172a", text: "“当你的能力、资源和意志降到冰点，请不要绝望，也不要凭血气硬抗。看看祂曾经为你走过的幽谷——祂降到了最卑微的尽头，却带出了不可战胜的生命。你此刻的无能为力，正是要将你从‘依靠自己’的迷梦中唤醒。不要害怕这眼前的黑夜，抬头仰望祂，因为使死人复活的大能正在祂里面，也必在极深处为你开辟出路。”" },
+      { start: "06:00", end: "08:30", icon: "🌞", color1: "#d97706", color2: "#b45309", text: "“看啊，晨光重新照亮大地！这不只是一天的新开端，更是祂在提醒你：昨日所有的失误、自责与愧疚，已被祂彻底洗去，不再被记念。你不需要凭自己的好表现去讨好世界，也不需要带着罪咎感战战兢兢。抬头注视祂那充满恩慈的面容，祂赐下的是一份不需要你付代价的全新接纳。带着这份释怀，满怀希望地重新开始。”" },
+      { start: "08:31", end: "11:29", icon: "🌿", color1: "#065f46", color2: "#0f766e", text: "“面对眼前漫长的征途与繁重的任务，不要试图凭一己之力去掌控所有的未知。焦虑源于我们想坐上主宰的宝座。将目光转回祂身上，承认祂才是你生命唯一的引导者。今天的难题今日担，把遥远的恐惧交在祂手中，专注于祂此刻为你铺就的这一步。忠心于当下的微小，把终局交由祂那美善的意旨。”" },
+      { start: "11:30", end: "14:29", icon: "☀️", color1: "#f59e0b", color2: "#d97706", text: "“当冲突与燥热达到顶峰，周围都在用高声和强势去抢占高位时，请转眼仰望祂——那位本拥有至高尊贵、却甘愿为你洗脚、屈膝服事的君王。你不需要在言语上赢过别人去捍卫面子，因为祂的爱已给了你最稳固的底气。给对方递一杯温水，退后一步去倾听，这种自甘卑微的体恤，不是懦弱，而是祂那丰盛与温和的生命在你里面的彰显。”" },
+      { start: "14:30", end: "16:30", icon: "🍂", color1: "#b45309", color2: "#9a3412", text: "“耗尽感临到时，不必硬扛着扮演那个无所不能的支撑者。请记得，祂降临不是要受人的服事，乃是要服事人。承认自己的有限与疲惫，正是去经历祂丰富供应的开始。放下手头的工作喝杯水，接受来自祂借由周围人所传递的善意与支持。正如枯干的花木需要雨水，允许自己被祂的恩典所滋养，你将在祂的爱中重新得力。”" },
+      { start: "16:30", end: "17:29", icon: "🌇", color1: "#be123c", color2: "#881337", text: "“一日将尽，收拢工具。不要在心里暗自打那个‘我今天付出了多少、该得多少回报’的算盘，也不要因为今日的瑕疵而陷入自责。生命的丰盛从来不是一场刻薄的功德交换，而是祂白白赐下的厚恩。仰望祂那不凭条件的大爱，温和地与自己和解。放下所有的紧绷，再次回到祂早已为你预备好的安息港湾。”" }
+    ];
+
+    let activeIndex = -1;
+    function getMins(tStr) { const [h, m] = tStr.split(':').map(Number); return h * 60 + m; }
+
+    function updateView() {
+      const now = new Date();
+      const curr = now.getHours() * 60 + now.getMinutes();
+      let match = -1;
+
+      for (let i = 0; i < periods.length; i++) {
+        const s = getMins(periods[i].start), e = getMins(periods[i].end);
+        if (s <= e) { if (curr >= s && curr <= e) { match = i; break; } } 
+        else { if (curr >= s || curr <= e) { match = i; break; } }
+      }
+
+      if (match !== activeIndex && match !== -1) {
+        activeIndex = match;
+        const p = periods[match];
+        const panel = document.getElementById('content-panel');
+        
+        panel.classList.add('fade-out');
+        setTimeout(() => {
+          document.getElementById('icon-display').innerText = p.icon;
+          document.getElementById('time-badge').innerText = `${p.start} - ${p.end}`;
+          document.getElementById('text-content').innerText = p.text;
+          document.documentElement.style.setProperty('--bg-color-1', p.color1);
+          document.documentElement.style.setProperty('--bg-color-2', p.color2);
+          panel.classList.remove('fade-out');
+        }, 750);
+      }
+    }
+    
+    updateView();
+    setInterval(updateView, 30000);
+
+    /* 🛡️ 解决从 app.html 滑动返回时的状态卡死问题 */
+    window.addEventListener('pageshow', function(e) {
+      if (e.persisted) { updateView(); }
+    });
+
+    /* ================= 🛡️ 防误触与顺滑跳转引擎 ================= */
+    let startY = 0;
+    let isDragging = false;
+    
+    window.addEventListener('touchstart', e => { 
+      startY = e.touches[0].clientY; 
+      isDragging = false; 
+    });
+    
+    window.addEventListener('touchmove', e => { 
+      if (Math.abs(e.touches[0].clientY - startY) > 10) { isDragging = true; }
+    });
+
+    window.addEventListener('touchend', e => {
+      if (!isDragging && window.getSelection().toString() === '') {
+        window.location.href = './app.html';
+      }
+    });
+
+    window.addEventListener('click', e => {
+      if (window.getSelection().toString() === '') {
+        window.location.href = './app.html';
+      }
+    });
+  </script>
+</body>
+</html>
