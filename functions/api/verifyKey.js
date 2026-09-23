@@ -31,10 +31,17 @@ export async function onRequest(context) {
             
             const user = db.users[username];
             if (!user) return new Response(JSON.stringify({ error: "用户不存在" }), { status: 400, headers: corsHeaders });
-            if (user.status === "banned") return new Response(JSON.stringify({ error: "您的账号已被管理员限制使用，请联系站长", status: "banned" }), { status: 403, headers: corsHeaders });
-            if (user.expireAt && now > user.expireAt) return new Response(JSON.stringify({ error: "印记时空已到期，请进入个人中心续费", status: "expired" }), { status: 403, headers: corsHeaders });
             
-            return new Response(JSON.stringify({ success: true, status: "normal", expireAt: user.expireAt || 0, now }), { headers: corsHeaders });
+            if (user.status === "banned") {
+                return new Response(JSON.stringify({ error: "您的账号已被管理员限制使用，请联系站长", status: "banned" }), { status: 403, headers: corsHeaders });
+            }
+            
+            // 💣 修复核心：不再使用 && 容错。只要 expireAt 是 undefined、或者是 0、或者是过去的日期，全部拦截封杀！
+            if (!user.expireAt || now > user.expireAt) {
+                return new Response(JSON.stringify({ error: "印记时空已到期（或未授权），请联系站长获取新卡密", status: "expired" }), { status: 403, headers: corsHeaders });
+            }
+            
+            return new Response(JSON.stringify({ success: true, status: "normal", expireAt: user.expireAt, now }), { headers: corsHeaders });
         }
 
         // 【安全拦截】：进入注册或续费，必须带卡密
