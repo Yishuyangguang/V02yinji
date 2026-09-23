@@ -303,7 +303,6 @@
             <input type="text" id="ipt-username" placeholder="账号 或 昵称" autocomplete="off">
             <input type="password" id="ipt-pwd" placeholder="密码" autocomplete="off">
             
-            <!-- 🛡️ 新增：16位授权卡密输入框，明确提示作用 -->
             <input type="text" id="ipt-key" placeholder="16位卡密 (老用户直接登录无需填写)" autocomplete="off">
 
             <button class="btn-glass btn-primary" style="margin-top: 10px;" onclick="window.handleLogin()">登 录</button>
@@ -312,7 +311,6 @@
         </div>
     </div>
 
-    <!-- 舞台屏幕等原有代码 -->
     <div class="screen center-content" id="screen-stage">
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
@@ -393,8 +391,6 @@
     </div>
 </div>
 
-<!-- ================= 弹窗群 ================= -->
-
 <div class="modal-overlay" id="user-profile-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px; padding: 25px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px; font-size:1.6rem;">个人中心</h2>
@@ -409,7 +405,6 @@
 
         <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称" style="text-align:center; padding: 12px 15px;">
         
-        <!-- 🛡️ 新增：剩余时长与续费组件 -->
         <div id="user-license-info" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.15); border-radius: 14px; font-size: 13px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
             <div style="margin-bottom: 12px; font-size: 14px;">剩余时空授权：<span id="user-days-left" style="color: #fde68a; font-weight: bold; font-size: 18px;">--</span> 天</div>
             <div style="display: flex; gap: 8px;">
@@ -427,13 +422,11 @@
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; background:transparent; padding: 0.8rem; border-radius:18px;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
             <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.manageMusicLibrary();">⚙️ 全局音律库管理 (管理员专属)</button>
             
-            <!-- 🛡️ 新增：超级管理员专属的卡密制造与风控控制台入口 -->
             <button class="btn-glass" style="width: 100%; border: 1px dashed #f59e0b; color: #f59e0b; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.openAuthAdmin();">🛡️ 全局时空权限管理 (管理员专属)</button>
         </div>
     </div>
 </div>
 
-<!-- 🛡️ 新增：超级管理员时空密钥与风控控制台 -->
 <div class="modal-overlay" id="auth-admin-modal">
     <div class="modal-content" style="padding: 25px; max-width: 420px; background: var(--theme-bg-color);">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px; font-size: 1.5rem;">🛡️ 时空权限指挥中心</h2>
@@ -448,7 +441,7 @@
         </div>
 
         <div style="background: rgba(255,255,255,0.03); border: 1px solid #ef4444; border-radius: 16px; padding: 15px;">
-            <h4 style="color: #ef4444; margin-bottom: 15px; font-size: 1.1rem;">⚖️ 封神榜 (极速风控)</h4>
+            <h4 style="color: #ef4444; margin-bottom: 15px; font-size: 1.1rem;">⚖️ 极速风控</h4>
             <div id="admin-user-list" style="max-height: 220px; overflow-y: auto; font-size: 12px; padding-right: 5px;"></div>
         </div>
 
@@ -626,7 +619,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
-// 🛡️ 扩容默认数据库，增加空的 licenseKeys 库和默认用户的无限期特权
 const defaultDB = {
     users: { 'yishuyangguang': { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } }, 
     licenseKeys: {},
@@ -689,7 +681,6 @@ window.upgradeDBStructure = function(source) {
 window.initDB = async function() { 
     let cloudDb = null;
     try { 
-        // 🛡️ 识别身份拉取数据，如果是站长且已登录，附加上帝权限 Header 拿卡密库
         const headers = {};
         if (state.isAdmin && currentUserAccount === 'yishuyangguang') headers['x-admin-auth'] = 'yishuyangguang';
         
@@ -731,7 +722,6 @@ window.saveDB = async function() {
     try { 
         window.showGlobalToast('正在同步至云端...', 'loading'); 
         
-        // 🛡️ 携带上帝权限证明
         const headers = { 'Content-Type': 'application/json' };
         if (state.isAdmin && currentUserAccount === 'yishuyangguang') headers['x-admin-auth'] = 'yishuyangguang';
         
@@ -779,7 +769,6 @@ class Particle {
 }
 window.initParticles = function() { particles = []; const count = window.innerWidth < 600 ? 20 : 40; for (let i = 0; i < count; i++) particles.push(new Particle()); }
 
-// ================= 🛡️ 安全登陆与状态核验 =================
 window.handleLogin = async function() { 
     const inputU = document.getElementById('ipt-username').value.trim(); 
     const p = document.getElementById('ipt-pwd').value.trim(); 
@@ -798,7 +787,6 @@ window.handleLogin = async function() {
 
     if (!pwdMatch) return alert('账号或密码错误。');
 
-    // 🛡️ 密码正确，开始向后端索要绝对生死判决（静默校验状态与时间）
     if (baseUsername !== 'yishuyangguang') {
         window.showGlobalToast('正在核实时空权限...', 'loading');
         try {
@@ -811,11 +799,9 @@ window.handleLogin = async function() {
                 return window.showGlobalToast(data.error || '权限拦截：您的账号状态异常', 'error');
             }
             
-            // 将安全的云端参数同步到本地内存中
             db.users[baseUsername].expireAt = data.expireAt;
             db.users[baseUsername].status = data.status;
 
-            // 💌 临期预警引擎：不足 7 天给予温馨提示
             const daysLeft = Math.ceil((data.expireAt - data.now) / (1000 * 60 * 60 * 24));
             if (daysLeft <= 7) {
                 alert(`【临期预警】您的印记时空仅剩 ${daysLeft} 天即将封存。为了您的专属回忆永不褪色，请进入个人中心提前续费。`);
@@ -832,21 +818,23 @@ window.loginSuccess = async function(baseUser, isAdmin) {
     state.isLoggedIn = true; state.isAdmin = isAdmin; currentUserAccount = baseUser; 
     document.getElementById('user-widget').style.display = 'flex'; window.updateUserWidgetIcon(); 
     
-    // 🛡️ 如果是站长降临，立刻重新发请求，强取带卡密库的完整数据库！
+    // 🛡️ 深呼吸同步引擎：任何人进门前，强制拉取云端最新数据，防止看到空白/旧版网页
+    window.showGlobalToast('正在同步云端最新时空...', 'loading');
+    await window.initDB();
+    
     if (isAdmin) {
-        window.showGlobalToast('加载超级管理员权限...', 'loading');
-        await window.initDB();
-        window.showGlobalToast('上帝模式已激活', 'success');
+        window.showGlobalToast('管理模式已激活', 'success');
+    } else {
+        window.showGlobalToast('数据同步成功', 'success');
     }
     
     window.initStageScreen(); 
 }
 
-// ================= 🛡️ 安全注册与卡密核销 =================
 window.handleRegister = async function() { 
     const u = document.getElementById('ipt-username').value.trim(); 
     const p = document.getElementById('ipt-pwd').value.trim(); 
-    const k = document.getElementById('ipt-key').value.trim().toUpperCase(); // 自动转大写
+    const k = document.getElementById('ipt-key').value.trim().toUpperCase(); 
     
     if(!u || !p || !k) return alert('请完整填写账号、密码，以及有效的16位时空卡密'); 
     if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('原生账号仅限英文数字组合'); 
@@ -863,7 +851,6 @@ window.handleRegister = async function() {
             return window.showGlobalToast(data.error || '注册失败', 'error');
         }
         
-        // 注册成功，卡密已在后端燃烧，安全地在本地加载账号并登入
         db.users[u] = { password: p, nickname: '', avatar: '', favorites: [], expireAt: data.expireAt, status: 'normal' };
         window.showGlobalToast(`注册成功！已为您赋予 ${data.days} 天时空权限`, 'success');
         window.loginSuccess(u, false);
@@ -883,7 +870,6 @@ window.openUserProfile = function() {
     if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } 
     document.getElementById('profile-nickname-input').value = userData.nickname || ''; 
     
-    // 🛡️ 渲染剩余时长状态
     const daysLeftEl = document.getElementById('user-days-left');
     if (currentUserAccount === 'yishuyangguang') {
         daysLeftEl.innerText = '永久 (特权)';
@@ -907,7 +893,6 @@ window.openUserProfile = function() {
     window.showModal('user-profile-modal'); 
 }
 
-// ================= 🛡️ 老用户续费与时长累加 =================
 window.handleRenew = async function() {
     const k = document.getElementById('ipt-renew-key').value.trim().toUpperCase();
     if(!k) return alert('请输入续费卡密');
@@ -924,7 +909,6 @@ window.handleRenew = async function() {
             return window.showGlobalToast(data.error || '续费失败', 'error');
         }
         
-        // 云端已更新，同步本地并刷新显示
         db.users[currentUserAccount].expireAt = data.expireAt;
         db.users[currentUserAccount].status = 'normal';
         document.getElementById('ipt-renew-key').value = '';
@@ -937,7 +921,6 @@ window.handleRenew = async function() {
 
 window.handleProfileAvatar = function(inputEl) { if(inputEl.files.length > 0) { window.compressImageFile(inputEl.files[0], (base64) => { const imgEl = document.getElementById('profile-avatar-img'); imgEl.src = base64; imgEl.style.display = 'block'; document.getElementById('profile-svg-placeholder').style.display = 'none'; }); } }
 
-// 🛡️ 安全防御：保存个人资料时，绝对不覆盖核心全网权限字段
 window.saveUserProfile = async function() { 
     if(!currentUserAccount) return; 
     const nick = document.getElementById('profile-nickname-input').value.trim(); 
@@ -946,14 +929,12 @@ window.saveUserProfile = async function() {
     
     if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [], expireAt: 0, status: 'normal' }; 
     
-    // 只更新展示信息
     db.users[currentUserAccount].nickname = nick; 
     if(imgEl.style.display === 'block') db.users[currentUserAccount].avatar = imgEl.src; 
     
     await window.saveDB(); window.updateUserWidgetIcon(); window.hideModal('user-profile-modal'); 
 }
 
-// ================= 🛡️ 超级管理员：时空密钥印钞机与风控控制台 =================
 window.openAuthAdmin = function() {
     if (!state.isAdmin) return;
     if (!db.licenseKeys) db.licenseKeys = {};
@@ -963,7 +944,6 @@ window.openAuthAdmin = function() {
 }
 
 window.generateKey = async function(days) {
-    // 采用高辨识度 32 字符，剔除易混淆的 0,1,I,O 等
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let key = 'YJ-';
     for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -975,7 +955,6 @@ window.generateKey = async function(days) {
     if (!db.licenseKeys) db.licenseKeys = {};
     db.licenseKeys[key] = { days: days, isUsed: false, createdAt: Date.now() };
     
-    // 因为具有上帝权限，直接写回全量数据
     await window.saveDB();
     window.renderLicenseKeys();
     window.showGlobalToast(`成功铸造一张 ${days} 天卡密`, 'success');
@@ -1007,7 +986,7 @@ window.renderUserControlList = function() {
     list.innerHTML = '';
     let hasUser = false;
     for (let u in db.users) {
-        if (u === 'yishuyangguang') continue; // 站长不入生死簿
+        if (u === 'yishuyangguang') continue; 
         hasUser = true;
         const user = db.users[u];
         const now = Date.now();
@@ -1044,7 +1023,6 @@ window.toggleUserStatus = async function(u) {
         window.showGlobalToast(`风控指令下达成功`, 'success');
     }
 }
-
 
 window.updateUserWidgetIcon = function() { if(!currentUserAccount) return; if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('user-widget-avatar'); const svgEl = document.getElementById('user-widget-svg'); if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } }
 window.toggleEditMode = function() { state.isEditMode = !state.isEditMode; document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑'; if(state.isEditMode) document.body.classList.add('edit-mode'); else document.body.classList.remove('edit-mode'); if (document.getElementById('screen-stage').classList.contains('active')) window.initStageScreen(); else if (document.getElementById('screen-card-list').classList.contains('active')) window.renderCardList(); }
