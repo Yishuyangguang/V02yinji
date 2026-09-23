@@ -1,10 +1,14 @@
 export async function onRequest(context) {
     const { request, env } = context;
 
+    // 🛡️ 新增最高级别的防缓存指令，确保注册后前端拉取的一定是绝对最新数据
     const corsHeaders = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, x-admin-auth"
+        "Access-Control-Allow-Headers": "Content-Type, x-admin-auth",
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
     };
 
     if (request.method === "OPTIONS") {
@@ -32,7 +36,6 @@ export async function onRequest(context) {
             
             let dbData = await object.json();
             
-            // 【终极防线 1】非站长拉取数据时，物理切除卡密库，杜绝 F12 抓包泄露
             if (!isAdmin && dbData.licenseKeys) {
                 delete dbData.licenseKeys;
             }
@@ -46,34 +49,26 @@ export async function onRequest(context) {
         if (request.method === "POST") {
             const incomingData = await request.json();
             
-            // 【终极防线 2】读取云端真实数据进行缝合，防止核心字段被前端篡改或覆盖
             const object = await env.MY_BUCKET.get("db.json");
             if (object) {
                 const cloudDb = await object.json();
                 
                 if (!isAdmin) {
-                    // 🛡️ 钛合金只读锁：强制保护站长配置的阶段卡片和音乐库！普通用户绝对无法覆盖
                     if (cloudDb.stages) {
                         incomingData.stages = cloudDb.stages;
                     }
                     if (cloudDb.globalMusicConfig) {
                         incomingData.globalMusicConfig = cloudDb.globalMusicConfig;
                     }
-
-                    // 保障 1：把刚才切除的卡密库缝合回去，防止被普通用户的上传清空
                     if (cloudDb.licenseKeys) {
                         incomingData.licenseKeys = cloudDb.licenseKeys;
                     }
-                    
-                    // 保障 2：权限锁死！强制使用云端的到期时间和封禁状态
                     if (cloudDb.users && incomingData.users) {
                         for (let u in incomingData.users) {
                             if (cloudDb.users[u]) {
-                                // 正常老用户，继承云端权限
                                 incomingData.users[u].expireAt = cloudDb.users[u].expireAt;
                                 incomingData.users[u].status = cloudDb.users[u].status;
                             } else {
-                                // 【打入冷宫】未经过 verifyKey 接口，妄图通过前端造假直接上传注册的用户，直接封禁
                                 incomingData.users[u].expireAt = 0;
                                 incomingData.users[u].status = "banned";
                             }
