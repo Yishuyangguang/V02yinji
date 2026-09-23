@@ -391,6 +391,8 @@
     </div>
 </div>
 
+<!-- ================= 弹窗群 ================= -->
+
 <div class="modal-overlay" id="user-profile-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px; padding: 25px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px; font-size:1.6rem;">个人中心</h2>
@@ -421,7 +423,6 @@
         <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 25px;">
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; background:transparent; padding: 0.8rem; border-radius:18px;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
             <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.manageMusicLibrary();">⚙️ 全局音律库管理 (管理员专属)</button>
-            
             <button class="btn-glass" style="width: 100%; border: 1px dashed #f59e0b; color: #f59e0b; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.openAuthAdmin();">🛡️ 全局时空权限管理 (管理员专属)</button>
         </div>
     </div>
@@ -593,6 +594,7 @@
 </div>
 
 <script>
+let lastParticleTime = 0; const particleFPS = 30; const particleInterval = 1000 / particleFPS;
 let isPressing = false; let pressProgress = 0; let pressFrame = null;
 let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true, isModalOpen: false };
 let db = null; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let particles = []; let animationId; window.isDraggingProgress = false;
@@ -634,8 +636,6 @@ const defaultDB = {
     }
 };
 
-db = defaultDB;
-
 window.showModal = function(id) { document.getElementById(id).style.display = 'flex'; state.isModalOpen = true; }
 window.hideModal = function(id) { 
     document.getElementById(id).style.display = 'none'; 
@@ -672,7 +672,7 @@ window.upgradeDBStructure = function(source) {
     let target = JSON.parse(JSON.stringify(defaultDB));
     if(!source) return target;
     if (source.users) { for (let u in source.users) { target.users[u] = source.users[u]; if (!target.users[u].favorites) target.users[u].favorites = []; if (!target.users[u].status) target.users[u].status = 'normal'; if (!target.users[u].expireAt) target.users[u].expireAt = 0; } }
-    if (source.stages) { stagesList.forEach(s => { if (source.stages[s]) { target.stages[s] = source.stages[s]; } }); }
+    if (source.stages) { Object.keys(source.stages).forEach(s => { target.stages[s] = source.stages[s]; }); }
     if (source.globalMusicConfig) { target.globalMusicConfig = source.globalMusicConfig; }
     if (source.licenseKeys) { target.licenseKeys = source.licenseKeys; }
     return target;
@@ -680,12 +680,14 @@ window.upgradeDBStructure = function(source) {
 
 window.initDB = async function() { 
     let cloudDb = null;
+    let fetchOk = false;
     try { 
         const headers = {};
         if (state.isAdmin && currentUserAccount === 'yishuyangguang') headers['x-admin-auth'] = 'yishuyangguang';
         
         const res = await fetch('/api/db?t=' + Date.now(), { headers }); 
         if (res.ok) { 
+            fetchOk = true;
             const remoteDb = await res.json(); 
             if (remoteDb && remoteDb.stages) { cloudDb = remoteDb; } 
         } 
@@ -713,7 +715,9 @@ window.initDB = async function() {
     if (document.getElementById('vinyl-player-modal').style.display === 'flex' && musicState.type !== 'favorites') {
         if (db.globalMusicConfig && db.globalMusicConfig.library[musicState.type]) { musicState.playlist = db.globalMusicConfig.library[musicState.type]; window.renderVinylPlaylist(); }
     }
-    if (bestLocalDb && !cloudDb) window.saveDB();
+    
+    // 🛡️ 绝不轻易将本地的残缺数据推上云端，仅在网络通畅且云端为空时进行初始填充
+    if (bestLocalDb && !cloudDb && fetchOk) window.saveDB();
 }
 
 window.saveDB = async function() { 
@@ -818,7 +822,6 @@ window.loginSuccess = async function(baseUser, isAdmin) {
     state.isLoggedIn = true; state.isAdmin = isAdmin; currentUserAccount = baseUser; 
     document.getElementById('user-widget').style.display = 'flex'; window.updateUserWidgetIcon(); 
     
-    // 🛡️ 深呼吸同步引擎：任何人进门前，强制拉取云端最新数据，防止看到空白/旧版网页
     window.showGlobalToast('正在同步云端最新时空...', 'loading');
     await window.initDB();
     
@@ -852,6 +855,10 @@ window.handleRegister = async function() {
         }
         
         db.users[u] = { password: p, nickname: '', avatar: '', favorites: [], expireAt: data.expireAt, status: 'normal' };
+        
+        // 🛡️ 注册后强制写入云端和本地，确保数据固化
+        await window.saveDB();
+        
         window.showGlobalToast(`注册成功！已为您赋予 ${data.days} 天时空权限`, 'success');
         window.loginSuccess(u, false);
     } catch(e) {
@@ -1029,7 +1036,7 @@ window.toggleEditMode = function() { state.isEditMode = !state.isEditMode; docum
 window.navigateTo = function(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); document.getElementById(screenId).scrollTop = 0; }
 window.applyStageTheme = function(stageName) { if (!stageName || !db.stages[stageName]) return; const t = db.stages[stageName].themeParams; const currentParams = state.isLightTheme ? t.light : t.dark; document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s); }
 
-window.initStageScreen = function() { document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none'; const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' }; document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s); const container = document.getElementById('stage-buttons-container'); container.innerHTML = ''; const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top'; const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom'; stagesList.forEach((sKey, index) => { const sData = db.stages[sKey]; const iconB64 = sData.icon; const displayName = sData.name || sKey; const card = document.createElement('div'); card.className = 'stage-card'; card.onclick = (e) => { if(!state.isEditMode) window.selectStage(sKey); }; const iconDiv = document.createElement('div'); iconDiv.className = 'stage-icon-dropzone'; if (iconB64) { iconDiv.innerHTML = `<img src="${iconB64}">`; } else { iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; } const titleInput = document.createElement('input'); titleInput.className = 'stage-card-title'; titleInput.value = displayName; if (state.isEditMode) { iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) window.handleIconUpload(ev.target.files[0], sKey)}; input.click(); }); titleInput.addEventListener('click', (e) => { e.stopPropagation(); }); titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; window.saveDB(); }); } card.appendChild(iconDiv); card.appendChild(titleInput); if (index < 3) rowTop.appendChild(card); else rowBottom.appendChild(card); }); container.appendChild(rowTop); container.appendChild(rowBottom); window.navigateTo('screen-stage'); }
+window.initStageScreen = function() { document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none'; const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' }; document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s); const container = document.getElementById('stage-buttons-container'); container.innerHTML = ''; const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top'; const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom'; Object.keys(db.stages).forEach((sKey, index) => { const sData = db.stages[sKey]; const iconB64 = sData.icon; const displayName = sData.name || sKey; const card = document.createElement('div'); card.className = 'stage-card'; card.onclick = (e) => { if(!state.isEditMode) window.selectStage(sKey); }; const iconDiv = document.createElement('div'); iconDiv.className = 'stage-icon-dropzone'; if (iconB64) { iconDiv.innerHTML = `<img src="${iconB64}">`; } else { iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; } const titleInput = document.createElement('input'); titleInput.className = 'stage-card-title'; titleInput.value = displayName; if (state.isEditMode) { iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) window.handleIconUpload(ev.target.files[0], sKey)}; input.click(); }); titleInput.addEventListener('click', (e) => { e.stopPropagation(); }); titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; window.saveDB(); }); } card.appendChild(iconDiv); card.appendChild(titleInput); if (index < 3) rowTop.appendChild(card); else rowBottom.appendChild(card); }); container.appendChild(rowTop); container.appendChild(rowBottom); window.navigateTo('screen-stage'); }
 window.handleIconUpload = function(file, stageKey) { window.compressImageFile(file, async (base64Str) => { db.stages[stageKey].icon = base64Str; await window.saveDB(); window.initStageScreen(); }); }
 
 window.selectStage = function(sKey) { if(state.isEditMode) return; state.stage = sKey; window.applyStageTheme(sKey); document.getElementById('list-stage-title').innerText = `${db.stages[sKey].name}`; const cats = db.stages[sKey].categories || []; if(cats.length > 0) state.activeCategoryId = cats[0].id; else state.activeCategoryId = ''; window.renderCardList(); window.navigateTo('screen-card-list'); }
