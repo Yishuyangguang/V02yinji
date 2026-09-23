@@ -593,26 +593,17 @@
 </div>
 
 <script>
-const defaultDB = {
-    users: { 'yishuyangguang': { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } }, 
-    licenseKeys: {},
-    globalMusicConfig: { categories: [{ id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' }], library: { 'mcat_1': [], 'mcat_2': [] } },
-    stages: {
-        '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
-        '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }] },
-        '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', name: '定婚期', prepText: '即将步入婚姻殿堂，回想决定携手的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [] },
-        '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', name: '结婚初阶', prepText: '爱意要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [] },
-        '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', name: '备孕时期', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [] },
-        '孕后初期': { themeParams: { dark: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, light: { bg: '#f4f9fd', p: '#0284c7', s: '#7dd3fc' } }, icon: '', name: '孕后初期', prepText: '疲惫需要温柔承托，轻揉肩膀放松。', categories: [{id:'cat_ep1',name:'温柔承托'}], cards: [] },
-        '婚后进阶': { themeParams: { dark: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, light: { bg: '#faf5ff', p: '#7c3aed', s: '#c4b5fd' } }, icon: '', name: '婚后进阶', prepText: '全然接纳此刻真实的彼此。', categories: [{id:'cat_a1',name:'平淡坚守'}], cards: [] }
-    }
-};
-
 let lastParticleTime = 0; const particleFPS = 30; const particleInterval = 1000 / particleFPS;
 let isPressing = false; let pressProgress = 0; let pressFrame = null;
 let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true, isModalOpen: false };
-let db = JSON.parse(JSON.stringify(defaultDB)); 
-let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let particles = []; let animationId; window.isDraggingProgress = false;
+let db = null; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let particles = []; let animationId; window.isDraggingProgress = false;
+
+let cachedPrimaryColorStr = '212,175,55';
+window.updateThemeCache = function(hexColor) {
+    if (!hexColor) return;
+    let r = parseInt(hexColor.slice(1, 3), 16), g = parseInt(hexColor.slice(3, 5), 16), b = parseInt(hexColor.slice(5, 7), 16);
+    if (!isNaN(r)) cachedPrimaryColorStr = `${r},${g},${b}`;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById('particle-canvas');
@@ -631,21 +622,66 @@ document.addEventListener("DOMContentLoaded", () => {
         longPressBtn.addEventListener('contextmenu', e => e.preventDefault());
     }
     state.isLightTheme = true; document.getElementById('btn-theme').innerText = '☀️';
+    window.updateThemeCache('#d99a29');
+    
+    // 🛡️ 休眠引擎：当浏览器被最小化或切到后台时，绝对彻底切断动画计算
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
+        } else {
+            if (!state.isModalOpen && !animationId) {
+                lastParticleTime = performance.now();
+                window.animateParticles();
+            }
+        }
+    });
+    
     window.initDB(); window.initProgressDrag();
 });
 
 const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
-window.showModal = function(id) { document.getElementById(id).style.display = 'flex'; state.isModalOpen = true; }
+const defaultDB = {
+    users: { 'yishuyangguang': { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } }, 
+    licenseKeys: {},
+    globalMusicConfig: { categories: [{ id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' }], library: { 'mcat_1': [], 'mcat_2': [] } },
+    stages: {
+        '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
+        '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }] },
+        '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', name: '定婚期', prepText: '即将步入婚姻殿堂，回想决定携手的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [] },
+        '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', name: '结婚初阶', prepText: '爱意要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [] },
+        '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', name: '备孕时期', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [] },
+        '孕后初期': { themeParams: { dark: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, light: { bg: '#f4f9fd', p: '#0284c7', s: '#7dd3fc' } }, icon: '', name: '孕后初期', prepText: '疲惫需要温柔承托，轻揉肩膀放松。', categories: [{id:'cat_ep1',name:'温柔承托'}], cards: [] },
+        '婚后进阶': { themeParams: { dark: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, light: { bg: '#faf5ff', p: '#7c3aed', s: '#c4b5fd' } }, icon: '', name: '婚后进阶', prepText: '全然接纳此刻真实的彼此。', categories: [{id:'cat_a1',name:'平淡坚守'}], cards: [] }
+    }
+};
+
+db = JSON.parse(JSON.stringify(defaultDB));
+
+window.showModal = function(id) { 
+    document.getElementById(id).style.display = 'flex'; 
+    state.isModalOpen = true; 
+    // 🛡️ 休眠引擎：只要打开弹窗，强行拔掉 CPU 的动画电源
+    if(animationId) { cancelAnimationFrame(animationId); animationId = null; }
+}
+
 window.hideModal = function(id) { 
     document.getElementById(id).style.display = 'none'; 
     let anyOpen = false; document.querySelectorAll('.modal-overlay').forEach(m => { if(window.getComputedStyle(m).display !== 'none') anyOpen = true; });
     state.isModalOpen = anyOpen;
+    // 🛡️ 唤醒引擎：弹窗全关，瞬间通电唤醒
+    if (!state.isModalOpen && !document.hidden && !animationId) {
+        lastParticleTime = performance.now();
+        window.animateParticles();
+    }
 }
 
 window.animateParticles = function(timestamp) { 
+    // 🛡️ 绝对防线：一旦处于隐藏或模态框状态，循环彻底熔断
+    if (document.hidden || state.isModalOpen) { animationId = null; return; }
+    
     animationId = requestAnimationFrame(window.animateParticles); 
-    if (document.hidden || state.isModalOpen) return;
+    
     if (!timestamp) timestamp = performance.now();
     const elapsed = timestamp - lastParticleTime;
     if (elapsed > particleInterval) {
@@ -653,10 +689,7 @@ window.animateParticles = function(timestamp) {
         const canvas = document.getElementById('particle-canvas'); 
         if(!canvas || !window.ctx) return; 
         window.ctx.clearRect(0, 0, canvas.width, canvas.height); 
-        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim(); 
-        const hexToRgb = hex => { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return isNaN(r) ? 'rgb(212,175,55)' : `rgb(${r},${g},${b})`; }; 
-        const colorStr = primaryColor.startsWith('#') ? hexToRgb(primaryColor) : 'rgb(212,175,55)'; 
-        particles.forEach(p => { p.update(); p.draw(colorStr); }); 
+        particles.forEach(p => { p.update(); p.draw(); }); 
     }
 }
 
@@ -704,6 +737,9 @@ window.initDB = async function() {
     
     if (cloudDb) db = window.upgradeDBStructure(cloudDb);
     else if (bestLocalDb) db = window.upgradeDBStructure(bestLocalDb);
+    else db = JSON.parse(JSON.stringify(defaultDB));
+
+    if (!db.users['yishuyangguang']) db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' };
     
     try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v34', JSON.stringify(db)); } catch(e){} 
     
@@ -744,6 +780,7 @@ window.toggleTheme = function() {
         document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); 
         document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
         document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
+        window.updateThemeCache(currentParams.p);
     }
 }
 window.resizeCanvas = function() { const canvas = document.getElementById('particle-canvas'); if(!canvas) return; canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -756,12 +793,24 @@ class Particle {
         else { this.y += this.speedY * 0.8; this.x += this.speedX + (Math.random() * 0.4 - 0.2); if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; if (this.x < 0) this.x = canvas.width / 2; if (this.x > canvas.width / 2) this.x = 0; }
         this.pulse += 0.02; 
     } 
-    draw(colorStr) { 
+    draw() { 
         if(!window.ctx) return; const canvas = document.getElementById('particle-canvas'); const alpha = Math.max(0, this.baseAlpha + Math.sin(this.pulse) * 0.3);
         const renderShape = (x, y) => {
             window.ctx.save(); window.ctx.translate(x, y);
-            if (state.isLightTheme) { const s = this.size * 0.6; window.ctx.scale(s, s); window.ctx.fillStyle = colorStr.replace(')', `, ${alpha})`).replace('rgb', 'rgba'); window.ctx.beginPath(); window.ctx.moveTo(0, 0); window.ctx.bezierCurveTo(-5, -6, -12, 4, 0, 14); window.ctx.bezierCurveTo(12, 4, 5, -6, 0, 0); window.ctx.fill(); } 
-            else { window.ctx.fillStyle = `rgba(180, 255, 100, ${alpha})`; window.ctx.shadowBlur = this.size * 5; window.ctx.shadowColor = `rgba(180, 255, 100, ${alpha})`; window.ctx.beginPath(); window.ctx.arc(0, 0, this.size * 0.7, 0, Math.PI * 2); window.ctx.fill(); }
+            if (state.isLightTheme) { 
+                const s = this.size * 0.6; window.ctx.scale(s, s); 
+                window.ctx.fillStyle = `rgba(${cachedPrimaryColorStr}, ${alpha})`;
+                window.ctx.beginPath(); window.ctx.moveTo(0, 0); window.ctx.bezierCurveTo(-5, -6, -12, 4, 0, 14); window.ctx.bezierCurveTo(12, 4, 5, -6, 0, 0); window.ctx.fill(); 
+            } 
+            else { 
+                // 🛡️ 废弃 CPU 杀手 shadowBlur，采用极致丝滑的径向渐变
+                const radius = this.size * 3;
+                const grad = window.ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+                grad.addColorStop(0, `rgba(180, 255, 100, ${alpha})`);
+                grad.addColorStop(1, `rgba(180, 255, 100, 0)`);
+                window.ctx.fillStyle = grad; 
+                window.ctx.beginPath(); window.ctx.arc(0, 0, radius, 0, Math.PI * 2); window.ctx.fill(); 
+            }
             window.ctx.restore();
         };
         renderShape(this.x, this.y); renderShape(canvas.width - this.x, this.y); 
@@ -1029,7 +1078,7 @@ window.toggleUserStatus = async function(u) {
 window.updateUserWidgetIcon = function() { if(!currentUserAccount) return; if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('user-widget-avatar'); const svgEl = document.getElementById('user-widget-svg'); if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } }
 window.toggleEditMode = function() { state.isEditMode = !state.isEditMode; document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑'; if(state.isEditMode) document.body.classList.add('edit-mode'); else document.body.classList.remove('edit-mode'); if (document.getElementById('screen-stage').classList.contains('active')) window.initStageScreen(); else if (document.getElementById('screen-card-list').classList.contains('active')) window.renderCardList(); }
 window.navigateTo = function(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); document.getElementById(screenId).scrollTop = 0; }
-window.applyStageTheme = function(stageName) { if (!stageName || !db.stages[stageName]) return; const t = db.stages[stageName].themeParams; const currentParams = state.isLightTheme ? t.light : t.dark; document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s); }
+window.applyStageTheme = function(stageName) { if (!stageName || !db.stages[stageName]) return; const t = db.stages[stageName].themeParams; const currentParams = state.isLightTheme ? t.light : t.dark; document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s); window.updateThemeCache(currentParams.p); }
 
 window.initStageScreen = function() { 
     if (!state.isAdmin && currentUserAccount !== 'yishuyangguang') {
@@ -1052,6 +1101,7 @@ window.initStageScreen = function() {
     document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); 
     document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
     document.documentElement.style.setProperty('--theme-secondary', currentParams.s); 
+    window.updateThemeCache(currentParams.p);
     const container = document.getElementById('stage-buttons-container'); container.innerHTML = ''; 
     const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top'; 
     const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom'; 
