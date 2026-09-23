@@ -52,6 +52,14 @@ export async function onRequest(context) {
                 const cloudDb = await object.json();
                 
                 if (!isAdmin) {
+                    // 🛡️ 钛合金只读锁：强制保护站长配置的阶段卡片和音乐库！普通用户绝对无法覆盖
+                    if (cloudDb.stages) {
+                        incomingData.stages = cloudDb.stages;
+                    }
+                    if (cloudDb.globalMusicConfig) {
+                        incomingData.globalMusicConfig = cloudDb.globalMusicConfig;
+                    }
+
                     // 保障 1：把刚才切除的卡密库缝合回去，防止被普通用户的上传清空
                     if (cloudDb.licenseKeys) {
                         incomingData.licenseKeys = cloudDb.licenseKeys;
