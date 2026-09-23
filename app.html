@@ -391,8 +391,6 @@
     </div>
 </div>
 
-<!-- ================= 弹窗群 ================= -->
-
 <div class="modal-overlay" id="user-profile-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px; padding: 25px;">
         <h2 class="text-gradient-blue" style="margin-bottom: 20px; font-size:1.6rem;">个人中心</h2>
@@ -407,7 +405,6 @@
 
         <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称" style="text-align:center; padding: 12px 15px;">
         
-        <!-- 🛡️ 完美的纵向流式响应式续费布局，拒绝输入框挤压变形 -->
         <div id="user-license-info" style="margin-top: 15px; padding: 20px; background: rgba(0,0,0,0.15); border-radius: 20px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
             <div style="margin-bottom: 16px; font-size: 15px; letter-spacing: 1px;">剩余时空授权：<span id="user-days-left" style="color: #fde68a; font-weight: bold; font-size: 24px;">--</span> 天</div>
             <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
@@ -1036,7 +1033,35 @@ window.toggleEditMode = function() { state.isEditMode = !state.isEditMode; docum
 window.navigateTo = function(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); document.getElementById(screenId).scrollTop = 0; }
 window.applyStageTheme = function(stageName) { if (!stageName || !db.stages[stageName]) return; const t = db.stages[stageName].themeParams; const currentParams = state.isLightTheme ? t.light : t.dark; document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s); }
 
-window.initStageScreen = function() { document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none'; const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' }; document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s); const container = document.getElementById('stage-buttons-container'); container.innerHTML = ''; const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top'; const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom'; Object.keys(db.stages).forEach((sKey, index) => { const sData = db.stages[sKey]; const iconB64 = sData.icon; const displayName = sData.name || sKey; const card = document.createElement('div'); card.className = 'stage-card'; card.onclick = (e) => { if(!state.isEditMode) window.selectStage(sKey); }; const iconDiv = document.createElement('div'); iconDiv.className = 'stage-icon-dropzone'; if (iconB64) { iconDiv.innerHTML = `<img src="${iconB64}">`; } else { iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; } const titleInput = document.createElement('input'); titleInput.className = 'stage-card-title'; titleInput.value = displayName; if (state.isEditMode) { iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) window.handleIconUpload(ev.target.files[0], sKey)}; input.click(); }); titleInput.addEventListener('click', (e) => { e.stopPropagation(); }); titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; window.saveDB(); }); } card.appendChild(iconDiv); card.appendChild(titleInput); if (index < 3) rowTop.appendChild(card); else rowBottom.appendChild(card); }); container.appendChild(rowTop); container.appendChild(rowBottom); window.navigateTo('screen-stage'); }
+window.initStageScreen = function() { 
+    // 🛡️ 全局驱逐守卫：每次进入主舞台前，核查是否过期
+    if (!state.isAdmin && currentUserAccount !== 'yishuyangguang') {
+        const uData = db.users[currentUserAccount];
+        const nowTime = Date.now();
+        if (!uData || !uData.expireAt || uData.expireAt < nowTime) {
+            alert("【系统拦截】您的时空印记已到期或未激活。请在登录界面联系站长获取新卡密续费。");
+            window.logout();
+            return;
+        }
+        if (uData.status === 'banned') {
+            alert("【系统拦截】您的账号已被限制使用。");
+            window.logout();
+            return;
+        }
+    }
+
+    document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none'; 
+    const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' }; 
+    document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); 
+    document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
+    document.documentElement.style.setProperty('--theme-secondary', currentParams.s); 
+    const container = document.getElementById('stage-buttons-container'); container.innerHTML = ''; 
+    const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top'; 
+    const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom'; 
+    Object.keys(db.stages).forEach((sKey, index) => { const sData = db.stages[sKey]; const iconB64 = sData.icon; const displayName = sData.name || sKey; const card = document.createElement('div'); card.className = 'stage-card'; card.onclick = (e) => { if(!state.isEditMode) window.selectStage(sKey); }; const iconDiv = document.createElement('div'); iconDiv.className = 'stage-icon-dropzone'; if (iconB64) { iconDiv.innerHTML = `<img src="${iconB64}">`; } else { iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; } const titleInput = document.createElement('input'); titleInput.className = 'stage-card-title'; titleInput.value = displayName; if (state.isEditMode) { iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) window.handleIconUpload(ev.target.files[0], sKey)}; input.click(); }); titleInput.addEventListener('click', (e) => { e.stopPropagation(); }); titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; window.saveDB(); }); } card.appendChild(iconDiv); card.appendChild(titleInput); if (index < 3) rowTop.appendChild(card); else rowBottom.appendChild(card); }); container.appendChild(rowTop); container.appendChild(rowBottom); 
+    window.navigateTo('screen-stage'); 
+}
+
 window.handleIconUpload = function(file, stageKey) { window.compressImageFile(file, async (base64Str) => { db.stages[stageKey].icon = base64Str; await window.saveDB(); window.initStageScreen(); }); }
 
 window.selectStage = function(sKey) { if(state.isEditMode) return; state.stage = sKey; window.applyStageTheme(sKey); document.getElementById('list-stage-title').innerText = `${db.stages[sKey].name}`; const cats = db.stages[sKey].categories || []; if(cats.length > 0) state.activeCategoryId = cats[0].id; else state.activeCategoryId = ''; window.renderCardList(); window.navigateTo('screen-card-list'); }
