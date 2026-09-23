@@ -407,11 +407,12 @@
 
         <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称" style="text-align:center; padding: 12px 15px;">
         
-        <div id="user-license-info" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.15); border-radius: 14px; font-size: 13px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
-            <div style="margin-bottom: 12px; font-size: 14px;">剩余时空授权：<span id="user-days-left" style="color: #fde68a; font-weight: bold; font-size: 18px;">--</span> 天</div>
-            <div style="display: flex; gap: 8px;">
-                <input type="text" id="ipt-renew-key" placeholder="在此输入新卡密续期" style="margin:0; flex: 1; padding: 10px; font-size: 12px; text-align: center;">
-                <button class="btn-glass btn-blue-gradient" style="margin:0; padding: 10px 15px; border-radius: 12px; font-size: 12px;" onclick="window.handleRenew()">立即续费</button>
+        <!-- 🛡️ 完美的纵向流式响应式续费布局，拒绝输入框挤压变形 -->
+        <div id="user-license-info" style="margin-top: 15px; padding: 20px; background: rgba(0,0,0,0.15); border-radius: 20px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
+            <div style="margin-bottom: 16px; font-size: 15px; letter-spacing: 1px;">剩余时空授权：<span id="user-days-left" style="color: #fde68a; font-weight: bold; font-size: 24px;">--</span> 天</div>
+            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                <input type="text" id="ipt-renew-key" placeholder="在此输入16位新卡密续期" style="margin:0; width: 100%; padding: 14px 15px; font-size: 13px; text-align: center; border-radius: 14px; letter-spacing: 1px; box-sizing: border-box;">
+                <button class="btn-glass btn-blue-gradient" style="margin:0; width: 100%; padding: 12px; border-radius: 14px; font-size: 13px; font-weight: bold; letter-spacing: 1px;" onclick="window.handleRenew()">⚡ 立 即 续 费</button>
             </div>
         </div>
 
@@ -423,6 +424,7 @@
         <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 25px;">
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; background:transparent; padding: 0.8rem; border-radius:18px;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
             <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.manageMusicLibrary();">⚙️ 全局音律库管理 (管理员专属)</button>
+            
             <button class="btn-glass" style="width: 100%; border: 1px dashed #f59e0b; color: #f59e0b; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.openAuthAdmin();">🛡️ 全局时空权限管理 (管理员专属)</button>
         </div>
     </div>
@@ -716,7 +718,6 @@ window.initDB = async function() {
         if (db.globalMusicConfig && db.globalMusicConfig.library[musicState.type]) { musicState.playlist = db.globalMusicConfig.library[musicState.type]; window.renderVinylPlaylist(); }
     }
     
-    // 🛡️ 绝不轻易将本地的残缺数据推上云端，仅在网络通畅且云端为空时进行初始填充
     if (bestLocalDb && !cloudDb && fetchOk) window.saveDB();
 }
 
@@ -856,7 +857,6 @@ window.handleRegister = async function() {
         
         db.users[u] = { password: p, nickname: '', avatar: '', favorites: [], expireAt: data.expireAt, status: 'normal' };
         
-        // 🛡️ 注册后强制写入云端和本地，确保数据固化
         await window.saveDB();
         
         window.showGlobalToast(`注册成功！已为您赋予 ${data.days} 天时空权限`, 'success');
