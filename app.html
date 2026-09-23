@@ -593,10 +593,26 @@
 </div>
 
 <script>
+const defaultDB = {
+    users: { 'yishuyangguang': { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } }, 
+    licenseKeys: {},
+    globalMusicConfig: { categories: [{ id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' }], library: { 'mcat_1': [], 'mcat_2': [] } },
+    stages: {
+        '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
+        '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }] },
+        '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', name: '定婚期', prepText: '即将步入婚姻殿堂，回想决定携手的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [] },
+        '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', name: '结婚初阶', prepText: '爱意要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [] },
+        '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', name: '备孕时期', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [] },
+        '孕后初期': { themeParams: { dark: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, light: { bg: '#f4f9fd', p: '#0284c7', s: '#7dd3fc' } }, icon: '', name: '孕后初期', prepText: '疲惫需要温柔承托，轻揉肩膀放松。', categories: [{id:'cat_ep1',name:'温柔承托'}], cards: [] },
+        '婚后进阶': { themeParams: { dark: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, light: { bg: '#faf5ff', p: '#7c3aed', s: '#c4b5fd' } }, icon: '', name: '婚后进阶', prepText: '全然接纳此刻真实的彼此。', categories: [{id:'cat_a1',name:'平淡坚守'}], cards: [] }
+    }
+};
+
 let lastParticleTime = 0; const particleFPS = 30; const particleInterval = 1000 / particleFPS;
 let isPressing = false; let pressProgress = 0; let pressFrame = null;
 let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true, isModalOpen: false };
-let db = null; let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let particles = []; let animationId; window.isDraggingProgress = false;
+let db = JSON.parse(JSON.stringify(defaultDB)); 
+let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let particles = []; let animationId; window.isDraggingProgress = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById('particle-canvas');
@@ -619,21 +635,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
-
-const defaultDB = {
-    users: { 'yishuyangguang': { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } }, 
-    licenseKeys: {},
-    globalMusicConfig: { categories: [{ id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' }], library: { 'mcat_1': [], 'mcat_2': [] } },
-    stages: {
-        '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
-        '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }] },
-        '定婚期': { themeParams: { dark: { bg: '#1a1610', p: '#d4af37', s: '#f59e0b' }, light: { bg: '#fcfaf5', p: '#d97706', s: '#fcd34d' } }, icon: '', name: '定婚期', prepText: '即将步入婚姻殿堂，回想决定携手的初心。', categories: [{id:'cat_e1',name:'盟约预备'}], cards: [] },
-        '结婚': { themeParams: { dark: { bg: '#1c1012', p: '#d4af37', s: '#ef4444' }, light: { bg: '#fdf5f5', p: '#dc2626', s: '#fca5a5' } }, icon: '', name: '结婚初阶', prepText: '爱意要在日常点滴中活出。请拥抱彼此。', categories: [{id:'cat_m1',name:'合二为一'}], cards: [] },
-        '备孕期': { themeParams: { dark: { bg: '#101c17', p: '#d4af37', s: '#10b981' }, light: { bg: '#f4fbf7', p: '#059669', s: '#6ee7b7' } }, icon: '', name: '备孕时期', prepText: '滋养爱情，把手放在对方的肩上。', categories: [{id:'cat_p1',name:'孕育之爱'}], cards: [] },
-        '孕后初期': { themeParams: { dark: { bg: '#10171c', p: '#d4af37', s: '#0ea5e9' }, light: { bg: '#f4f9fd', p: '#0284c7', s: '#7dd3fc' } }, icon: '', name: '孕后初期', prepText: '疲惫需要温柔承托，轻揉肩膀放松。', categories: [{id:'cat_ep1',name:'温柔承托'}], cards: [] },
-        '婚后进阶': { themeParams: { dark: { bg: '#16121c', p: '#d4af37', s: '#8b5cf6' }, light: { bg: '#faf5ff', p: '#7c3aed', s: '#c4b5fd' } }, icon: '', name: '婚后进阶', prepText: '全然接纳此刻真实的彼此。', categories: [{id:'cat_a1',name:'平淡坚守'}], cards: [] }
-    }
-};
 
 window.showModal = function(id) { document.getElementById(id).style.display = 'flex'; state.isModalOpen = true; }
 window.hideModal = function(id) { 
@@ -703,9 +704,6 @@ window.initDB = async function() {
     
     if (cloudDb) db = window.upgradeDBStructure(cloudDb);
     else if (bestLocalDb) db = window.upgradeDBStructure(bestLocalDb);
-    else db = JSON.parse(JSON.stringify(defaultDB));
-
-    if (!db.users['yishuyangguang']) db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' };
     
     try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v34', JSON.stringify(db)); } catch(e){} 
     
@@ -1034,7 +1032,6 @@ window.navigateTo = function(screenId) { document.querySelectorAll('.screen').fo
 window.applyStageTheme = function(stageName) { if (!stageName || !db.stages[stageName]) return; const t = db.stages[stageName].themeParams; const currentParams = state.isLightTheme ? t.light : t.dark; document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s); }
 
 window.initStageScreen = function() { 
-    // 🛡️ 全局驱逐守卫：每次进入主舞台前，核查是否过期
     if (!state.isAdmin && currentUserAccount !== 'yishuyangguang') {
         const uData = db.users[currentUserAccount];
         const nowTime = Date.now();
@@ -1161,7 +1158,6 @@ window.deleteAdminMusic = async function(catId, idx) {
     } 
 }
 
-let lastTimeUpdate = 0;
 window.initProgressDrag = function() {
     const track = document.getElementById('progress-track');
     if (!track) return;
@@ -1318,6 +1314,83 @@ window.confirmTrackLimit = function() {
 }
 window.closeVinylPlayer = function() { window.hideModal('vinyl-player-modal'); }
 window.showPlayerFromFloat = function() { if(state.isLoggedIn && !state.isEditMode && document.getElementById('vinyl-player-modal').style.display !== 'flex') window.showModal('vinyl-player-modal'); }
+
+window.startCardFlow = function(card) { state.currentCard = card; document.getElementById('prep-text').innerText = db.stages[state.stage].prepText; const prepBtn = document.getElementById('btn-prep-confirm'); if (state.stage === '单身期') { prepBtn.innerText = '我已准备好'; } else { prepBtn.innerText = '我们已预备好'; } window.navigateTo('screen-prep'); }
+window.confirmPrepAndNavigate = function() { if (state.stage === '单身期') { const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged'); const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; document.getElementById('sync-title').innerText = "抬头仰望"; const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || ''; let subText = "愿你在静谧中得着内心的力量与安宁。"; if (catName.includes('不想') || catName.includes('单身')) subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。"; else if (catName.includes('想') || catName.includes('进入婚姻')) subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。"; document.getElementById('sync-subtitle').innerText = subText; document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望"; document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)"; syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`; window.navigateTo('screen-sync'); } else { document.getElementById('sync-title').innerText = "双向奔赴"; document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并"; document.getElementById('btn-sync-confirm').innerText = "确 认 合 并"; document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)"; window.navigateTo('screen-role'); } }
+window.selectRole = function(role) { state.role = role; const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged'); const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; if (role === 'boy') syncBox.innerHTML = `<div class="sync-half boy" style="${bgStyle} background-size: cover;"></div>`; else syncBox.innerHTML = `<div class="sync-half girl" style="${bgStyle} background-size: cover;"></div>`; window.navigateTo('screen-sync'); }
+window.triggerSync = function() { document.getElementById('sync-animation-box').classList.add('merged'); state.currentStep = 0; setTimeout(() => { window.renderContentStep(); window.navigateTo('screen-content'); }, 1800); }
+window.renderContentStep = function() { const stepData = state.currentCard.steps[state.currentStep]; document.getElementById('content-type-title').innerText = `【${db.stages[state.stage].categories.find(c => c.id === state.currentCard.categoryId)?.name || '印记'}】的连结`; document.getElementById('step-title').innerText = stepData.title; document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>'); for(let i=1; i<=3; i++) { const dot = document.getElementById(`dot-${i}`); if (i - 1 === state.currentStep) dot.classList.add('active'); else dot.classList.remove('active'); } const nextBtn = document.getElementById('btn-next-step'); const longPressBtn = document.getElementById('btn-long-press'); if (state.currentStep < 2) { nextBtn.style.display = 'flex'; longPressBtn.style.display = 'none'; } else { nextBtn.style.display = 'none'; longPressBtn.style.display = 'flex'; } }
+window.nextContentStep = function() { if (state.currentStep < 2) { state.currentStep++; const t = document.getElementById('step-title'); const p = document.getElementById('step-text'); t.style.opacity = 0; p.style.opacity = 0; setTimeout(() => { window.renderContentStep(); t.style.transition = 'opacity 0.5s'; p.style.transition = 'opacity 0.5s'; t.style.opacity = 1; p.style.opacity = 1; }, 300); } }
+
+window.startPress = function(e) { 
+    if(e && e.type === 'touchstart') e.preventDefault(); 
+    if(isPressing) return; 
+    const pressArea = document.getElementById('btn-long-press');
+    const pressFill = document.getElementById('press-fill'); 
+    isPressing = true; 
+    pressProgress = 0; 
+    if (pressArea) pressArea.classList.add('pressing');
+    
+    if(pressFill) {
+        pressFill.style.transition = 'none'; 
+        pressFill.style.height = '0%';
+    }
+    if(pressFrame) cancelAnimationFrame(pressFrame); 
+    
+    let startTime = null;
+    const duration = 1500; 
+    
+    function up(timestamp) { 
+        if(!isPressing) return; 
+        if(!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        
+        pressProgress = Math.min((elapsed / duration) * 100, 100); 
+        if(pressFill) pressFill.style.height = `${pressProgress}%`; 
+        
+        if (pressProgress >= 100) { 
+            isPressing = false; 
+            if (pressArea) pressArea.classList.remove('pressing');
+            window.completeAction(); 
+        } else { 
+            pressFrame = requestAnimationFrame(up); 
+        } 
+    } 
+    pressFrame = requestAnimationFrame(up); 
+}
+
+window.endPress = function(e) { 
+    if(e && e.type === 'touchend') e.preventDefault(); 
+    isPressing = false; 
+    const pressArea = document.getElementById('btn-long-press');
+    if (pressArea) pressArea.classList.remove('pressing');
+    if(pressFrame) cancelAnimationFrame(pressFrame); 
+    
+    if (pressProgress < 100) { 
+        pressProgress = 0; 
+        const pressFill = document.getElementById('press-fill'); 
+        if(pressFill) {
+            pressFill.style.transition = 'height 0.3s ease-out';
+            pressFill.style.height = `0%`; 
+            setTimeout(() => { if(!isPressing) pressFill.style.transition = ''; }, 300);
+        }
+    } 
+}
+
+window.completeAction = function() { 
+    if(pressFrame) cancelAnimationFrame(pressFrame); 
+    window.navigateTo('screen-finish'); 
+}
+
+window.resetToStage = function() { 
+    const pressFill = document.getElementById('press-fill'); 
+    if(pressFill) {
+        pressFill.style.transition = ''; 
+        pressFill.style.height = `0%`; 
+    }
+    state.currentCard = null; state.role = ''; state.currentStep = 0; 
+    window.initStageScreen(); 
+}
 
 </script>
 <script src="card-tracker.js"></script>
