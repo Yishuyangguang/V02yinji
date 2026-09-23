@@ -1,11 +1,10 @@
 export async function onRequest(context) {
     const { request, env } = context;
 
-    // 跨域与通信头支持（为跨环境搬家做绝对兼容）
     const corsHeaders = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
+        "Access-Control-Allow-Headers": "Content-Type, x-admin-auth"
     };
 
     if (request.method === "OPTIONS") {
@@ -13,7 +12,6 @@ export async function onRequest(context) {
     }
 
     try {
-        // 【终极防线 1】拦截空绑定异常：如果环境没挂载成功，优雅返回空对象让前端存活，而不是崩溃
         if (!env.MY_BUCKET) {
             return new Response(JSON.stringify({}), { 
                 status: 200, 
@@ -21,11 +19,10 @@ export async function onRequest(context) {
             });
         }
 
-        // 【终极防线 2】处理 GET 拉取数据
+        const isAdmin = request.headers.get("x-admin-auth") === "yishuyangguang";
+
         if (request.method === "GET") {
             const object = await env.MY_BUCKET.get("db.json");
-            
-            // 如果旧桶是空的或者文件不存在，返回空初始化状态
             if (!object) {
                 return new Response(JSON.stringify({}), { 
                     status: 200, 
@@ -33,32 +30,63 @@ export async function onRequest(context) {
                 });
             }
             
-            // 修复数据流锁死 BUG：强制转换为文本体再返回，确保 100% 吐出数据
-            const text = await object.text();
-            return new Response(text, { 
+            let dbData = await object.json();
+            
+            // 【终极防线 1】非站长拉取数据时，物理切除卡密库，杜绝 F12 抓包泄露
+            if (!isAdmin && dbData.licenseKeys) {
+                delete dbData.licenseKeys;
+            }
+            
+            return new Response(JSON.stringify(dbData), { 
                 status: 200, 
                 headers: { "Content-Type": "application/json", ...corsHeaders } 
             });
         }
 
-        // 【终极防线 3】处理 POST 保存数据
         if (request.method === "POST") {
-            const data = await request.json();
-            await env.MY_BUCKET.put("db.json", JSON.stringify(data));
+            const incomingData = await request.json();
+            
+            // 【终极防线 2】读取云端真实数据进行缝合，防止核心字段被前端篡改或覆盖
+            const object = await env.MY_BUCKET.get("db.json");
+            if (object) {
+                const cloudDb = await object.json();
+                
+                if (!isAdmin) {
+                    // 保障 1：把刚才切除的卡密库缝合回去，防止被普通用户的上传清空
+                    if (cloudDb.licenseKeys) {
+                        incomingData.licenseKeys = cloudDb.licenseKeys;
+                    }
+                    
+                    // 保障 2：权限锁死！强制使用云端的到期时间和封禁状态
+                    if (cloudDb.users && incomingData.users) {
+                        for (let u in incomingData.users) {
+                            if (cloudDb.users[u]) {
+                                // 正常老用户，继承云端权限
+                                incomingData.users[u].expireAt = cloudDb.users[u].expireAt;
+                                incomingData.users[u].status = cloudDb.users[u].status;
+                            } else {
+                                // 【打入冷宫】未经过 verifyKey 接口，妄图通过前端造假直接上传注册的用户，直接封禁
+                                incomingData.users[u].expireAt = 0;
+                                incomingData.users[u].status = "banned";
+                            }
+                        }
+                    }
+                }
+            }
+
+            await env.MY_BUCKET.put("db.json", JSON.stringify(incomingData));
             return new Response(JSON.stringify({ success: true }), { 
                 status: 200, 
                 headers: { "Content-Type": "application/json", ...corsHeaders } 
             });
         }
 
-        // 非法请求方法拦截
         return new Response(JSON.stringify({ error: "Method Not Allowed" }), { 
             status: 405, 
             headers: corsHeaders 
         });
 
     } catch (err) {
-        // 【绝对保活机制】即使遇到极端未知错误，也包装成 JSON 返回，绝对不抛出 500 导致前端红屏
         return new Response(JSON.stringify({ 
             error: err.message || "后端发生未知崩溃",
             isError: true 
