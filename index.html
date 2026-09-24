@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   
-  <!-- ================= 🛡️ 微信/企微环境极致侦测与熔断拦截 ================= -->
+  <!-- ================= 🛡️ 腾讯系全家桶(微信/企微/QQ)极致侦测与熔断拦截 ================= -->
   <script>
     (function() {
         var ua = navigator.userAgent.toLowerCase();
-        var isWechat = ua.indexOf('micromessenger') !== -1 || ua.indexOf('wxwork') !== -1;
-        if (isWechat) {
+        // 精准狙击：微信、企业微信、QQ内置浏览器
+        var isTencentApp = ua.indexOf('micromessenger') !== -1 || ua.indexOf('wxwork') !== -1 || ua.indexOf('qq/') !== -1;
+        if (isTencentApp) {
             document.write('\
             <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.98);z-index:2147483647;display:flex;flex-direction:column;align-items:center;padding-top:15vh;color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,sans-serif;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);touch-action:none;pointer-events:all;overscroll-behavior:none;">\
                 <svg style="position:absolute;top:15px;right:25px;width:70px;height:70px;animation:wechatBounce 1s infinite alternate;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">\
