@@ -2,6 +2,32 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  
+  <!-- ================= 🛡️ 微信/企微环境极致侦测与熔断拦截 ================= -->
+  <script>
+    (function() {
+        var ua = navigator.userAgent.toLowerCase();
+        var isWechat = ua.indexOf('micromessenger') !== -1 || ua.indexOf('wxwork') !== -1;
+        if (isWechat) {
+            document.write('\
+            <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.98);z-index:2147483647;display:flex;flex-direction:column;align-items:center;padding-top:15vh;color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,sans-serif;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);touch-action:none;pointer-events:all;overscroll-behavior:none;">\
+                <svg style="position:absolute;top:15px;right:25px;width:70px;height:70px;animation:wechatBounce 1s infinite alternate;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">\
+                    <path d="M85 15 C 60 15, 30 40, 20 80" stroke="#d4af37" stroke-width="4" stroke-linecap="round" fill="none" stroke-dasharray="8 8"/>\
+                    <path d="M90 10 L 65 20 L 80 35 Z" fill="#d4af37"/>\
+                </svg>\
+                <h2 style="font-size:1.6rem;color:#d4af37;margin-bottom:20px;letter-spacing:2px;font-weight:bold;">请在浏览器中打开</h2>\
+                <p style="font-size:1.15rem;line-height:2;text-align:center;padding:0 30px;opacity:0.9;">为了呈现完美的沉浸式体验<br>并确保音频与数据正常运作</p>\
+                <div style="background:#ef4444;color:#fff;padding:8px 20px;border-radius:20px;font-weight:bold;margin-top:25px;letter-spacing:1px;box-shadow:0 8px 20px rgba(239,68,68,0.4);">点击右上角【···】选择在浏览器打开</div>\
+                <style>@keyframes wechatBounce { 0% { transform:translate(0,0); } 100% { transform:translate(-10px,10px); } }</style>\
+            </div>\
+            ');
+            document.close();
+            if(window.stop) window.stop();
+        }
+    })();
+  </script>
+  <!-- ================= 拦截结束 ================= -->
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   
