@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
 
-    <!-- ================= 🛡️ 微信/企微环境极致侦测与熔断拦截 ================= -->
+    <!-- ================= 🛡️ 腾讯系全家桶(微信/企微/QQ)极致侦测与熔断拦截 ================= -->
     <script>
       (function() {
           var ua = navigator.userAgent.toLowerCase();
-          var isWechat = ua.indexOf('micromessenger') !== -1 || ua.indexOf('wxwork') !== -1;
-          if (isWechat) {
+          var isTencentApp = ua.indexOf('micromessenger') !== -1 || ua.indexOf('wxwork') !== -1 || ua.indexOf('qq/') !== -1;
+          if (isTencentApp) {
               document.write('\
               <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.98);z-index:2147483647;display:flex;flex-direction:column;align-items:center;padding-top:15vh;color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,sans-serif;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);touch-action:none;pointer-events:all;overscroll-behavior:none;">\
                   <svg style="position:absolute;top:15px;right:25px;width:70px;height:70px;animation:wechatBounce 1s infinite alternate;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">\
@@ -650,6 +650,7 @@ document.addEventListener("DOMContentLoaded", () => {
     state.isLightTheme = true; document.getElementById('btn-theme').innerText = '☀️';
     window.updateThemeCache('#d99a29');
     
+    // 🛡️ 休眠引擎：当浏览器被最小化或切到后台时，绝对彻底切断动画计算
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
@@ -686,6 +687,7 @@ db = JSON.parse(JSON.stringify(defaultDB));
 window.showModal = function(id) { 
     document.getElementById(id).style.display = 'flex'; 
     state.isModalOpen = true; 
+    // 🛡️ 休眠引擎：只要打开弹窗，强行拔掉 CPU 的动画电源
     if(animationId) { cancelAnimationFrame(animationId); animationId = null; }
 }
 
@@ -693,6 +695,7 @@ window.hideModal = function(id) {
     document.getElementById(id).style.display = 'none'; 
     let anyOpen = false; document.querySelectorAll('.modal-overlay').forEach(m => { if(window.getComputedStyle(m).display !== 'none') anyOpen = true; });
     state.isModalOpen = anyOpen;
+    // 🛡️ 唤醒引擎：弹窗全关，瞬间通电唤醒
     if (!state.isModalOpen && !document.hidden && !animationId) {
         lastParticleTime = performance.now();
         window.animateParticles();
@@ -700,6 +703,7 @@ window.hideModal = function(id) {
 }
 
 window.animateParticles = function(timestamp) { 
+    // 🛡️ 绝对防线：一旦处于隐藏或模态框状态，循环彻底熔断
     if (document.hidden || state.isModalOpen) { animationId = null; return; }
     
     animationId = requestAnimationFrame(window.animateParticles); 
@@ -825,6 +829,7 @@ class Particle {
                 window.ctx.beginPath(); window.ctx.moveTo(0, 0); window.ctx.bezierCurveTo(-5, -6, -12, 4, 0, 14); window.ctx.bezierCurveTo(12, 4, 5, -6, 0, 0); window.ctx.fill(); 
             } 
             else { 
+                // 🛡️ 废弃 CPU 杀手 shadowBlur，采用极致丝滑的径向渐变
                 const radius = this.size * 3;
                 const grad = window.ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
                 grad.addColorStop(0, `rgba(180, 255, 100, ${alpha})`);
