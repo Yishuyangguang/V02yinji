@@ -1,7 +1,6 @@
 /* ================= 1. 高级数据中枢与全栈同步架构 ================= */
 const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
-// 彻底移除了站长的明文密码，安全全权交由后端环境变量验证
 const defaultDB = {
     users: { 
         'yishuyangguang': { nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } 
@@ -23,8 +22,12 @@ const defaultDB = {
 };
 
 let db = JSON.parse(JSON.stringify(defaultDB));
-let lastParticleTime = 0; const particleFPS = 30; const particleInterval = 1000 / particleFPS;
-let isPressing = false; let pressProgress = 0; let pressFrame = null;
+let lastParticleTime = 0; 
+const particleFPS = 30; 
+const particleInterval = 1000 / particleFPS;
+let isPressing = false; 
+let pressProgress = 0; 
+let pressFrame = null;
 let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true, isModalOpen: false };
 let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let particles = []; let animationId; window.isDraggingProgress = false;
 
@@ -37,7 +40,14 @@ window.updateThemeCache = function(hexColor) {
 
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById('particle-canvas');
-    if (canvas) { window.ctx = canvas.getContext('2d'); window.resizeCanvas(); window.addEventListener('resize', window.resizeCanvas); window.initParticles(); window.animateParticles(); }
+    if (canvas) { 
+        window.ctx = canvas.getContext('2d'); 
+        window.resizeCanvas(); 
+        window.addEventListener('resize', window.resizeCanvas); 
+        window.initParticles(); 
+        window.animateParticles(); 
+    }
+
     const audioPlayer = document.getElementById('bgm-player');
     if (audioPlayer) { 
         audioPlayer.addEventListener('ended', (e) => { if (typeof window.handleAudioEnded === 'function') window.handleAudioEnded(e); });
@@ -45,15 +55,23 @@ document.addEventListener("DOMContentLoaded", () => {
         audioPlayer.addEventListener('loadedmetadata', () => { if (typeof window.updateProgress === 'function') window.updateProgress(); });
         audioPlayer.addEventListener('durationchange', () => { if (typeof window.updateProgress === 'function') window.updateProgress(); });
     }
+
     const longPressBtn = document.getElementById('btn-long-press');
     if (longPressBtn) {
-        longPressBtn.addEventListener('mousedown', window.startPress); longPressBtn.addEventListener('mouseup', window.endPress); longPressBtn.addEventListener('mouseleave', window.endPress);
-        longPressBtn.addEventListener('touchstart', window.startPress, {passive: false}); longPressBtn.addEventListener('touchend', window.endPress, {passive: false}); longPressBtn.addEventListener('touchcancel', window.endPress, {passive: false});
+        longPressBtn.addEventListener('mousedown', window.startPress); 
+        longPressBtn.addEventListener('mouseup', window.endPress); 
+        longPressBtn.addEventListener('mouseleave', window.endPress);
+        longPressBtn.addEventListener('touchstart', window.startPress, {passive: false}); 
+        longPressBtn.addEventListener('touchend', window.endPress, {passive: false}); 
+        longPressBtn.addEventListener('touchcancel', window.endPress, {passive: false});
         longPressBtn.addEventListener('contextmenu', e => e.preventDefault());
     }
-    state.isLightTheme = true; document.getElementById('btn-theme').innerText = '☀️';
+
+    state.isLightTheme = true; 
+    document.getElementById('btn-theme').innerText = '☀️';
     window.updateThemeCache('#d99a29');
     
+    // 🛡️ 严格锁死熄屏与挂后台时的渲染引擎
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
@@ -65,7 +83,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
-    window.initDB(); window.initProgressDrag();
+    window.initDB(); 
+    window.initProgressDrag();
 });
 
 window.showModal = function(id) { 
@@ -76,7 +95,10 @@ window.showModal = function(id) {
 
 window.hideModal = function(id) { 
     document.getElementById(id).style.display = 'none'; 
-    let anyOpen = false; document.querySelectorAll('.modal-overlay').forEach(m => { if(window.getComputedStyle(m).display !== 'none') anyOpen = true; });
+    let anyOpen = false; 
+    document.querySelectorAll('.modal-overlay').forEach(m => { 
+        if(window.getComputedStyle(m).display !== 'none') anyOpen = true; 
+    });
     state.isModalOpen = anyOpen;
     if (!state.isModalOpen && !document.hidden && !animationId) {
         lastParticleTime = performance.now();
@@ -107,7 +129,7 @@ window.animateParticles = function(timestamp) {
 }
 
 window.cleanupOldLocalStorage = function() { 
-    const currentVersion = 'sealOfLoveDB_v39'; 
+    const currentVersion = 'sealOfLoveDB_v42'; 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
@@ -120,8 +142,11 @@ window.upgradeDBStructure = function(source) {
     let target = JSON.parse(JSON.stringify(defaultDB));
     if(!source) return target;
     
-    if (!source.topModules) target.topModules = [{ id: 'tm_music', name: '印记音律', icon: 'apple-touch-icon.png', actionType: 'music', url: '' }];
-    else target.topModules = source.topModules;
+    if (!source.topModules) {
+        target.topModules = [{ id: 'tm_music', name: '印记音律', icon: 'apple-touch-icon.png', actionType: 'music', url: '' }];
+    } else {
+        target.topModules = source.topModules;
+    }
 
     if (source.users) { 
         for (let u in source.users) { 
@@ -134,11 +159,10 @@ window.upgradeDBStructure = function(source) {
     
     if (source.stages) { 
         target.stages = {};
-        Object.keys(source.stages).forEach(s => { 
-            target.stages[s] = source.stages[s]; 
-        }); 
+        Object.keys(source.stages).forEach(s => { target.stages[s] = source.stages[s]; }); 
     }
     
+    if (source.customDocs) { target.customDocs = source.customDocs; }
     if (source.globalMusicConfig) { target.globalMusicConfig = source.globalMusicConfig; }
     if (source.licenseKeys) { target.licenseKeys = source.licenseKeys; }
     return target;
@@ -180,16 +204,11 @@ window.initDB = async function() {
     
     try { 
         window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v39', JSON.stringify(db)); 
+        localStorage.setItem('sealOfLoveDB_v42', JSON.stringify(db)); 
     } catch(e){} 
     
-    if (document.getElementById('screen-stage').classList.contains('active')) window.initStageScreen();
-    if (document.getElementById('screen-card-list').classList.contains('active')) window.renderCardList();
-    if (document.getElementById('vinyl-player-modal').style.display === 'flex' && musicState.type !== 'favorites') {
-        if (db.globalMusicConfig && db.globalMusicConfig.library[musicState.type]) { 
-            musicState.playlist = db.globalMusicConfig.library[musicState.type]; 
-            window.renderVinylPlaylist(); 
-        }
+    if (document.getElementById('screen-stage').classList.contains('active')) {
+        if(typeof window.initStageScreen === 'function') window.initStageScreen();
     }
     
     if (bestLocalDb && !cloudDb && fetchOk) window.saveDB();
@@ -199,7 +218,7 @@ window.saveDB = async function() {
     let localSaved = false; 
     try { 
         window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v39', JSON.stringify(db)); 
+        localStorage.setItem('sealOfLoveDB_v42', JSON.stringify(db)); 
         localSaved = true; 
     } catch (e) {} 
     
@@ -224,14 +243,11 @@ window.showGlobalToast = function(text, type = 'loading') {
     const icon = document.getElementById('toast-icon'); 
     const msg = document.getElementById('toast-text'); 
     if(!toast) return; 
-    
     toast.className = `global-toast show ${type}`; 
     msg.innerText = text; 
-    
     if(type === 'loading') icon.innerText = '⏳'; 
     if(type === 'success') icon.innerText = '✓'; 
     if(type === 'error') icon.innerText = '✖'; 
-    
     clearTimeout(toastTimeout); 
     if(type !== 'loading') { 
         toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); 
@@ -245,23 +261,15 @@ window.compressImageFile = function(file, callback) {
         img.onload = function() { 
             const canvas = document.createElement('canvas'); 
             const MAX_SIZE = 240; 
-            let width = img.width; 
-            let height = img.height; 
-            
-            if (width > height) { 
-                if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } 
-            } else { 
-                if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } 
-            } 
-            canvas.width = width; 
-            canvas.height = height; 
+            let width = img.width; let height = img.height; 
+            if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+            else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } 
+            canvas.width = width; canvas.height = height; 
             const ctx = canvas.getContext('2d'); 
             ctx.drawImage(img, 0, 0, width, height); 
             callback(canvas.toDataURL('image/webp', 0.75)); 
-        }; 
-        img.src = e.target.result; 
-    }; 
-    reader.readAsDataURL(file); 
+        }; img.src = e.target.result; 
+    }; reader.readAsDataURL(file); 
 }
 
 window.toggleTheme = function() { 
@@ -269,15 +277,13 @@ window.toggleTheme = function() {
     document.getElementById('btn-theme').innerText = state.isLightTheme ? '☀️' : '🌙'; 
     
     if (!state.isLightTheme) { 
-        document.body.classList.add('dark-theme'); 
-        document.body.classList.remove('light-theme'); 
+        document.body.classList.add('dark-theme'); document.body.classList.remove('light-theme'); 
     } else { 
-        document.body.classList.remove('dark-theme'); 
-        document.body.classList.add('light-theme'); 
+        document.body.classList.remove('dark-theme'); document.body.classList.add('light-theme'); 
     } 
     
     if(state.stage) {
-        window.applyStageTheme(state.stage); 
+        if(typeof window.applyStageTheme === 'function') window.applyStageTheme(state.stage); 
     } else {
         const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' };
         document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); 
@@ -294,6 +300,7 @@ window.resizeCanvas = function() {
     canvas.height = window.innerHeight; 
 }
 
+// 🔥 核心重写：极简纯色粒子，彻底抛弃消耗算力的渐变，手机 0 发热！
 class Particle { 
     constructor() { 
         const canvas = document.getElementById('particle-canvas'); 
@@ -302,7 +309,7 @@ class Particle {
         this.size = Math.random() * 1.5 + 0.5; 
         this.speedY = Math.random() * 0.4 - 0.2; 
         this.speedX = Math.random() * 0.2 - 0.1; 
-        this.baseAlpha = Math.random() * 0.4 + 0.1; 
+        this.baseAlpha = Math.random() * 0.3 + 0.1; 
         this.pulse = Math.random() * Math.PI; 
     } 
     update() { 
@@ -313,7 +320,7 @@ class Particle {
             this.x += Math.sin(this.pulse) * 0.5; 
             if (this.y < -20) { this.y = canvas.height + 20; this.x = Math.random() * (canvas.width / 2); } 
         } else { 
-            this.y += this.speedY * 0.8; 
+            this.y += this.speedY * 0.6; 
             this.x += this.speedX + (Math.random() * 0.4 - 0.2); 
             if (this.y < 0) this.y = canvas.height; 
             if (this.y > canvas.height) this.y = 0; 
@@ -325,39 +332,29 @@ class Particle {
     draw() { 
         if(!window.ctx) return; 
         const canvas = document.getElementById('particle-canvas'); 
-        const alpha = Math.max(0, this.baseAlpha + Math.sin(this.pulse) * 0.3);
-        const renderShape = (x, y) => {
-            window.ctx.save(); 
-            window.ctx.translate(x, y);
-            if (state.isLightTheme) { 
-                const s = this.size * 0.6; 
-                window.ctx.scale(s, s); 
-                window.ctx.fillStyle = `rgba(${cachedPrimaryColorStr}, ${alpha})`;
-                window.ctx.beginPath(); 
-                window.ctx.moveTo(0, 0); 
-                window.ctx.bezierCurveTo(-5, -6, -12, 4, 0, 14); 
-                window.ctx.bezierCurveTo(12, 4, 5, -6, 0, 0); 
-                window.ctx.fill(); 
-            } else { 
-                const radius = this.size * 3;
-                const grad = window.ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
-                grad.addColorStop(0, `rgba(180, 255, 100, ${alpha})`);
-                grad.addColorStop(1, `rgba(180, 255, 100, 0)`);
-                window.ctx.fillStyle = grad; 
-                window.ctx.beginPath(); 
-                window.ctx.arc(0, 0, radius, 0, Math.PI * 2); 
-                window.ctx.fill(); 
-            }
-            window.ctx.restore();
-        };
-        renderShape(this.x, this.y); 
-        renderShape(canvas.width - this.x, this.y); 
+        const alpha = Math.max(0, this.baseAlpha + Math.sin(this.pulse) * 0.2);
+        
+        window.ctx.save(); 
+        window.ctx.globalAlpha = alpha;
+        // 使用纯净的单一色值进行高斯扩散渲染，避免几何级的浮点运算
+        window.ctx.fillStyle = state.isLightTheme ? `rgb(${cachedPrimaryColorStr})` : '#b4ff64'; 
+        
+        window.ctx.beginPath(); 
+        window.ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2); 
+        window.ctx.fill(); 
+        
+        window.ctx.beginPath(); 
+        window.ctx.arc(canvas.width - this.x, this.y, this.size * 2, 0, Math.PI * 2); 
+        window.ctx.fill(); 
+        
+        window.ctx.restore();
     } 
 }
 
 window.initParticles = function() { 
     particles = []; 
-    const count = window.innerWidth < 600 ? 20 : 40; 
+    // 手机端将粒子数量从20直降至10，进一步解放GPU
+    const count = window.innerWidth < 600 ? 10 : 25; 
     for (let i = 0; i < count; i++) {
         particles.push(new Particle()); 
     }
@@ -436,7 +433,7 @@ window.loginSuccess = async function(baseUser, isAdmin) {
     } else {
         window.showGlobalToast('数据同步成功', 'success');
     }
-    window.initStageScreen(); 
+    if(typeof window.initStageScreen === 'function') window.initStageScreen(); 
 }
 
 window.handleRegister = async function() { 
@@ -671,7 +668,7 @@ window.renderUserControlList = function() {
             <div>
                 <div style="font-weight:bold; color:#fff; font-size:13px;">${user.nickname || '未命名'} <span style="font-size:11px; opacity:0.6; font-weight:normal;">(${u})</span></div>
                 <div style="font-size:12px; font-weight:bold; color:${isBanned ? '#ef4444' : (days === 0 ? '#f59e0b' : '#10b981')}; margin-top:6px;">
-                    ${isBanned ? '🚫 强制封禁中' : (days === 0 ? '⚠️️ 已到期' : `✅ 正常 (余 ${days} 天)`)}
+                    ${isBanned ? '🚫 强制封禁中' : (days === 0 ? '⚠️ 已到期' : `✅ 正常 (余 ${days} 天)`)}
                 </div>
             </div>
             <button class="btn-glass" style="margin:0; padding:6px 12px; font-size:12px; border-radius:8px; border-color:${isBanned ? '#10b981' : '#ef4444'}; color:${isBanned ? '#10b981' : '#ef4444'};" onclick="window.toggleUserStatus('${u}')">
@@ -724,9 +721,9 @@ window.toggleEditMode = function() {
     }
     
     if (document.getElementById('screen-stage').classList.contains('active')) {
-        window.initStageScreen(); 
+        if(typeof window.initStageScreen === 'function') window.initStageScreen();
     } else if (document.getElementById('screen-card-list').classList.contains('active')) {
-        window.renderCardList(); 
+        if(typeof window.renderCardList === 'function') window.renderCardList();
     }
 }
 
@@ -750,362 +747,7 @@ window.applyStageTheme = function(stageName) {
     window.updateThemeCache(currentParams.p); 
 }
 
-window.addNewStage = async function() {
-    const stageName = prompt("请输入新模块的名称 (如: 晚年期):");
-    if(!stageName) return;
-    const newKey = 'stage_' + Date.now();
-    db.stages[newKey] = {
-        name: stageName, 
-        icon: '', 
-        themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } },
-        prepText: '请准备，预备进入内心的探索。', 
-        categories: [{ id: 'cat_default_' + Date.now(), name: '核心印记' }], 
-        cards: []
-    };
-    await window.saveDB(); 
-    window.initStageScreen();
-}
-
-window.deleteStage = async function(sKey) {
-    if(confirm(`确定要彻底删除大模块 [${db.stages[sKey].name}] 吗？\n删除后不可恢复！`)) {
-        delete db.stages[sKey]; 
-        await window.saveDB(); 
-        window.initStageScreen();
-    }
-}
-
-// 🔥 核心重现：被我不小心删掉的主页渲染与弹性对称引擎，已安全加固，图片绝不越界溢出
-window.initStageScreen = function() { 
-    if (!state.isAdmin && currentUserAccount !== 'yishuyangguang') {
-        const uData = db.users[currentUserAccount]; 
-        const nowTime = Date.now();
-        if (!uData || !uData.expireAt || uData.expireAt < nowTime) { 
-            alert("【系统拦截】您的时空印记已到期或未激活。请在登录界面联系站长获取新卡密续费。"); 
-            window.logout(); 
-            return; 
-        }
-        if (uData.status === 'banned') { 
-            alert("【系统拦截】您的账号已被限制使用。"); 
-            window.logout(); 
-            return; 
-        }
-    }
-
-    document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none'; 
-    const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' }; 
-    document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); 
-    document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
-    document.documentElement.style.setProperty('--theme-secondary', currentParams.s); 
-    window.updateThemeCache(currentParams.p);
-    
-    // 渲染动态顶部模块
-    const topContainer = document.getElementById('top-modules-dynamic-container');
-    if (topContainer) {
-        topContainer.innerHTML = '';
-        (db.topModules || []).forEach((tm, idx) => {
-            const capsule = document.createElement('div');
-            capsule.className = 'brand-capsule-dynamic';
-            capsule.onclick = (e) => {
-                if (state.isEditMode) return;
-                if (tm.actionType === 'music') window.openMusicTypeModal();
-                else if (tm.actionType === 'link' && tm.url) window.open(tm.url, '_blank');
-                else window.showGlobalToast('该模块暂未配置功能', 'loading');
-            };
-
-            const imgEl = document.createElement('img');
-            imgEl.src = tm.icon || 'favicon-32x32.png';
-            imgEl.onerror = function() { this.src = 'favicon-32x32.png'; };
-            
-            const inputEl = document.createElement('input');
-            inputEl.value = tm.name;
-            
-            if (state.isEditMode) {
-                imgEl.onclick = (e) => {
-                    e.stopPropagation();
-                    const fileIpt = document.createElement('input'); 
-                    fileIpt.type = 'file'; 
-                    fileIpt.accept = 'image/*';
-                    fileIpt.onchange = ev => { if(ev.target.files[0]) window.handleTopModuleIconUpload(ev.target.files[0], idx); };
-                    fileIpt.click();
-                };
-                inputEl.onclick = (e) => e.stopPropagation();
-                inputEl.onblur = async (e) => { tm.name = e.target.value; await window.saveDB(); };
-
-                const delBtn = document.createElement('div');
-                delBtn.className = 'del-badge';
-                delBtn.innerHTML = '✖';
-                delBtn.onclick = (e) => { e.stopPropagation(); window.deleteTopModule(idx); };
-                capsule.appendChild(delBtn);
-            }
-
-            capsule.appendChild(imgEl);
-            capsule.appendChild(inputEl);
-            topContainer.appendChild(capsule);
-        });
-    }
-
-    const mainContainer = document.getElementById('stage-buttons-container'); 
-    if (mainContainer) {
-        mainContainer.innerHTML = ''; 
-        mainContainer.className = 'stage-array-flex'; 
-        
-        Object.keys(db.stages).forEach((sKey) => { 
-            const sData = db.stages[sKey]; 
-            const iconB64 = sData.icon; 
-            const displayName = sData.name || sKey; 
-            
-            const card = document.createElement('div'); 
-            card.className = 'stage-card-flex'; 
-            card.onclick = (e) => { if(!state.isEditMode) window.selectStage(sKey); }; 
-            
-            const iconDiv = document.createElement('div'); 
-            iconDiv.className = 'stage-icon-dropzone'; 
-            
-            // 🔥 注入强制内联样式锁定图片在圆形框内，根除全局样式污染溢出
-            if (iconB64) { 
-                iconDiv.innerHTML = `<img src="${iconB64}" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; margin:0; padding:0; border:none; box-shadow:none;">`; 
-            } else { 
-                iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; 
-            } 
-            
-            const titleInput = document.createElement('input'); 
-            titleInput.className = 'stage-card-title'; 
-            titleInput.value = displayName; 
-            
-            if (state.isEditMode) { 
-                iconDiv.addEventListener('click', (e) => { 
-                    e.stopPropagation(); 
-                    const input = document.createElement('input'); 
-                    input.type = 'file'; 
-                    input.accept = 'image/*'; 
-                    input.onchange = ev => {if(ev.target.files[0]) window.handleIconUpload(ev.target.files[0], sKey)}; 
-                    input.click(); 
-                }); 
-                titleInput.addEventListener('click', (e) => { e.stopPropagation(); }); 
-                titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; window.saveDB(); }); 
-                
-                const delBtn = document.createElement('div');
-                delBtn.className = 'del-badge';
-                delBtn.innerHTML = '✖';
-                delBtn.onclick = (e) => { e.stopPropagation(); window.deleteStage(sKey); };
-                card.appendChild(delBtn);
-            } 
-            card.appendChild(iconDiv); 
-            card.appendChild(titleInput); 
-            mainContainer.appendChild(card);
-        }); 
-    }
-    window.navigateTo('screen-stage'); 
-}
-
-window.addNewTopModule = async function() {
-    const name = prompt("请输入顶部模块名称 (如: 小程序/音律等):", "新模块");
-    if(!name) return;
-    const type = prompt("请输入模块类型\n1: 音乐组件 (弹窗)\n2: 外部链接 (跳转URL)", "1");
-    let actionType = 'none'; let url = '';
-    if(type === '1') { actionType = 'music'; } 
-    else if (type === '2') { actionType = 'link'; url = prompt("请输入外部链接 (包含 https://):", "https://"); }
-
-    if(!db.topModules) db.topModules = [];
-    db.topModules.push({ id: 'tm_' + Date.now(), name: name, icon: 'apple-touch-icon.png', actionType: actionType, url: url });
-    await window.saveDB();
-    window.initStageScreen();
-};
-
-window.deleteTopModule = async function(idx) {
-    if(confirm(`确定彻底删除顶部模块 [${db.topModules[idx].name}] 吗？`)) {
-        db.topModules.splice(idx, 1);
-        await window.saveDB();
-        window.initStageScreen();
-    }
-};
-
-window.handleTopModuleIconUpload = function(file, idx) {
-    window.compressImageFile(file, async (base64Str) => {
-        db.topModules[idx].icon = base64Str;
-        await window.saveDB();
-        window.initStageScreen();
-    });
-};
-
-window.handleIconUpload = function(file, stageKey) { 
-    window.compressImageFile(file, async (base64Str) => { 
-        db.stages[stageKey].icon = base64Str; 
-        await window.saveDB(); 
-        window.initStageScreen(); 
-    }); 
-}
-
-window.selectStage = function(sKey) { 
-    if(state.isEditMode) return; 
-    state.stage = sKey; 
-    window.applyStageTheme(sKey); 
-    document.getElementById('list-stage-title').innerText = `${db.stages[sKey].name}`; 
-    
-    const cats = db.stages[sKey].categories || []; 
-    if(cats.length > 0) {
-        state.activeCategoryId = cats[0].id; 
-    } else {
-        state.activeCategoryId = ''; 
-    }
-    window.renderCardList(); 
-    window.navigateTo('screen-card-list'); 
-}
-
-window.renderCardList = function() { 
-    const cats = db.stages[state.stage].categories || []; 
-    const tabContainer = document.getElementById('cat-tabs-container'); 
-    tabContainer.innerHTML = ''; 
-    
-    if (cats.length > 1 || state.isEditMode) { 
-        cats.forEach(cat => { 
-            const tab = document.createElement('div'); 
-            tab.className = `cat-tab ${cat.id === state.activeCategoryId ? 'active' : ''}`; 
-            tab.innerText = cat.name; 
-            tab.onclick = () => { state.activeCategoryId = cat.id; window.renderCardList(); }; 
-            tabContainer.appendChild(tab); 
-        }); 
-    } 
-    
-    const container = document.getElementById('card-list-container'); 
-    container.innerHTML = ''; 
-    const activeCards = db.stages[state.stage].cards.filter(c => c.categoryId === state.activeCategoryId); 
-    
-    if (activeCards.length > 0 || state.isEditMode) {
-        const grid = document.createElement('div');
-        grid.className = 'content-grid';
-        activeCards.forEach((card) => {
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'data-card';
-            cardDiv.innerHTML = `<h3 class="card-inner-title">${card.title}</h3>`;
-            if (state.isEditMode) {
-                const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id);
-                const actDiv = document.createElement('div');
-                actDiv.className = 'card-edit-badge';
-                actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); window.openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); window.deleteCard(${globalIndex})">✖</div>`;
-                cardDiv.appendChild(actDiv);
-            }
-            cardDiv.onclick = () => { if(!state.isEditMode) window.startCardFlow(card); };
-            grid.appendChild(cardDiv);
-        });
-        if (activeCards.length === 0 && state.isEditMode) { 
-            grid.innerHTML = `<p style="opacity:0.4; font-size:0.85rem; text-align:center; width:100%; grid-column: 1 / -1; padding: 20px;">该板块暂无卡片</p>`; 
-        }
-        const section = document.createElement('div');
-        section.className = 'module-section';
-        section.appendChild(grid);
-        container.appendChild(section);
-    } else {
-        container.innerHTML = '<p style="opacity:0.5; margin-top:30px; text-align:center;">当前分类暂无内容</p>';
-    }
-}
-
-window.manageCategories = async function() { 
-    const listDiv = document.getElementById('cat-list-edit'); 
-    listDiv.innerHTML = ''; 
-    const cats = db.stages[state.stage].categories || []; 
-    cats.forEach((cat, idx) => { 
-        const div = document.createElement('div'); 
-        div.style.display = 'flex'; 
-        div.style.gap = '10px'; 
-        div.style.alignItems = 'center'; 
-        div.innerHTML = `<input type="text" style="margin:0; flex:1;" id="cat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:45px; height:45px; margin:0; color:#ef4444; padding:0; border-radius:12px;" onclick="window.removeCat(${idx})">✖</button>`; 
-        listDiv.appendChild(div); 
-    }); 
-    window.showModal('cat-modal'); 
-}
-
-window.addNewCategory = function() { 
-    if(!db.stages[state.stage].categories) db.stages[state.stage].categories = []; 
-    db.stages[state.stage].categories.push({ id: 'cat_' + Date.now(), name: '新建大选项' }); 
-    window.manageCategories(); 
-}
-
-window.removeCat = async function(idx) { 
-    const catId = db.stages[state.stage].categories[idx].id; 
-    const linkedCards = db.stages[state.stage].cards.filter(c => c.categoryId === catId); 
-    if(linkedCards.length > 0 && !confirm(`该分类下有 ${linkedCards.length} 张卡片，确定删除吗？`)) return; 
-    db.stages[state.stage].categories.splice(idx, 1); 
-    window.manageCategories(); 
-}
-
-window.saveCategories = async function() { 
-    const cats = db.stages[state.stage].categories || []; 
-    cats.forEach((cat, idx) => { 
-        const input = document.getElementById(`cat_input_${idx}`); 
-        if(input) cat.name = input.value; 
-    }); 
-    await window.saveDB(); 
-    window.hideModal('cat-modal'); 
-    if(!cats.find(c => c.id === state.activeCategoryId) && cats.length > 0) {
-        state.activeCategoryId = cats[0].id; 
-    }
-    window.renderCardList(); 
-}
-
-window.editPrepText = async function() { 
-    const t = prompt("预备提醒文本：", db.stages[state.stage].prepText); 
-    if (t !== null) { 
-        db.stages[state.stage].prepText = t; 
-        await window.saveDB(); 
-    } 
-}
-
-window.deleteCard = async function(index) { 
-    if(confirm('确认彻底删除本卡片吗？')) { 
-        db.stages[state.stage].cards.splice(index, 1); 
-        await window.saveDB(); 
-        window.renderCardList(); 
-    } 
-}
-
-window.openEditModal = function(index) { 
-    const isNew = (index === null); 
-    document.getElementById('modal-title').innerText = isNew ? '新增卡片' : '编辑卡片'; 
-    const catSelect = document.getElementById('edit-card-category'); 
-    catSelect.innerHTML = ''; 
-    const cats = db.stages[state.stage].categories || []; 
-    cats.forEach(c => { catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`; }); 
-    
-    let c = isNew ? { id: 'c_'+Date.now(), categoryId: state.activeCategoryId, title:'', steps:[{title:'', text:''},{title:'', text:''},{title:'', text:''}] } : db.stages[state.stage].cards[index]; 
-    document.getElementById('edit-card-id').value = index === null ? 'new' : index; 
-    document.getElementById('edit-card-category').value = c.categoryId || (cats[0]?cats[0].id:''); 
-    document.getElementById('edit-card-title').value = c.title; 
-    
-    for(let i=1; i<=3; i++) { 
-        document.getElementById(`edit-s${i}-title`).value = c.steps[i-1] ? c.steps[i-1].title : ''; 
-        document.getElementById(`edit-s${i}-text`).value = c.steps[i-1] ? c.steps[i-1].text : ''; 
-    } 
-    window.showModal('edit-modal'); 
-}
-
-window.saveCard = async function() { 
-    const idxStr = document.getElementById('edit-card-id').value; 
-    const c = { 
-        id: idxStr === 'new' ? 'c_' + Date.now() : db.stages[state.stage].cards[parseInt(idxStr)].id, 
-        categoryId: document.getElementById('edit-card-category').value, 
-        title: document.getElementById('edit-card-title').value || '未命名', 
-        steps: [] 
-    }; 
-    
-    for(let i=1; i<=3; i++) {
-        c.steps.push({ 
-            title: document.getElementById(`edit-s${i}-title`).value, 
-            text: document.getElementById(`edit-s${i}-text`).value 
-        }); 
-    }
-    
-    if(idxStr === 'new') {
-        db.stages[state.stage].cards.push(c); 
-    } else {
-        db.stages[state.stage].cards[parseInt(idxStr)] = c; 
-    }
-    
-    await window.saveDB(); 
-    window.hideModal('edit-modal'); 
-    window.renderCardList(); 
-}
-
+// ============== 音乐库与上传云端核心逻辑 ==============
 window.processUploadQueue = async function() { 
     if(isUploading || uploadQueue.length === 0) return; 
     isUploading = true; 
@@ -1155,7 +797,7 @@ window.processUploadQueue = async function() {
     } 
     
     await window.saveDB(); 
-    window.renderAdminMusicList(); 
+    if(typeof window.renderAdminMusicList === 'function') window.renderAdminMusicList(); 
     
     capsuleText.innerText = "全部极速上传完成"; 
     capsuleProgress.style.width = "100%"; 
@@ -1689,174 +1331,4 @@ window.showPlayerFromFloat = function() {
     if(state.isLoggedIn && !state.isEditMode && document.getElementById('vinyl-player-modal').style.display !== 'flex') {
         window.showModal('vinyl-player-modal'); 
     }
-}
-
-window.startCardFlow = function(card) { 
-    state.currentCard = card; 
-    document.getElementById('prep-text').innerText = db.stages[state.stage].prepText; 
-    const prepBtn = document.getElementById('btn-prep-confirm'); 
-    if (state.stage === '单身期') { prepBtn.innerText = '我已准备好'; } else { prepBtn.innerText = '我们已预备好'; } 
-    window.navigateTo('screen-prep'); 
-}
-
-window.confirmPrepAndNavigate = function() { 
-    if (state.stage === '单身期') { 
-        const syncBox = document.getElementById('sync-animation-box'); 
-        syncBox.classList.remove('merged'); 
-        const iconB64 = db.stages[state.stage].icon; 
-        const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; 
-        document.getElementById('sync-title').innerText = "抬头仰望"; 
-        
-        const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || ''; 
-        let subText = "愿你在静谧中得着内心的力量与安宁。"; 
-        if (catName.includes('不想') || catName.includes('单身')) subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。"; 
-        else if (catName.includes('想') || catName.includes('进入婚姻')) subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。"; 
-        
-        document.getElementById('sync-subtitle').innerText = subText; 
-        document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望"; 
-        document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)"; 
-        syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`; 
-        window.navigateTo('screen-sync'); 
-    } else { 
-        document.getElementById('sync-title').innerText = "双向奔赴"; 
-        document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并"; 
-        document.getElementById('btn-sync-confirm').innerText = "确 认 合 并"; 
-        document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)"; 
-        window.navigateTo('screen-role'); 
-    } 
-}
-
-window.selectRole = function(role) { 
-    state.role = role; 
-    const syncBox = document.getElementById('sync-animation-box'); 
-    syncBox.classList.remove('merged'); 
-    const iconB64 = db.stages[state.stage].icon; 
-    const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; 
-    
-    if (role === 'boy') syncBox.innerHTML = `<div class="sync-half boy" style="${bgStyle} background-size: cover;"></div>`; 
-    else syncBox.innerHTML = `<div class="sync-half girl" style="${bgStyle} background-size: cover;"></div>`; 
-    
-    window.navigateTo('screen-sync'); 
-}
-
-window.triggerSync = function() { 
-    document.getElementById('sync-animation-box').classList.add('merged'); 
-    state.currentStep = 0; 
-    setTimeout(() => { 
-        window.renderContentStep(); 
-        window.navigateTo('screen-content'); 
-    }, 1800); 
-}
-
-window.renderContentStep = function() { 
-    const stepData = state.currentCard.steps[state.currentStep]; 
-    document.getElementById('content-type-title').innerText = `【${db.stages[state.stage].categories.find(c => c.id === state.currentCard.categoryId)?.name || '印记'}】的连结`; 
-    document.getElementById('step-title').innerText = stepData.title; 
-    document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>'); 
-    
-    for(let i=1; i<=3; i++) { 
-        const dot = document.getElementById(`dot-${i}`); 
-        if (i - 1 === state.currentStep) dot.classList.add('active'); 
-        else dot.classList.remove('active'); 
-    } 
-    
-    const nextBtn = document.getElementById('btn-next-step'); 
-    const longPressBtn = document.getElementById('btn-long-press'); 
-    if (state.currentStep < 2) { 
-        nextBtn.style.display = 'flex'; 
-        longPressBtn.style.display = 'none'; 
-    } else { 
-        nextBtn.style.display = 'none'; 
-        longPressBtn.style.display = 'flex'; 
-    } 
-}
-
-window.nextContentStep = function() { 
-    if (state.currentStep < 2) { 
-        state.currentStep++; 
-        const t = document.getElementById('step-title'); 
-        const p = document.getElementById('step-text'); 
-        t.style.opacity = 0; 
-        p.style.opacity = 0; 
-        setTimeout(() => { 
-            window.renderContentStep(); 
-            t.style.transition = 'opacity 0.5s'; 
-            p.style.transition = 'opacity 0.5s'; 
-            t.style.opacity = 1; 
-            p.style.opacity = 1; 
-        }, 300); 
-    } 
-}
-
-window.startPress = function(e) { 
-    if(e && e.type === 'touchstart') e.preventDefault(); 
-    if(isPressing) return; 
-    const pressArea = document.getElementById('btn-long-press');
-    const pressFill = document.getElementById('press-fill'); 
-    isPressing = true; 
-    pressProgress = 0; 
-    
-    if (pressArea) pressArea.classList.add('pressing');
-    
-    if(pressFill) {
-        pressFill.style.transition = 'none'; 
-        pressFill.style.height = '0%';
-    }
-    if(pressFrame) cancelAnimationFrame(pressFrame); 
-    
-    let startTime = null;
-    const duration = 1500; 
-    
-    function up(timestamp) { 
-        if(!isPressing) return; 
-        if(!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        
-        pressProgress = Math.min((elapsed / duration) * 100, 100); 
-        if(pressFill) pressFill.style.height = `${pressProgress}%`; 
-        
-        if (pressProgress >= 100) { 
-            isPressing = false; 
-            if (pressArea) pressArea.classList.remove('pressing');
-            window.completeAction(); 
-        } else { 
-            pressFrame = requestAnimationFrame(up); 
-        } 
-    } 
-    pressFrame = requestAnimationFrame(up); 
-}
-
-window.endPress = function(e) { 
-    if(e && e.type === 'touchend') e.preventDefault(); 
-    isPressing = false; 
-    const pressArea = document.getElementById('btn-long-press');
-    if (pressArea) pressArea.classList.remove('pressing');
-    if(pressFrame) cancelAnimationFrame(pressFrame); 
-    
-    if (pressProgress < 100) { 
-        pressProgress = 0; 
-        const pressFill = document.getElementById('press-fill'); 
-        if(pressFill) {
-            pressFill.style.transition = 'height 0.3s ease-out';
-            pressFill.style.height = `0%`; 
-            setTimeout(() => { if(!isPressing) pressFill.style.transition = ''; }, 300);
-        }
-    } 
-}
-
-window.completeAction = function() { 
-    if(pressFrame) cancelAnimationFrame(pressFrame); 
-    window.navigateTo('screen-finish'); 
-}
-
-window.resetToStage = function() { 
-    const pressFill = document.getElementById('press-fill'); 
-    if(pressFill) {
-        pressFill.style.transition = ''; 
-        pressFill.style.height = `0%`; 
-    }
-    state.currentCard = null; 
-    state.role = ''; 
-    state.currentStep = 0; 
-    window.initStageScreen(); 
 }
