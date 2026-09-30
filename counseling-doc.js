@@ -1,12 +1,13 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 左侧分类目录导航、右侧沉浸式A4纸排版、管理员免检编辑、拖拽R2秒传
+ * 更新内容: 新增字体/字号选择器、游客自动全屏沉浸阅读模式、游客端字号智能缩放引擎
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V5.0"); // 留个标记，方便确认代码是否生效
+    console.log("🚀 成功加载知识库引擎 V6.0 (全屏排版级)");
 
+    // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
         const style = document.createElement('style');
         style.id = 'counseling-doc-style';
@@ -22,8 +23,11 @@
             .doc-sidebar {
                 width: 280px; background: #ffffff; border-right: 1px solid #e0e0e0;
                 display: flex; flex-direction: column; flex-shrink: 0; height: 100%;
-                box-shadow: 2px 0 10px rgba(0,0,0,0.02); z-index: 10;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.02); z-index: 10; transition: transform 0.3s ease, width 0.3s ease;
             }
+            /* 游客自动全屏：隐藏侧边栏 */
+            .doc-sidebar.collapsed { display: none; }
+            
             .doc-sidebar-header {
                 padding: 20px; border-bottom: 1px solid #f1f3f4; display: flex; justify-content: space-between; align-items: center;
             }
@@ -55,24 +59,39 @@
             .admin-mode .btn-add-cat { display: block; }
             .btn-add-cat:hover { background: #f8f9fa; }
 
-            /* ================= 右侧：文档编辑主区域 ================= */
-            .doc-main { flex: 1; display: flex; flex-direction: column; position: relative; height: 100%; background: #f8f9fa; }
+            /* ================= 右侧：文档编辑与阅读主区域 ================= */
+            .doc-main { flex: 1; display: flex; flex-direction: column; position: relative; height: 100%; background: #f8f9fa; min-width: 0; }
             
             .doc-header-wrapper { background: #ffffff; border-bottom: 1px solid #e0e0e0; display: flex; flex-direction: column; flex-shrink: 0; }
-            .doc-header-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 25px; }
+            .doc-header-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 25px; gap: 15px; }
             
+            .doc-title-group { display: flex; align-items: center; gap: 10px; flex: 1; }
+            .btn-toggle-menu { display: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #5f6368; padding: 5px; border-radius: 4px; }
+            .btn-toggle-menu:hover { background: #f1f3f4; }
+            /* 只有游客模式或者手机端才显示展开目录按钮 */
+            .reader-mode .btn-toggle-menu { display: block; }
+
             .doc-title-input {
                 background: transparent; border: none; color: #202124; font-size: 1.4rem; 
-                font-weight: bold; outline: none; width: 70%; pointer-events: none; padding: 4px 8px; border-radius: 4px;
+                font-weight: bold; outline: none; width: 100%; max-width: 500px; pointer-events: none; padding: 4px 8px; border-radius: 4px;
             }
             .admin-mode .doc-title-input { pointer-events: auto; }
             .admin-mode .doc-title-input:focus { background: #f1f3f4; border-bottom: 2px solid #1a73e8; }
             
-            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-            .admin-mode .btn-doc-save { display: block; }
+            /* 站长：保存按钮区 */
+            .doc-actions-admin { display: none; gap: 10px; align-items: center; }
+            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
             .btn-doc-save:active { transform: scale(0.95); }
+            .admin-mode .doc-actions-admin { display: flex; }
 
-            /* 仿 Google Docs 工具栏 */
+            /* 游客：阅读缩放控制区 */
+            .doc-actions-reader { display: none; gap: 8px; align-items: center; }
+            .reader-mode .doc-actions-reader { display: flex; }
+            .btn-zoom { background: #f1f3f4; border: 1px solid #dadce0; padding: 6px 14px; border-radius: 6px; cursor: pointer; color: #3c4043; font-size: 0.95rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
+            .btn-zoom.active { background: #e8f0fe; color: #1a73e8; border-color: #1a73e8; font-weight: bold; }
+            .btn-reader-close { background: #ea4335; border: none; color: #fff; padding: 6px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 10px; }
+
+            /* 仿 Google Docs 工具栏 (只对管理员显示) */
             .doc-toolbar {
                 display: none; flex-wrap: wrap; gap: 4px; padding: 8px 25px; 
                 background: #edf2fa; border-top: 1px solid #e0e0e0; align-items: center;
@@ -84,7 +103,7 @@
                 display: flex; justify-content: center; align-items: center; transition: all 0.2s; font-family: serif; font-weight: bold;
             }
             .doc-tool-btn:hover { background: #e0e6ed; border-color: #c7c7c7; }
-            .doc-tool-select { background: transparent; border: 1px solid transparent; padding: 4px; border-radius: 4px; outline: none; cursor: pointer; color: #444746; font-size: 14px; font-weight: bold; }
+            .doc-tool-select { background: transparent; border: 1px solid transparent; padding: 4px; border-radius: 4px; outline: none; cursor: pointer; color: #444746; font-size: 14px; font-weight: bold; max-width: 130px; }
             .doc-tool-select:hover { background: #e0e6ed; }
             .doc-tool-separator { width: 1px; height: 18px; background: #c7c7c7; margin: 0 6px; }
             
@@ -98,18 +117,18 @@
                 flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 40px 20px 80px 20px;
                 scroll-behavior: smooth;
             }
-            .doc-paper-wrapper { position: relative; width: 100%; max-width: 816px; display: none; }
+            .doc-paper-wrapper { position: relative; width: 100%; max-width: 850px; display: none; transition: transform 0.3s ease; }
             
             .doc-paper {
                 background: #ffffff; color: #111111;
-                width: 100%; min-height: 1056px; 
-                padding: clamp(40px, 8vw, 80px) clamp(40px, 6vw, 70px);
-                box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-                outline: none; font-size: 11.5pt; line-height: 1.8; word-wrap: break-word;
+                width: 100%; min-height: 1100px; 
+                padding: clamp(40px, 8vw, 90px) clamp(40px, 6vw, 80px);
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1);
+                outline: none; font-size: 12pt; line-height: 1.8; word-wrap: break-word;
                 font-family: Arial, "Microsoft YaHei", sans-serif;
             }
             
-            .doc-paper img, .doc-paper video { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; border: 1px solid #e0e0e0; }
+            .doc-paper img, .doc-paper video { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
             .doc-paper audio { width: 100%; margin: 15px 0; outline: none; }
             .doc-paper a.doc-file-link { 
                 display: inline-flex; align-items: center; background: #f8f9fa; color: #1a73e8; 
@@ -136,11 +155,14 @@
             @media (max-width: 768px) {
                 .doc-modal-overlay { flex-direction: column; }
                 .doc-sidebar { width: 100%; height: 35vh; border-right: none; border-bottom: 2px solid #e0e0e0; }
+                .doc-sidebar.collapsed { display: none; }
                 .doc-main { height: 65vh; }
-                .doc-paper { min-height: 600px; padding: 30px 20px; font-size: 16px; }
+                .reader-mode .doc-main { height: 100vh; } /* 游客全屏时撑满 */
+                .doc-paper { min-height: 800px; padding: 30px 20px; }
                 .doc-toolbar { overflow-x: auto; flex-wrap: nowrap; padding: 8px 10px; }
                 .doc-tool-btn { flex-shrink: 0; }
-                .doc-title-input { font-size: 1.1rem; width: 50%; }
+                .btn-toggle-menu { display: block; } /* 手机端管理员也允许折叠侧边栏 */
+                .doc-actions-reader { overflow-x: auto; flex-wrap: nowrap; }
             }
         `;
         document.head.appendChild(style);
@@ -150,7 +172,7 @@
     const docModalHTML = `
         <div class="doc-modal-overlay" id="counseling-doc-modal">
             <!-- 左侧：知识库导航 -->
-            <div class="doc-sidebar">
+            <div class="doc-sidebar" id="doc-sidebar">
                 <div class="doc-sidebar-header">
                     <h2 id="kb-main-title">知识库目录</h2>
                     <button class="btn-close-kb" onclick="window.closeCounselingDoc()">退出</button>
@@ -167,28 +189,58 @@
             <div class="doc-main">
                 <div class="doc-header-wrapper">
                     <div class="doc-header-top">
-                        <input type="text" class="doc-title-input" id="doc-title" placeholder="无标题文档" onblur="window.kbSaveDocMeta()">
-                        <div class="doc-actions">
+                        <div class="doc-title-group">
+                            <button class="btn-toggle-menu" onclick="window.toggleDocSidebar()" title="展开/收起目录">☰</button>
+                            <input type="text" class="doc-title-input" id="doc-title" placeholder="无标题文档" onblur="window.kbSaveDocMeta()">
+                        </div>
+                        
+                        <!-- 管理员控制台 -->
+                        <div class="doc-actions-admin">
                             <button class="btn-doc-save" onclick="window.saveCounselingDoc()">☁ 云端保存</button>
                         </div>
+
+                        <!-- 游客自动全屏阅读控制台 -->
+                        <div class="doc-actions-reader">
+                            <span style="font-size:0.85rem; color:#5f6368; font-weight:bold;">阅读字号:</span>
+                            <button class="btn-zoom" id="zoom-small" onclick="window.setDocZoom(0.85, 'small')">偏小</button>
+                            <button class="btn-zoom active" id="zoom-normal" onclick="window.setDocZoom(1, 'normal')">标准</button>
+                            <button class="btn-zoom" id="zoom-large" onclick="window.setDocZoom(1.15, 'large')">稍大</button>
+                            <button class="btn-reader-close" onclick="window.closeCounselingDoc()">退出</button>
+                        </div>
                     </div>
-                    <!-- Google Docs 风格工具栏 -->
+
+                    <!-- Google Docs 风格高级工具栏 -->
                     <div class="doc-toolbar" id="doc-toolbar">
                         <button class="doc-tool-btn" onclick="window.docExec('undo')" title="撤销">↩</button>
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
                         <div class="doc-tool-separator"></div>
-                        <select class="doc-tool-select" onchange="window.docExec('formatBlock', this.value)" title="段落格式">
-                            <option value="P">正文</option>
-                            <option value="H1">标题 1</option>
-                            <option value="H2">标题 2</option>
-                            <option value="H3">标题 3</option>
+                        
+                        <!-- 新增：字体库选择 -->
+                        <select class="doc-tool-select" onchange="window.docExec('fontName', this.value)" title="字体集">
+                            <option value="Arial">默认字体</option>
+                            <option value="SimSun">宋体</option>
+                            <option value="KaiTi">楷体</option>
+                            <option value="Microsoft YaHei">微软雅黑</option>
+                            <option value="SimHei">黑体</option>
                         </select>
                         <div class="doc-tool-separator"></div>
+
+                        <!-- 新增：字号选择 (原生 1-7 标准映射) -->
+                        <select class="doc-tool-select" onchange="window.docExec('fontSize', this.value)" title="文章字号排版">
+                            <option value="3">稍小 (Small)</option>
+                            <option value="4" selected>内容大小 (Normal)</option>
+                            <option value="5">偏大 (Large)</option>
+                            <option value="6">小标题 (Sub-title)</option>
+                            <option value="7">主标题 (Main Title)</option>
+                        </select>
+                        <div class="doc-tool-separator"></div>
+
                         <button class="doc-tool-btn" onclick="window.docExec('bold')" style="font-weight:bold;" title="加粗 (Ctrl+B)">B</button>
                         <button class="doc-tool-btn" onclick="window.docExec('italic')" style="font-style:italic;" title="斜体 (Ctrl+I)">I</button>
                         <button class="doc-tool-btn" onclick="window.docExec('underline')" style="text-decoration:underline;" title="下划线 (Ctrl+U)">U</button>
                         <button class="doc-tool-btn" onclick="window.docExec('strikeThrough')" style="text-decoration:line-through;" title="删除线">S</button>
                         <div class="doc-tool-separator"></div>
+
                         <div class="color-picker-wrap" title="文本颜色">
                             <div class="color-picker-icon" style="color: #ea4335; border-bottom: 3px solid #ea4335;">A</div>
                             <input type="color" onchange="window.docExec('foreColor', this.value)">
@@ -198,14 +250,17 @@
                             <input type="color" onchange="window.docExec('hiliteColor', this.value)">
                         </div>
                         <div class="doc-tool-separator"></div>
+
                         <button class="doc-tool-btn" onclick="window.docExec('justifyLeft')" title="左对齐">⇦</button>
                         <button class="doc-tool-btn" onclick="window.docExec('justifyCenter')" title="居中">⇨⇦</button>
                         <button class="doc-tool-btn" onclick="window.docExec('justifyRight')" title="右对齐">⇨</button>
                         <div class="doc-tool-separator"></div>
+
                         <button class="doc-tool-btn" onclick="window.docExec('insertUnorderedList')" title="无序列表">•</button>
                         <button class="doc-tool-btn" onclick="window.docExec('insertOrderedList')" title="有序列表">1.</button>
                         <button class="doc-tool-btn" onclick="window.docExec('removeFormat')" title="清除格式">🆑</button>
                         <div class="doc-tool-separator"></div>
+
                         <button class="doc-tool-btn" onclick="document.getElementById('doc-file-upload').click()" title="插入图片/视频/音乐/PPT" style="width:auto; padding:0 10px; color:#1a73e8; font-weight:bold;">
                             <span style="font-size:18px; margin-right:4px;">+</span> 插入附件
                         </button>
@@ -218,7 +273,7 @@
                         <div>👈 请在左侧选择或创建一篇文档</div>
                     </div>
                     <div class="doc-paper-wrapper" id="doc-paper-wrapper">
-                        <div class="doc-paper" id="doc-editor" placeholder="开始撰写内容...\n\n· 支持直接从 Word/WPS 全选复制并粘贴，颜色和排版100%保留。\n· 支持直接将电脑的 图片、视频、音频、PDF、PPT 拖拽到此处极速上传。"></div>
+                        <div class="doc-paper" id="doc-editor" placeholder="开始撰写内容...\n\n· 支持直接从 Word/WPS 全选复制并粘贴，所有颜色、表格和排版将100%原封不动保留。\n· 支持直接将电脑的 图片、视频、音频、PDF、PPT 拖拽到此处极速上传。"></div>
                         <div class="doc-drag-overlay">松开鼠标，极速上传并插入到文档中</div>
                     </div>
                 </div>
@@ -237,25 +292,30 @@
         currentSystemId = systemId;
         activeArticleId = null;
         
+        // 初始化数据库结构
         if (!db.docSystems) db.docSystems = {};
         if (!db.docSystems[systemId]) {
             db.docSystems[systemId] = {
                 title: '知识库',
-                categories: [
-                    { id: 'cat_' + Date.now(), name: '默认分类', articles: [] }
-                ]
+                categories: [{ id: 'cat_' + Date.now(), name: '默认分类', articles: [] }]
             };
         }
 
         const modal = document.getElementById('counseling-doc-modal');
+        const sidebar = document.getElementById('doc-sidebar');
         
-        // 🔥 【终极修复】：只要你是站长 (state.isAdmin)，无论你在主页点没点"开启深度编辑"，这里都强行给你开启管理员编辑特权！游客则彻底锁定。
+        // 【核心解绑权限】：站长永远是编辑模式；游客永远是沉浸阅读模式
         if (state.isAdmin) {
             modal.classList.add('admin-mode');
+            modal.classList.remove('reader-mode');
             document.getElementById('doc-editor').setAttribute('contenteditable', 'true');
+            sidebar.classList.remove('collapsed'); // 管理员默认展开目录
         } else {
             modal.classList.remove('admin-mode');
+            modal.classList.add('reader-mode');
             document.getElementById('doc-editor').setAttribute('contenteditable', 'false');
+            sidebar.classList.add('collapsed'); // 游客默认自动全屏（隐藏侧边栏）
+            window.setDocZoom(1, 'normal'); // 重置游客视角缩放
         }
 
         window.renderKBSidebar();
@@ -269,6 +329,23 @@
         const modal = document.getElementById('counseling-doc-modal');
         modal.style.opacity = '0';
         setTimeout(() => modal.style.display = 'none', 300);
+    };
+
+    // 游客侧边栏切换（展开/收起目录）
+    window.toggleDocSidebar = function() {
+        const sidebar = document.getElementById('doc-sidebar');
+        sidebar.classList.toggle('collapsed');
+    };
+
+    // 游客沉浸式阅读字号引擎 (CSS Zoom无损缩放)
+    window.setDocZoom = function(scale, btnId) {
+        const wrapper = document.getElementById('doc-paper-wrapper');
+        // 使用 zoom 缩放，能完美等比放大图片、表格和字体，且自动换行不出界
+        wrapper.style.zoom = scale;
+        
+        // 按钮高亮状态切换
+        document.querySelectorAll('.btn-zoom').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('zoom-' + btnId).classList.add('active');
     };
 
     // ================== 左侧目录树渲染与 CRUD ==================
@@ -299,7 +376,13 @@
                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">📄 ${art.title}</span>
                     <button class="kb-admin-btn del" style="flex-shrink:0;" onclick="event.stopPropagation(); window.kbDeleteArticle('${cat.id}', '${art.id}')">✖</button>
                 `;
-                artItem.onclick = () => window.kbSelectArticle(cat.id, art.id);
+                // 选择文章后，如果在手机端或游客模式，自动收起侧边栏实现全屏沉浸阅读
+                artItem.onclick = () => {
+                    window.kbSelectArticle(cat.id, art.id);
+                    if (window.innerWidth <= 768 || !state.isAdmin) {
+                        document.getElementById('doc-sidebar').classList.add('collapsed');
+                    }
+                };
                 catGroup.appendChild(artItem);
             });
 
@@ -460,11 +543,11 @@
         editor.focus();
         let html = '';
         if (mimeType.startsWith('image/')) {
-            html = `<br><img src="${url}" alt="${fileName}"><br>`;
+            html = `<br><img src="${url}" alt="${fileName}" style="max-width:100%; border-radius:6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);"><br>`;
         } else if (mimeType.startsWith('video/')) {
-            html = `<br><video src="${url}" controls playsinline></video><br>`;
+            html = `<br><video src="${url}" controls playsinline style="max-width:100%; border-radius:6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);"></video><br>`;
         } else if (mimeType.startsWith('audio/')) {
-            html = `<br><audio src="${url}" controls></audio><br>`;
+            html = `<br><audio src="${url}" controls style="width:100%;"></audio><br>`;
         } else {
             html = `<br><a href="${url}" target="_blank" class="doc-file-link">📎 下载附件：${fileName}</a><br>`;
         }
