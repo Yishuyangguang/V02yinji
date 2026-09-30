@@ -5,7 +5,8 @@
  */
 
 (function initCounselingDocEngine() {
-    // 1. 注入极简高级的 UI 样式
+    console.log("🚀 成功加载知识库引擎 V5.0"); // 留个标记，方便确认代码是否生效
+
     if (!document.getElementById('counseling-doc-style')) {
         const style = document.createElement('style');
         style.id = 'counseling-doc-style';
@@ -26,7 +27,7 @@
             .doc-sidebar-header {
                 padding: 20px; border-bottom: 1px solid #f1f3f4; display: flex; justify-content: space-between; align-items: center;
             }
-            .doc-sidebar-header h2 { font-size: 1.1rem; color: #202124; margin: 0; }
+            .doc-sidebar-header h2 { font-size: 1.1rem; color: #202124; margin: 0; font-weight: bold; }
             .btn-close-kb { background: #f1f3f4; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: #5f6368; font-weight: bold; transition: 0.2s; }
             .btn-close-kb:hover { background: #e8eaed; color: #202124; }
             
@@ -41,16 +42,16 @@
                 margin-bottom: 4px; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center;
             }
             .kb-article-item:hover { background: #f1f3f4; }
-            .kb-article-item.active { background: #e8f0fe; color: #1a73e8; font-weight: 500; }
+            .kb-article-item.active { background: #e8f0fe; color: #1a73e8; font-weight: bold; }
             
-            .kb-admin-btn { background: transparent; border: none; color: #1a73e8; font-size: 1rem; cursor: pointer; display: none; padding: 2px 6px; border-radius: 4px; }
+            .kb-admin-btn { background: transparent; border: none; color: #1a73e8; font-size: 1.1rem; cursor: pointer; display: none; padding: 2px 6px; border-radius: 4px; }
             .kb-admin-btn:hover { background: rgba(26,115,232,0.1); }
             .kb-admin-btn.del { color: #ea4335; }
             .kb-admin-btn.del:hover { background: rgba(234,67,53,0.1); }
             .admin-mode .kb-admin-btn { display: inline-block; }
             .admin-mode .kb-category-title:hover .kb-admin-btn { display: inline-block; }
 
-            .btn-add-cat { width: 100%; padding: 12px; background: #fff; border: 1px dashed #dadce0; border-radius: 8px; color: #1a73e8; cursor: pointer; font-weight: 500; display: none; }
+            .btn-add-cat { width: 100%; padding: 12px; background: #fff; border: 1px dashed #dadce0; border-radius: 8px; color: #1a73e8; cursor: pointer; font-weight: bold; display: none; margin-top: 10px; }
             .admin-mode .btn-add-cat { display: block; }
             .btn-add-cat:hover { background: #f8f9fa; }
 
@@ -62,12 +63,12 @@
             
             .doc-title-input {
                 background: transparent; border: none; color: #202124; font-size: 1.4rem; 
-                font-weight: 500; outline: none; width: 70%; pointer-events: none; padding: 4px 8px; border-radius: 4px;
+                font-weight: bold; outline: none; width: 70%; pointer-events: none; padding: 4px 8px; border-radius: 4px;
             }
             .admin-mode .doc-title-input { pointer-events: auto; }
-            .admin-mode .doc-title-input:focus { background: #f1f3f4; }
+            .admin-mode .doc-title-input:focus { background: #f1f3f4; border-bottom: 2px solid #1a73e8; }
             
-            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; display: none; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
             .admin-mode .btn-doc-save { display: block; }
             .btn-doc-save:active { transform: scale(0.95); }
 
@@ -80,10 +81,10 @@
             .doc-tool-btn {
                 background: transparent; border: 1px solid transparent; color: #444746;
                 width: 32px; height: 32px; border-radius: 4px; cursor: pointer; font-size: 15px;
-                display: flex; justify-content: center; align-items: center; transition: all 0.2s; font-family: serif;
+                display: flex; justify-content: center; align-items: center; transition: all 0.2s; font-family: serif; font-weight: bold;
             }
-            .doc-tool-btn:hover { background: #e0e6ed; }
-            .doc-tool-select { background: transparent; border: 1px solid transparent; padding: 4px; border-radius: 4px; outline: none; cursor: pointer; color: #444746; font-size: 14px; }
+            .doc-tool-btn:hover { background: #e0e6ed; border-color: #c7c7c7; }
+            .doc-tool-select { background: transparent; border: 1px solid transparent; padding: 4px; border-radius: 4px; outline: none; cursor: pointer; color: #444746; font-size: 14px; font-weight: bold; }
             .doc-tool-select:hover { background: #e0e6ed; }
             .doc-tool-separator { width: 1px; height: 18px; background: #c7c7c7; margin: 0 6px; }
             
@@ -98,7 +99,6 @@
                 scroll-behavior: smooth;
             }
             .doc-paper-wrapper { position: relative; width: 100%; max-width: 816px; display: none; }
-            .doc-paper-wrapper.show { display: block; }
             
             .doc-paper {
                 background: #ffffff; color: #111111;
@@ -113,10 +113,10 @@
             .doc-paper audio { width: 100%; margin: 15px 0; outline: none; }
             .doc-paper a.doc-file-link { 
                 display: inline-flex; align-items: center; background: #f8f9fa; color: #1a73e8; 
-                padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; 
-                border: 1px solid #dadce0; margin: 10px 0; font-size: 0.95rem;
+                padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; 
+                border: 1px solid #dadce0; margin: 10px 0; font-size: 0.95rem; transition: background 0.2s;
             }
-            .doc-paper a.doc-file-link:hover { background: #f1f3f4; }
+            .doc-paper a.doc-file-link:hover { background: #f1f3f4; border-color: #1a73e8; }
             
             /* 拖拽上传全屏遮罩层 */
             .doc-drag-overlay {
@@ -130,7 +130,7 @@
             
             [contenteditable="true"]:empty:before { content: attr(placeholder); opacity: 0.4; pointer-events: none; display: block; }
             
-            .empty-state { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #5f6368; font-size: 1.1rem; flex-direction: column; gap: 15px; }
+            .empty-state { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #5f6368; font-size: 1.2rem; flex-direction: column; gap: 15px; font-weight: bold; }
             
             /* 移动端响应式侧边栏 */
             @media (max-width: 768px) {
@@ -140,6 +140,7 @@
                 .doc-paper { min-height: 600px; padding: 30px 20px; font-size: 16px; }
                 .doc-toolbar { overflow-x: auto; flex-wrap: nowrap; padding: 8px 10px; }
                 .doc-tool-btn { flex-shrink: 0; }
+                .doc-title-input { font-size: 1.1rem; width: 50%; }
             }
         `;
         document.head.appendChild(style);
@@ -151,14 +152,14 @@
             <!-- 左侧：知识库导航 -->
             <div class="doc-sidebar">
                 <div class="doc-sidebar-header">
-                    <h2 id="kb-main-title">知识库文档</h2>
+                    <h2 id="kb-main-title">知识库目录</h2>
                     <button class="btn-close-kb" onclick="window.closeCounselingDoc()">退出</button>
                 </div>
                 <div class="doc-sidebar-content" id="kb-sidebar-content">
                     <!-- 动态分类与文章列表渲染区 -->
                 </div>
                 <div style="padding: 15px;">
-                    <button class="btn-add-cat" onclick="window.kbAddCategory()">+ 新增分类菜单</button>
+                    <button class="btn-add-cat" onclick="window.kbAddCategory()">+ 新增分类</button>
                 </div>
             </div>
 
@@ -236,7 +237,6 @@
         currentSystemId = systemId;
         activeArticleId = null;
         
-        // 初始化数据库结构
         if (!db.docSystems) db.docSystems = {};
         if (!db.docSystems[systemId]) {
             db.docSystems[systemId] = {
@@ -249,7 +249,7 @@
 
         const modal = document.getElementById('counseling-doc-modal');
         
-        // 【核心修复】：不再判断 isEditMode，只要是站长登录，永远开启管理员模式！
+        // 🔥 【终极修复】：只要你是站长 (state.isAdmin)，无论你在主页点没点"开启深度编辑"，这里都强行给你开启管理员编辑特权！游客则彻底锁定。
         if (state.isAdmin) {
             modal.classList.add('admin-mode');
             document.getElementById('doc-editor').setAttribute('contenteditable', 'true');
@@ -259,7 +259,7 @@
         }
 
         window.renderKBSidebar();
-        window.kbShowEmptyState(); // 默认不选中任何文章
+        window.kbShowEmptyState(); 
 
         modal.style.display = 'flex';
         setTimeout(() => modal.style.opacity = '1', 10);
@@ -281,25 +281,23 @@
             const catGroup = document.createElement('div');
             catGroup.className = 'kb-category-group';
             
-            // 分类标题栏
             const catTitle = document.createElement('div');
             catTitle.className = 'kb-category-title';
             catTitle.innerHTML = `
                 <span>${cat.name}</span>
                 <div>
-                    <button class="kb-admin-btn" onclick="window.kbAddArticle('${cat.id}')" title="添加文章">+</button>
+                    <button class="kb-admin-btn" onclick="window.kbAddArticle('${cat.id}')" title="添加文章">➕</button>
                     <button class="kb-admin-btn del" onclick="window.kbDeleteCategory('${cat.id}')" title="删除分类">✖</button>
                 </div>
             `;
             catGroup.appendChild(catTitle);
 
-            // 文章列表
             cat.articles.forEach(art => {
                 const artItem = document.createElement('div');
                 artItem.className = `kb-article-item ${art.id === activeArticleId ? 'active' : ''}`;
                 artItem.innerHTML = `
-                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 ${art.title}</span>
-                    <button class="kb-admin-btn del" onclick="event.stopPropagation(); window.kbDeleteArticle('${cat.id}', '${art.id}')">✖</button>
+                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">📄 ${art.title}</span>
+                    <button class="kb-admin-btn del" style="flex-shrink:0;" onclick="event.stopPropagation(); window.kbDeleteArticle('${cat.id}', '${art.id}')">✖</button>
                 `;
                 artItem.onclick = () => window.kbSelectArticle(cat.id, art.id);
                 catGroup.appendChild(artItem);
@@ -337,11 +335,11 @@
         cat.articles.push(newArt);
         await window.saveDB();
         window.renderKBSidebar();
-        window.kbSelectArticle(catId, newArt.id); // 创建后自动打开
+        window.kbSelectArticle(catId, newArt.id);
     };
 
     window.kbDeleteArticle = async function(catId, artId) {
-        if (!confirm("确定要删除这篇文档吗？删除后无法恢复！")) return;
+        if (!confirm("确定要彻底删除这篇文档吗？删除后无法恢复！")) return;
         const cat = db.docSystems[currentSystemId].categories.find(c => c.id === catId);
         cat.articles = cat.articles.filter(a => a.id !== artId);
         if (activeArticleId === artId) window.kbShowEmptyState();
@@ -368,7 +366,7 @@
         document.getElementById('doc-title').value = art.title;
         document.getElementById('doc-editor').innerHTML = art.content;
         
-        window.renderKBSidebar(); // 刷新高亮状态
+        window.renderKBSidebar(); 
     };
 
     // 失去焦点时实时保存标题
