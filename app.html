@@ -68,7 +68,6 @@
         #bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top center, var(--theme-secondary) 0%, var(--theme-bg-color) 80%); opacity: 0.12; z-index: 1; transition: background 1s ease; pointer-events: none; }
         #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; transform: translateZ(0); will-change: transform; }
         
-        /* 🚀 彻底放开最大宽度限制，交由弹性引擎管理对称与铺展 */
         #app-container { position: relative; z-index: 10; width: 100%; max-width: 100vw; height: 100%; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; }
 
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: calc(env(safe-area-inset-top) + 2rem) 1.5rem calc(env(safe-area-inset-bottom) + 2rem) 1.5rem; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); transform: scale(0.97) translateY(15px); overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; }
@@ -91,10 +90,8 @@
         .btn-glass:active { transform: translateY(3px) scale(0.97); box-shadow: 0 2px 10px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1); }
         .btn-primary { background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); border: none; color: #111 !important; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5); }
         .btn-type-dark { background: #2d3748 !important; color: #e2e8f0 !important; border: 1px solid rgba(255,255,255,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        
         .btn-favorite-cat { background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%) !important; border: 1px solid var(--theme-primary) !important; color: var(--theme-primary) !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; font-weight: bold !important; box-shadow: 0 8px 25px rgba(212,175,55,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important; letter-spacing: 2px; }
 
-        /* 全局输入框基础样式 */
         input, textarea, select { width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); padding: 14px 18px; border-radius: 16px; margin-bottom: 14px; font-size: 1rem; outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
         input[type="search"] { padding: 10px 18px; border-radius: 20px; margin-bottom: 12px; font-size: 0.95rem; }
         input:focus, textarea:focus, select:focus { border-color: #6366f1; }
@@ -138,10 +135,10 @@
         .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
 
-        /* 🔥 全端响应式引擎核心样式注入 (彻底防止图片和输入框崩塌) */
+        /* 🔥 全端响应式引擎核心样式 (强制防止图片和标题溢出) */
         .top-modules-wrapper {
             display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; 
-            width: 100%; margin-bottom: 30px; position: relative; z-index: 10;
+            width: 100%; margin-bottom: 25px; position: relative; z-index: 10;
         }
         .brand-capsule-dynamic {
             display: inline-flex; align-items: center; justify-content: center; gap: 10px;
@@ -152,14 +149,13 @@
             position: relative;
         }
         .brand-capsule-dynamic:active { transform: scale(0.95); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .brand-capsule-dynamic img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1); }
+        .brand-capsule-dynamic img { width: 36px !important; height: 36px !important; border-radius: 50% !important; object-fit: cover !important; flex-shrink: 0 !important; border: 1px solid rgba(255,255,255,0.1) !important; margin: 0 !important; padding: 0 !important; }
         .brand-capsule-dynamic input { 
             background: transparent !important; border: none !important; color: inherit !important; font-weight: bold; 
             font-size: 1.1rem; letter-spacing: 2px; font-family: var(--font-title); padding: 0 !important; margin: 0 !important;
             outline: none; max-width: 120px; text-align: center; pointer-events: none; box-shadow: none !important;
         }
         .edit-mode .brand-capsule-dynamic input { pointer-events: auto; border-bottom: 1px dashed var(--theme-primary) !important; padding: 2px 5px !important; }
-        .edit-mode .brand-capsule-dynamic img { cursor: pointer; }
 
         .stage-array-flex {
             display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;
@@ -187,15 +183,14 @@
             border-bottom: 1px dashed var(--theme-primary) !important; padding: 5px !important; border-radius: 8px !important;
         }
 
-        /* 强制图片裁剪不溢出 */
         .stage-icon-dropzone { 
-            width: clamp(65px, 18vw, 85px); height: clamp(65px, 18vw, 85px); 
-            border-radius: 50%; overflow: hidden; margin-bottom: 15px; position: relative;
+            width: clamp(65px, 18vw, 85px) !important; height: clamp(65px, 18vw, 85px) !important; 
+            border-radius: 50% !important; overflow: hidden !important; margin-bottom: 15px !important; position: relative !important;
             display: flex; justify-content: center; align-items: center;
             background: rgba(255,255,255,0.05); border: 2px solid var(--theme-primary); 
             box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.2); transition: all 0.3s; 
         }
-        .stage-icon-dropzone img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+        .stage-icon-dropzone img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; border-radius: 50% !important; margin: 0 !important; padding: 0 !important; border: none !important; }
         .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
         .del-badge {
@@ -337,11 +332,10 @@
 
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
-<!-- 🎵 预加载修正: 使用 metadata 避免未播放就全量下载，配合 Worker 206 实现秒播 -->
 <audio id="bgm-player" preload="metadata"></audio>
 
 <div class="widget-controls" id="theme-widget">
-    <div class="theme-toggle-btn" onclick="window.toggleTheme()" id="btn-theme">☀️️</div>
+    <div class="theme-toggle-btn" onclick="window.toggleTheme()" id="btn-theme">☀️</div>
 </div>
 
 <div class="widget-controls-right">
@@ -389,7 +383,7 @@
         </div>
     </div>
 
-    <!-- 主页模块 -->
+    <!-- 主页模块：弹性对称流体排版 -->
     <div class="screen center-content" id="screen-stage">
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
@@ -399,11 +393,11 @@
             <button class="btn-glass btn-small btn-blue-gradient" onclick="window.addNewStage()">+ 动态新增主模块</button>
         </div>
 
-        <!-- 🚀 弹性对称顶栏模块 -->
+        <!-- 动态顶栏模块 (印记音律、婚前辅导等) -->
         <div class="top-modules-wrapper" id="top-modules-dynamic-container"></div>
 
-        <!-- 🚀 弹性对称主模块 -->
-        <div id="stage-buttons-container"></div>
+        <!-- 动态主模块网格 (单身、恋爱、定婚等) -->
+        <div class="stage-array-flex" id="stage-buttons-container"></div>
     </div>
 
     <div class="screen" id="screen-card-list" style="padding-top: calc(env(safe-area-inset-top) + 60px); justify-content: flex-start;">
@@ -474,7 +468,7 @@
     </div>
 </div>
 
-<!-- ================ 以下是各种弹窗 ================ -->
+<!-- ================ 模态弹窗区 ================ -->
 
 <div class="modal-overlay" id="user-profile-modal">
     <div class="modal-content" style="text-align: center; max-width: 320px; padding: 25px;">
@@ -577,7 +571,7 @@
             <span id="player-time-current">00:00</span>
             <div class="progress-track" id="progress-track">
                 <div class="progress-fill" id="progress-fill"></div>
-                <div class="progress-thumb" id="progress-thumb">❤️</div>
+                <div class="progress-thumb" id="progress-thumb">❤</div>
             </div>
             <span id="player-time-total">00:00</span>
         </div>
@@ -601,7 +595,7 @@
         <h2 class="text-gradient-blue" style="margin-bottom: 15px; text-align:left; font-size: 1.4rem;">全局音律库管理</h2>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <p style="font-size: 0.85rem; opacity: 0.8; text-align:left; margin:0;">选择分类库进行管理</p>
-            <button class="btn-glass btn-small" style="margin:0; border: 1px dashed #f59e0b; color:#f59e0b; padding:4px 8px; font-size: 0.8rem;" onclick="window.manageMusicCategories()">⚙️ 管理分类</button>
+            <button class="btn-glass btn-small" style="margin:0; border: 1px dashed #f59e0b; color:#f59e0b; padding:4px 8px; font-size: 0.8rem;" onclick="window.manageMusicCategories()">⚙️️ 管理分类</button>
         </div>
         <select id="admin-music-cat" onchange="window.renderAdminMusicList()" style="margin-bottom: 15px; padding:10px 15px; background:var(--theme-glass-bg);"></select>
         <input type="search" id="admin-music-search" placeholder="🔍 模糊搜索音乐库..." oninput="window.filterAdminMusicList()" style="margin-bottom:12px; padding:10px 15px;">
@@ -677,14 +671,10 @@
     </div>
 </div>
 
-<!-- ================= 自动防缓存加载引擎 ================= -->
+<!-- ================= 一劳永逸防缓存：全自动附加时间戳加载 ================= -->
 <script>
     (function() {
-        // 自动获取当前时间的毫秒时间戳（例如：1727681234567）
-        // 这样每次用户刷新页面，浏览器都会认为这是一个全宇宙独一无二的新文件
-        var autoVersion = new Date().getTime(); 
-        
-        // 将你需要加载的核心引擎按顺序放在这里
+        var autoVersion = Date.now();
         var scripts = [
             'app.js',
             'stage-layout.js',
@@ -692,13 +682,11 @@
             'card-purifier.js',
             'counseling-doc.js'
         ];
-        
         scripts.forEach(function(src) {
-            var script = document.createElement('script');
-            script.src = src + '?v=' + autoVersion;
-            // 【核心安全锁】：强行关闭异步，保证代码严格按照上面的数组顺序执行，绝不报错
-            script.async = false; 
-            document.body.appendChild(script);
+            var s = document.createElement('script');
+            s.src = src + '?v=' + autoVersion;
+            s.async = false;
+            document.body.appendChild(s);
         });
     })();
 </script>
