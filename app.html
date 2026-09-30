@@ -2,8 +2,6 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-
-    <!-- ================= 🛡️ 腾讯系全家桶(微信/企微/QQ)极致侦测与熔断拦截 ================= -->
     <script>
       (function() {
           var ua = navigator.userAgent.toLowerCase();
@@ -26,7 +24,6 @@
           }
       })();
     </script>
-    <!-- ================= 拦截结束 ================= -->
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
@@ -141,9 +138,16 @@
         .brand-capsule img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
         .brand-capsule span { font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; font-family: var(--font-title); white-space: nowrap; }
 
-        .stage-array-wrapper { display: flex; flex-direction: column; gap: clamp(10px, 2.5vw, 18px); width: 100%; align-items: center; padding: 10px 0; }
-        .stage-row-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(10px, 2.5vw, 18px); width: 100%; }
-        .stage-row-bottom { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(8px, 2vw, 14px); width: 100%; }
+        /* 🔥 全新响应式网格流布局 (适配任意数量模块) */
+        .stage-array-wrapper { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); 
+            gap: clamp(12px, 2.5vw, 20px); 
+            width: 100%; 
+            align-items: start; 
+            padding: 10px 0; 
+            justify-content: center; 
+        }
         
         .stage-card { background: var(--theme-glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--theme-glass-border); border-radius: 18px; padding: clamp(15px, 4vw, 25px) 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; }
         .stage-card:active { transform: translateY(2px) scale(0.96); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
@@ -286,7 +290,8 @@
 
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
-<audio id="bgm-player" preload="auto"></audio>
+<!-- 🎵 预加载修正: 使用 metadata 避免未播放就全量下载，配合 Worker 206 实现秒播 -->
+<audio id="bgm-player" preload="metadata"></audio>
 
 <div class="widget-controls" id="theme-widget">
     <div class="theme-toggle-btn" onclick="window.toggleTheme()" id="btn-theme">☀️</div>
@@ -346,6 +351,11 @@
             <span>印记音律</span>
         </div>
 
+        <div class="stage-admin-bar edit-mode-only" style="margin-bottom: 20px;">
+            <button class="btn-glass btn-small btn-blue-gradient" onclick="window.addNewStage()">+ 动态新增模块</button>
+        </div>
+
+        <!-- 🚀 全新动态 Grid 网格，支持任意模块数量无限延展 -->
         <div class="stage-array-wrapper" id="stage-buttons-container"></div>
     </div>
 
@@ -650,7 +660,7 @@ document.addEventListener("DOMContentLoaded", () => {
     state.isLightTheme = true; document.getElementById('btn-theme').innerText = '☀️';
     window.updateThemeCache('#d99a29');
     
-    // 🛡️ 休眠引擎：当浏览器被最小化或切到后台时，绝对彻底切断动画计算
+    // 🛡️ CPU休眠引擎升级版：严格嗅探活动视图
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
@@ -664,8 +674,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     window.initDB(); window.initProgressDrag();
 });
-
-const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
 const defaultDB = {
     users: { 'yishuyangguang': { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } }, 
@@ -687,7 +695,6 @@ db = JSON.parse(JSON.stringify(defaultDB));
 window.showModal = function(id) { 
     document.getElementById(id).style.display = 'flex'; 
     state.isModalOpen = true; 
-    // 🛡️ 休眠引擎：只要打开弹窗，强行拔掉 CPU 的动画电源
     if(animationId) { cancelAnimationFrame(animationId); animationId = null; }
 }
 
@@ -695,7 +702,6 @@ window.hideModal = function(id) {
     document.getElementById(id).style.display = 'none'; 
     let anyOpen = false; document.querySelectorAll('.modal-overlay').forEach(m => { if(window.getComputedStyle(m).display !== 'none') anyOpen = true; });
     state.isModalOpen = anyOpen;
-    // 🛡️ 唤醒引擎：弹窗全关，瞬间通电唤醒
     if (!state.isModalOpen && !document.hidden && !animationId) {
         lastParticleTime = performance.now();
         window.animateParticles();
@@ -703,8 +709,14 @@ window.hideModal = function(id) {
 }
 
 window.animateParticles = function(timestamp) { 
-    // 🛡️ 绝对防线：一旦处于隐藏或模态框状态，循环彻底熔断
-    if (document.hidden || state.isModalOpen) { animationId = null; return; }
+    // 🛡️ 终极降频引擎：一旦处于阅读、列表等重绘密集区域，或者模态框打开，彻底切断底层画布算力
+    const activeScreen = document.querySelector('.screen.active');
+    const isLightWeightScreen = activeScreen && (activeScreen.id === 'screen-card-list' || activeScreen.id === 'screen-content' || activeScreen.id === 'screen-finish' || activeScreen.id === 'screen-prep');
+    
+    if (document.hidden || state.isModalOpen || isLightWeightScreen) { 
+        animationId = null; 
+        return; 
+    }
     
     animationId = requestAnimationFrame(window.animateParticles); 
     
@@ -720,7 +732,7 @@ window.animateParticles = function(timestamp) {
 }
 
 window.cleanupOldLocalStorage = function() { 
-    const currentVersion = 'sealOfLoveDB_v34'; 
+    const currentVersion = 'sealOfLoveDB_v35'; 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) localStorage.removeItem(key);
@@ -731,7 +743,13 @@ window.upgradeDBStructure = function(source) {
     let target = JSON.parse(JSON.stringify(defaultDB));
     if(!source) return target;
     if (source.users) { for (let u in source.users) { target.users[u] = source.users[u]; if (!target.users[u].favorites) target.users[u].favorites = []; if (!target.users[u].status) target.users[u].status = 'normal'; if (!target.users[u].expireAt) target.users[u].expireAt = 0; } }
-    if (source.stages) { Object.keys(source.stages).forEach(s => { target.stages[s] = source.stages[s]; }); }
+    
+    // 动态融合：放弃固定 stagesList 束缚，直接克隆全集
+    if (source.stages) { 
+        target.stages = {};
+        Object.keys(source.stages).forEach(s => { target.stages[s] = source.stages[s]; }); 
+    }
+    
     if (source.globalMusicConfig) { target.globalMusicConfig = source.globalMusicConfig; }
     if (source.licenseKeys) { target.licenseKeys = source.licenseKeys; }
     return target;
@@ -743,7 +761,6 @@ window.initDB = async function() {
     try { 
         const headers = {};
         if (state.isAdmin && currentUserAccount === 'yishuyangguang') headers['x-admin-auth'] = 'yishuyangguang';
-        
         const res = await fetch('/api/db?t=' + Date.now(), { headers }); 
         if (res.ok) { 
             fetchOk = true;
@@ -767,7 +784,7 @@ window.initDB = async function() {
 
     if (!db.users['yishuyangguang']) db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' };
     
-    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v34', JSON.stringify(db)); } catch(e){} 
+    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v35', JSON.stringify(db)); } catch(e){} 
     
     if (document.getElementById('screen-stage').classList.contains('active')) window.initStageScreen();
     if (document.getElementById('screen-card-list').classList.contains('active')) window.renderCardList();
@@ -780,13 +797,11 @@ window.initDB = async function() {
 
 window.saveDB = async function() { 
     let localSaved = false; 
-    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v34', JSON.stringify(db)); localSaved = true; } catch (e) {} 
+    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v35', JSON.stringify(db)); localSaved = true; } catch (e) {} 
     try { 
         window.showGlobalToast('正在同步至云端...', 'loading'); 
-        
         const headers = { 'Content-Type': 'application/json' };
         if (state.isAdmin && currentUserAccount === 'yishuyangguang') headers['x-admin-auth'] = 'yishuyangguang';
-        
         const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers }); 
         if(res.ok) window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); else window.showGlobalToast('云端同步异常', 'error'); 
     } catch(e) { window.showGlobalToast('网络异常，数据未保存至云端', 'error'); } 
@@ -829,7 +844,6 @@ class Particle {
                 window.ctx.beginPath(); window.ctx.moveTo(0, 0); window.ctx.bezierCurveTo(-5, -6, -12, 4, 0, 14); window.ctx.bezierCurveTo(12, 4, 5, -6, 0, 0); window.ctx.fill(); 
             } 
             else { 
-                // 🛡️ 废弃 CPU 杀手 shadowBlur，采用极致丝滑的径向渐变
                 const radius = this.size * 3;
                 const grad = window.ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
                 grad.addColorStop(0, `rgba(180, 255, 100, ${alpha})`);
@@ -859,7 +873,6 @@ window.handleLogin = async function() {
     } catch (error) {} 
     
     if(!pwdMatch && db.users[baseUsername] && db.users[baseUsername].password === p) { pwdMatch = true; }
-
     if (!pwdMatch) return alert('账号或密码错误。');
 
     if (baseUsername !== 'yishuyangguang') {
@@ -892,16 +905,9 @@ window.handleLogin = async function() {
 window.loginSuccess = async function(baseUser, isAdmin) { 
     state.isLoggedIn = true; state.isAdmin = isAdmin; currentUserAccount = baseUser; 
     document.getElementById('user-widget').style.display = 'flex'; window.updateUserWidgetIcon(); 
-    
     window.showGlobalToast('正在同步云端最新时空...', 'loading');
     await window.initDB();
-    
-    if (isAdmin) {
-        window.showGlobalToast('管理模式已激活', 'success');
-    } else {
-        window.showGlobalToast('数据同步成功', 'success');
-    }
-    
+    if (isAdmin) window.showGlobalToast('管理模式已激活', 'success'); else window.showGlobalToast('数据同步成功', 'success');
     window.initStageScreen(); 
 }
 
@@ -926,14 +932,11 @@ window.handleRegister = async function() {
         }
         
         db.users[u] = { password: p, nickname: '', avatar: '', favorites: [], expireAt: data.expireAt, status: 'normal' };
-        
         await window.saveDB();
         
         window.showGlobalToast(`注册成功！已为您赋予 ${data.days} 天时空权限`, 'success');
         window.loginSuccess(u, false);
-    } catch(e) {
-        window.showGlobalToast('网络异常，卡密核验失败', 'error');
-    }
+    } catch(e) { window.showGlobalToast('网络异常，卡密核验失败', 'error'); }
 }
 
 window.logout = function() { state.isLoggedIn = false; state.isAdmin = false; state.isEditMode = false; currentUserAccount = null; document.getElementById('top-admin-controls').style.display = 'none'; document.getElementById('user-widget').style.display = 'none'; window.navigateTo('screen-login'); document.body.classList.remove('dark-theme'); document.body.classList.add('light-theme'); state.isLightTheme = true; document.getElementById('btn-theme').innerText = '☀️'; document.documentElement.style.setProperty('--theme-bg-color', '#f8f6f0'); document.documentElement.style.setProperty('--theme-primary', '#d99a29'); document.documentElement.style.setProperty('--theme-secondary', '#f4c453'); }
@@ -949,20 +952,14 @@ window.openUserProfile = function() {
     
     const daysLeftEl = document.getElementById('user-days-left');
     if (currentUserAccount === 'yishuyangguang') {
-        daysLeftEl.innerText = '永久 (特权)';
-        daysLeftEl.style.color = '#fde68a';
+        daysLeftEl.innerText = '永久 (特权)'; daysLeftEl.style.color = '#fde68a';
     } else {
         const now = Date.now();
         let days = Math.ceil(((userData.expireAt || 0) - now) / (1000 * 60 * 60 * 24));
         if (days < 0) days = 0;
         
-        if (userData.status === 'banned') {
-            daysLeftEl.innerText = '被封禁';
-            daysLeftEl.style.color = '#ef4444';
-        } else {
-            daysLeftEl.innerText = days;
-            daysLeftEl.style.color = days <= 7 ? '#ef4444' : '#fde68a';
-        }
+        if (userData.status === 'banned') { daysLeftEl.innerText = '被封禁'; daysLeftEl.style.color = '#ef4444'; } 
+        else { daysLeftEl.innerText = days; daysLeftEl.style.color = days <= 7 ? '#ef4444' : '#fde68a'; }
     }
 
     const recoveryWrap = document.getElementById('admin-recovery-btn-wrap'); 
@@ -973,7 +970,6 @@ window.openUserProfile = function() {
 window.handleRenew = async function() {
     const k = document.getElementById('ipt-renew-key').value.trim().toUpperCase();
     if(!k) return alert('请输入续费卡密');
-    
     window.showGlobalToast('正在向时空网络验证...', 'loading');
     try {
         const res = await fetch('/api/verifyKey', {
@@ -981,65 +977,45 @@ window.handleRenew = async function() {
             body: JSON.stringify({ action: 'renew', username: currentUserAccount, key: k })
         });
         const data = await res.json();
+        if (!res.ok || !data.success) { return window.showGlobalToast(data.error || '续费失败', 'error'); }
         
-        if (!res.ok || !data.success) {
-            return window.showGlobalToast(data.error || '续费失败', 'error');
-        }
-        
-        db.users[currentUserAccount].expireAt = data.expireAt;
-        db.users[currentUserAccount].status = 'normal';
+        db.users[currentUserAccount].expireAt = data.expireAt; db.users[currentUserAccount].status = 'normal';
         document.getElementById('ipt-renew-key').value = '';
         window.showGlobalToast(`续费成功！已为您叠加 ${data.days} 天`, 'success');
         window.openUserProfile(); 
-    } catch(e) {
-        window.showGlobalToast('网络异常', 'error');
-    }
+    } catch(e) { window.showGlobalToast('网络异常', 'error'); }
 }
 
 window.handleProfileAvatar = function(inputEl) { if(inputEl.files.length > 0) { window.compressImageFile(inputEl.files[0], (base64) => { const imgEl = document.getElementById('profile-avatar-img'); imgEl.src = base64; imgEl.style.display = 'block'; document.getElementById('profile-svg-placeholder').style.display = 'none'; }); } }
 
 window.saveUserProfile = async function() { 
     if(!currentUserAccount) return; 
-    const nick = document.getElementById('profile-nickname-input').value.trim(); 
-    const imgEl = document.getElementById('profile-avatar-img'); 
+    const nick = document.getElementById('profile-nickname-input').value.trim(); const imgEl = document.getElementById('profile-avatar-img'); 
     for(let key in db.users) { if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) { return alert('该昵称已被使用'); } } 
-    
     if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [], expireAt: 0, status: 'normal' }; 
-    
     db.users[currentUserAccount].nickname = nick; 
     if(imgEl.style.display === 'block') db.users[currentUserAccount].avatar = imgEl.src; 
-    
     await window.saveDB(); window.updateUserWidgetIcon(); window.hideModal('user-profile-modal'); 
 }
 
 window.openAuthAdmin = function() {
     if (!state.isAdmin) return;
     if (!db.licenseKeys) db.licenseKeys = {};
-    window.renderLicenseKeys();
-    window.renderUserControlList();
-    window.showModal('auth-admin-modal');
+    window.renderLicenseKeys(); window.renderUserControlList(); window.showModal('auth-admin-modal');
 }
 
 window.generateKey = async function(days) {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let key = 'YJ-';
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let key = 'YJ-';
+    for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length)); key += '-';
+    for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length)); key += '-';
     for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
-    key += '-';
-    for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
-    key += '-';
-    for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
-    
     if (!db.licenseKeys) db.licenseKeys = {};
     db.licenseKeys[key] = { days: days, isUsed: false, createdAt: Date.now() };
-    
-    await window.saveDB();
-    window.renderLicenseKeys();
-    window.showGlobalToast(`成功铸造一张 ${days} 天卡密`, 'success');
+    await window.saveDB(); window.renderLicenseKeys(); window.showGlobalToast(`成功铸造一张 ${days} 天卡密`, 'success');
 }
 
 window.renderLicenseKeys = function() {
-    const list = document.getElementById('admin-key-list');
-    list.innerHTML = '';
+    const list = document.getElementById('admin-key-list'); list.innerHTML = '';
     let keys = Object.keys(db.licenseKeys || {}).map(k => ({ key: k, ...db.licenseKeys[k] })).sort((a,b) => b.createdAt - a.createdAt);
     if(keys.length === 0) return list.innerHTML = '<div style="opacity:0.5;text-align:center;padding:10px;">暂无卡密，请点击上方生成</div>';
     keys.forEach(k => {
@@ -1059,18 +1035,13 @@ window.renderLicenseKeys = function() {
 }
 
 window.renderUserControlList = function() {
-    const list = document.getElementById('admin-user-list');
-    list.innerHTML = '';
+    const list = document.getElementById('admin-user-list'); list.innerHTML = '';
     let hasUser = false;
     for (let u in db.users) {
         if (u === 'yishuyangguang') continue; 
-        hasUser = true;
-        const user = db.users[u];
-        const now = Date.now();
-        let days = Math.ceil(((user.expireAt || 0) - now) / (1000 * 60 * 60 * 24));
-        if (days < 0) days = 0;
+        hasUser = true; const user = db.users[u]; const now = Date.now();
+        let days = Math.ceil(((user.expireAt || 0) - now) / (1000 * 60 * 60 * 24)); if (days < 0) days = 0;
         const isBanned = user.status === 'banned';
-
         const div = document.createElement('div');
         div.style.padding = '12px'; div.style.background = 'rgba(0,0,0,0.2)'; div.style.borderRadius = '10px'; div.style.marginBottom = '8px';
         div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.alignItems = 'center';
@@ -1091,35 +1062,39 @@ window.renderUserControlList = function() {
 }
 
 window.toggleUserStatus = async function(u) {
-    if (!db.users[u]) return;
-    const isBanned = db.users[u].status === 'banned';
+    if (!db.users[u]) return; const isBanned = db.users[u].status === 'banned';
     if(confirm(`确定要对用户 ${u} 执行【${isBanned ? '解除封禁' : '强制限制使用'}】操作吗？`)) {
-        db.users[u].status = isBanned ? 'normal' : 'banned';
-        await window.saveDB();
-        window.renderUserControlList();
-        window.showGlobalToast(`风控指令下达成功`, 'success');
+        db.users[u].status = isBanned ? 'normal' : 'banned'; await window.saveDB(); window.renderUserControlList(); window.showGlobalToast(`风控指令下达成功`, 'success');
     }
 }
 
 window.updateUserWidgetIcon = function() { if(!currentUserAccount) return; if (!db.users[currentUserAccount]) db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; const userData = db.users[currentUserAccount]; const imgEl = document.getElementById('user-widget-avatar'); const svgEl = document.getElementById('user-widget-svg'); if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } }
 window.toggleEditMode = function() { state.isEditMode = !state.isEditMode; document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑'; if(state.isEditMode) document.body.classList.add('edit-mode'); else document.body.classList.remove('edit-mode'); if (document.getElementById('screen-stage').classList.contains('active')) window.initStageScreen(); else if (document.getElementById('screen-card-list').classList.contains('active')) window.renderCardList(); }
-window.navigateTo = function(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); document.getElementById(screenId).scrollTop = 0; }
+window.navigateTo = function(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); document.getElementById(screenId).scrollTop = 0; if(!state.isModalOpen) { lastParticleTime = performance.now(); window.animateParticles(); } }
 window.applyStageTheme = function(stageName) { if (!stageName || !db.stages[stageName]) return; const t = db.stages[stageName].themeParams; const currentParams = state.isLightTheme ? t.light : t.dark; document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); document.documentElement.style.setProperty('--theme-primary', currentParams.p); document.documentElement.style.setProperty('--theme-secondary', currentParams.s); window.updateThemeCache(currentParams.p); }
+
+window.addNewStage = async function() {
+    const stageName = prompt("请输入新模块的名称 (如: 晚年期):");
+    if(!stageName) return;
+    const newKey = 'stage_' + Date.now();
+    db.stages[newKey] = {
+        name: stageName, icon: '', themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } },
+        prepText: '请准备，预备进入内心的探索。', categories: [{ id: 'cat_default_' + Date.now(), name: '核心印记' }], cards: []
+    };
+    await window.saveDB(); window.initStageScreen();
+}
+
+window.deleteStage = async function(sKey) {
+    if(confirm(`确定要彻底删除大模块 [${db.stages[sKey].name}] 吗？\n删除后不可恢复！`)) {
+        delete db.stages[sKey]; await window.saveDB(); window.initStageScreen();
+    }
+}
 
 window.initStageScreen = function() { 
     if (!state.isAdmin && currentUserAccount !== 'yishuyangguang') {
-        const uData = db.users[currentUserAccount];
-        const nowTime = Date.now();
-        if (!uData || !uData.expireAt || uData.expireAt < nowTime) {
-            alert("【系统拦截】您的时空印记已到期或未激活。请在登录界面联系站长获取新卡密续费。");
-            window.logout();
-            return;
-        }
-        if (uData.status === 'banned') {
-            alert("【系统拦截】您的账号已被限制使用。");
-            window.logout();
-            return;
-        }
+        const uData = db.users[currentUserAccount]; const nowTime = Date.now();
+        if (!uData || !uData.expireAt || uData.expireAt < nowTime) { alert("【系统拦截】您的时空印记已到期或未激活。请在登录界面联系站长获取新卡密续费。"); window.logout(); return; }
+        if (uData.status === 'banned') { alert("【系统拦截】您的账号已被限制使用。"); window.logout(); return; }
     }
 
     document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none'; 
@@ -1128,10 +1103,37 @@ window.initStageScreen = function() {
     document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
     document.documentElement.style.setProperty('--theme-secondary', currentParams.s); 
     window.updateThemeCache(currentParams.p);
-    const container = document.getElementById('stage-buttons-container'); container.innerHTML = ''; 
-    const rowTop = document.createElement('div'); rowTop.className = 'stage-row-top'; 
-    const rowBottom = document.createElement('div'); rowBottom.className = 'stage-row-bottom'; 
-    Object.keys(db.stages).forEach((sKey, index) => { const sData = db.stages[sKey]; const iconB64 = sData.icon; const displayName = sData.name || sKey; const card = document.createElement('div'); card.className = 'stage-card'; card.onclick = (e) => { if(!state.isEditMode) window.selectStage(sKey); }; const iconDiv = document.createElement('div'); iconDiv.className = 'stage-icon-dropzone'; if (iconB64) { iconDiv.innerHTML = `<img src="${iconB64}">`; } else { iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; } const titleInput = document.createElement('input'); titleInput.className = 'stage-card-title'; titleInput.value = displayName; if (state.isEditMode) { iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) window.handleIconUpload(ev.target.files[0], sKey)}; input.click(); }); titleInput.addEventListener('click', (e) => { e.stopPropagation(); }); titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; window.saveDB(); }); } card.appendChild(iconDiv); card.appendChild(titleInput); if (index < 3) rowTop.appendChild(card); else rowBottom.appendChild(card); }); container.appendChild(rowTop); container.appendChild(rowBottom); 
+    
+    const container = document.getElementById('stage-buttons-container'); 
+    container.innerHTML = ''; 
+    
+    // 动态拉取所有对象，支持无限扩充 
+    Object.keys(db.stages).forEach((sKey) => { 
+        const sData = db.stages[sKey]; const iconB64 = sData.icon; const displayName = sData.name || sKey; 
+        const card = document.createElement('div'); card.className = 'stage-card'; card.onclick = (e) => { if(!state.isEditMode) window.selectStage(sKey); }; 
+        const iconDiv = document.createElement('div'); iconDiv.className = 'stage-icon-dropzone'; 
+        
+        if (iconB64) { iconDiv.innerHTML = `<img src="${iconB64}">`; } else { iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; } 
+        
+        const titleInput = document.createElement('input'); titleInput.className = 'stage-card-title'; titleInput.value = displayName; 
+        
+        if (state.isEditMode) { 
+            iconDiv.addEventListener('click', (e) => { e.stopPropagation(); const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = ev => {if(ev.target.files[0]) window.handleIconUpload(ev.target.files[0], sKey)}; input.click(); }); 
+            titleInput.addEventListener('click', (e) => { e.stopPropagation(); }); titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; window.saveDB(); }); 
+            
+            // 模块删除按钮
+            const delBtn = document.createElement('div');
+            delBtn.className = 'action-icon del';
+            delBtn.style.position = 'absolute';
+            delBtn.style.top = '-10px';
+            delBtn.style.right = '-10px';
+            delBtn.innerHTML = '✖';
+            delBtn.onclick = (e) => { e.stopPropagation(); window.deleteStage(sKey); };
+            card.appendChild(delBtn);
+        } 
+        card.appendChild(iconDiv); card.appendChild(titleInput); 
+        container.appendChild(card);
+    }); 
     window.navigateTo('screen-stage'); 
 }
 
@@ -1172,7 +1174,7 @@ window.removeCat = async function(idx) { const catId = db.stages[state.stage].ca
 window.saveCategories = async function() { const cats = db.stages[state.stage].categories || []; cats.forEach((cat, idx) => { const input = document.getElementById(`cat_input_${idx}`); if(input) cat.name = input.value; }); await window.saveDB(); window.hideModal('cat-modal'); if(!cats.find(c => c.id === state.activeCategoryId) && cats.length > 0) state.activeCategoryId = cats[0].id; window.renderCardList(); }
 
 window.editPrepText = async function() { const t = prompt("预备提醒文本：", db.stages[state.stage].prepText); if (t !== null) { db.stages[state.stage].prepText = t; await window.saveDB(); } }
-window.deleteCard = async function(index) { if(confirm('确认删除？')) { db.stages[state.stage].cards.splice(index, 1); await window.saveDB(); window.renderCardList(); } }
+window.deleteCard = async function(index) { if(confirm('确认彻底删除本卡片吗？')) { db.stages[state.stage].cards.splice(index, 1); await window.saveDB(); window.renderCardList(); } }
 window.openEditModal = function(index) { const isNew = (index === null); document.getElementById('modal-title').innerText = isNew ? '新增卡片' : '编辑卡片'; const catSelect = document.getElementById('edit-card-category'); catSelect.innerHTML = ''; const cats = db.stages[state.stage].categories || []; cats.forEach(c => { catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`; }); let c = isNew ? { id: 'c_'+Date.now(), categoryId: state.activeCategoryId, title:'', steps:[{title:'', text:''},{title:'', text:''},{title:'', text:''}] } : db.stages[state.stage].cards[index]; document.getElementById('edit-card-id').value = index === null ? 'new' : index; document.getElementById('edit-card-category').value = c.categoryId || (cats[0]?cats[0].id:''); document.getElementById('edit-card-title').value = c.title; for(let i=1; i<=3; i++) { document.getElementById(`edit-s${i}-title`).value = c.steps[i-1] ? c.steps[i-1].title : ''; document.getElementById(`edit-s${i}-text`).value = c.steps[i-1] ? c.steps[i-1].text : ''; } window.showModal('edit-modal'); }
 window.saveCard = async function() { const idxStr = document.getElementById('edit-card-id').value; const c = { id: idxStr === 'new' ? 'c_' + Date.now() : db.stages[state.stage].cards[parseInt(idxStr)].id, categoryId: document.getElementById('edit-card-category').value, title: document.getElementById('edit-card-title').value || '未命名', steps: [] }; for(let i=1; i<=3; i++) c.steps.push({ title: document.getElementById(`edit-s${i}-title`).value, text: document.getElementById(`edit-s${i}-text`).value }); if(idxStr === 'new') db.stages[state.stage].cards.push(c); else db.stages[state.stage].cards[parseInt(idxStr)] = c; await window.saveDB(); window.hideModal('edit-modal'); window.renderCardList(); }
 
@@ -1227,7 +1229,7 @@ window.deleteAdminMusic = async function(catId, idx) {
     if(confirm('确认彻底删除此曲（将同时从云端存储桶物理移除）？')) { 
         const track = db.globalMusicConfig.library[catId][idx];
         if (track && track.url) {
-            try { await fetch(track.url, { method: 'DELETE' }); } catch (e) { console.error("云端物理删除失败", e); }
+            try { await fetch(track.url, { method: 'DELETE' }); } catch (e) {}
         }
         db.globalMusicConfig.library[catId].splice(idx, 1); 
         await window.saveDB(); window.renderAdminMusicList(); 
@@ -1255,7 +1257,7 @@ window.formatTime = function(seconds) {
 
 window.updateProgress = function() {
     if(window.isDraggingProgress) return; 
-    const now = Date.now(); if (now - lastTimeUpdate < 100) return; lastTimeUpdate = now;
+    const now = Date.now(); if (now - (window.lastTimeUpdate || 0) < 100) return; window.lastTimeUpdate = now;
     const audio = document.getElementById('bgm-player'); if (!audio || isNaN(audio.duration) || !isFinite(audio.duration)) return;
     const currentTime = audio.currentTime; const duration = audio.duration; const percent = (currentTime / duration) * 100;
     const fill = document.getElementById('progress-fill'); const thumb = document.getElementById('progress-thumb');
