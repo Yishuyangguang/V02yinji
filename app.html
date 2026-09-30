@@ -677,10 +677,30 @@
     </div>
 </div>
 
-<script src="app.js?v=3.1"></script>
-<script src="stage-layout.js?v=3.1"></script>
-<script src="card-tracker.js?v=3.1"></script>
-<script src="card-purifier.js?v=3.1"></script>
-<script src="counseling-doc.js?v=3.1"></script>
+<!-- ================= 自动防缓存加载引擎 ================= -->
+<script>
+    (function() {
+        // 自动获取当前时间的毫秒时间戳（例如：1727681234567）
+        // 这样每次用户刷新页面，浏览器都会认为这是一个全宇宙独一无二的新文件
+        var autoVersion = new Date().getTime(); 
+        
+        // 将你需要加载的核心引擎按顺序放在这里
+        var scripts = [
+            'app.js',
+            'stage-layout.js',
+            'card-tracker.js',
+            'card-purifier.js',
+            'counseling-doc.js'
+        ];
+        
+        scripts.forEach(function(src) {
+            var script = document.createElement('script');
+            script.src = src + '?v=' + autoVersion;
+            // 【核心安全锁】：强行关闭异步，保证代码严格按照上面的数组顺序执行，绝不报错
+            script.async = false; 
+            document.body.appendChild(script);
+        });
+    })();
+</script>
 </body>
 </html>
