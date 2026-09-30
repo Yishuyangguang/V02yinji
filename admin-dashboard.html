@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>时空权限指挥中心 - 恒久印记</title>
+    <style>
+        :root {
+            --theme-bg: #f8f6f0;
+            --theme-panel: #ffffff;
+            --theme-text: #1f2937;
+            --theme-text-light: #5f6368;
+            --theme-primary: #d4af37;
+            --theme-blue: #1a73e8;
+            --theme-red: #ef4444;
+            --theme-green: #10b981;
+            --theme-border: #e5e7eb;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: #333333; /* 外围深色背景突显主体 */
+            color: var(--theme-text); 
+            font-family: var(--font-main); 
+            display: flex; justify-content: center; padding: 20px 10px;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            width: 100%; max-width: 500px;
+            background: var(--theme-bg);
+            border-radius: 28px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            padding: 30px 20px;
+            display: flex; flex-direction: column; gap: 25px;
+        }
+
+        .header-title {
+            font-size: 1.6rem; color: #4f46e5; font-weight: bold;
+            display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+        }
+
+        /* 模块卡片基础样式 */
+        .section-card {
+            background: var(--theme-panel);
+            border-radius: 20px; padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        .section-card.keys { border: 2px solid #fcd34d; }
+        .section-card.users { border: 2px solid #fca5a5; }
+
+        .section-title {
+            font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-title.keys { color: #d97706; }
+        .section-title.users { color: #ef4444; }
+
+        /* 按钮与控件 */
+        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn {
+            flex: 1; padding: 12px; border: none; border-radius: 12px;
+            font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: all 0.2s;
+            display: flex; justify-content: center; align-items: center; gap: 5px;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-outline { background: #fff; border: 1px solid var(--theme-border); color: var(--theme-text); }
+        .btn-outline:hover { background: #f3f4f6; }
+        .btn-gold { background: linear-gradient(135deg, #fcd34d, #f59e0b); color: #111; box-shadow: 0 4px 10px rgba(245,158,11,0.3); }
+        .btn-red-outline { background: transparent; border: 1px solid var(--theme-red); color: var(--theme-red); }
+        .btn-green-outline { background: transparent; border: 1px solid var(--theme-green); color: var(--theme-green); }
+
+        /* 分类选项卡 (Tab) */
+        .tab-container { display: flex; gap: 10px; margin-bottom: 15px; background: #f3f4f6; padding: 4px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.9rem; font-weight: bold; color: var(--theme-text-light); cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { background: #fff; color: var(--theme-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* 列表区域 */
+        .list-container { max-height: 400px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 10px; }
+        .list-container::-webkit-scrollbar { width: 4px; }
+        .list-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .item-card {
+            background: #e2e8f0; border-radius: 12px; padding: 15px;
+            display: flex; flex-direction: column; gap: 8px; position: relative;
+        }
+        
+        .item-header { display: flex; justify-content: space-between; align-items: center; }
+        .item-key { font-family: monospace; font-size: 1.05rem; font-weight: bold; color: #0284c7; }
+        .item-key.used { color: #94a3b8; text-decoration: line-through; }
+        .item-days { font-weight: bold; color: #d97706; font-size: 0.9rem; }
+        
+        .item-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--theme-text-light); }
+        
+        .btn-copy { background: #fff; border: 1px solid #cbd5e1; color: #1e293b; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+        .btn-copy:active { background: #e2e8f0; }
+
+        .user-name { font-size: 1.05rem; font-weight: bold; color: #1f2937; }
+        .user-id { font-size: 0.8rem; color: var(--theme-text-light); font-weight: normal; }
+        .user-status { font-size: 0.85rem; font-weight: bold; display: flex; align-items: center; gap: 4px; margin-top: 4px;}
+        .status-expired { color: var(--theme-red); }
+        .status-active { color: var(--theme-green); }
+        .status-banned { color: #6b7280; }
+
+        /* 吐司提示 */
+        .toast {
+            position: fixed; top: -60px; left: 50%; transform: translateX(-50%);
+            background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 30px;
+            font-size: 0.95rem; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: bold;
+        }
+        .toast.show { top: 30px; }
+        
+        .loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); display:none; justify-content:center; align-items:center; z-index: 50; border-radius: 20px; font-weight:bold; color:var(--theme-blue); }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ 操作成功</div>
+
+<div class="dashboard-container">
+    <div class="header-title">🛡️ 时空权限指挥中心</div>
+
+    <!-- ================= 密钥管理模块 ================= -->
+    <div class="section-card keys" style="position: relative;">
+        <div class="loading-overlay" id="loading-keys">数据同步中...</div>
+        <div class="section-title keys">💳 制造时空密钥</div>
+        
+        <div class="btn-group">
+            <button class="btn btn-outline" onclick="generateKey(7)">生成 7天卡</button>
+            <button class="btn btn-gold" onclick="generateKey(365)">生成 365天卡</button>
+        </div>
+
+        <div class="tab-container">
+            <div class="tab-btn active" id="tab-unused" onclick="switchKeyTab('unused')">未使用</div>
+            <div class="tab-btn" id="tab-used" onclick="switchKeyTab('used')">已使用</div>
+        </div>
+
+        <div class="list-container" id="key-list">
+            <!-- 卡密列表渲染区 -->
+        </div>
+    </div>
+
+    <!-- ================= 极速风控模块 ================= -->
+    <div class="section-card users" style="position: relative;">
+        <div class="loading-overlay" id="loading-users">数据同步中...</div>
+        <div class="section-title users">⚖️ 极速风控</div>
+        
+        <div class="list-container" id="user-list" style="max-height: 450px;">
+            <!-- 用户列表渲染区 -->
+        </div>
+    </div>
+</div>
+
+<script>
+    let db = {};
+    const ADMIN_AUTH_HEADER = 'yishuyangguang';
+    let currentKeyTab = 'unused'; // 默认显示未使用的卡密
+    let toastTimer;
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    async function loadDB() {
+        document.getElementById('loading-keys').style.display = 'flex';
+        document.getElementById('loading-users').style.display = 'flex';
+        try {
+            const res = await fetch('/api/db?t=' + Date.now(), { 
+                headers: { 'x-admin-auth': ADMIN_AUTH_HEADER } 
+            });
+            if (!res.ok) throw new Error("网络错误");
+            db = await res.json();
+            if(!db.licenseKeys) db.licenseKeys = {};
+            if(!db.users) db.users = {};
+            
+            renderKeys();
+            renderUsers();
+        } catch (e) {
+            showToast('⚠️ 无法连接云端数据库');
+        } finally {
+            document.getElementById('loading-keys').style.display = 'none';
+            document.getElementById('loading-users').style.display = 'none';
+        }
+    }
+
+    async function saveDB() {
+        try {
+            const res = await fetch('/api/db', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-admin-auth': ADMIN_AUTH_HEADER },
+                body: JSON.stringify(db)
+            });
+            if (res.ok) showToast('✅ 云端同步成功');
+            else showToast('⚠️ 云端同步失败');
+        } catch (e) {
+            showToast('⚠️ 网络异常');
+        }
+    }
+
+    // ================= 密钥逻辑 =================
+    
+    function switchKeyTab(tab) {
+        currentKeyTab = tab;
+        document.getElementById('tab-unused').classList.remove('active');
+        document.getElementById('tab-used').classList.remove('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+        renderKeys();
+    }
+
+    async function generateKey(days) {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
+        let key = 'YJ-';
+        for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length)); key += '-';
+        for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length)); key += '-';
+        for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+        
+        db.licenseKeys[key] = { days: days, isUsed: false, createdAt: Date.now() };
+        await saveDB();
+        
+        // 生成新卡密后，自动切换到“未使用”标签页以便查看
+        if (currentKeyTab !== 'unused') switchKeyTab('unused');
+        else renderKeys();
+        
+        // 自动将新生成的卡密复制到剪贴板
+        copyToClipboard(key, `成功生成并复制 ${days} 天卡密`);
+    }
+
+    function renderKeys() {
+        const list = document.getElementById('key-list');
+        list.innerHTML = '';
+        
+        let allKeys = Object.keys(db.licenseKeys || {}).map(k => ({ key: k, ...db.licenseKeys[k] })).sort((a,b) => b.createdAt - a.createdAt);
+        
+        // 分类过滤
+        let filteredKeys = allKeys.filter(k => currentKeyTab === 'unused' ? !k.isUsed : k.isUsed);
+
+        if(filteredKeys.length === 0) {
+            list.innerHTML = `<div style="text-align:center; padding:20px; color:#9ca3af; font-size:0.9rem;">暂无${currentKeyTab === 'unused' ? '未使用' : '已使用'}的卡密</div>`;
+            return;
+        }
+
+        filteredKeys.forEach(k => {
+            const div = document.createElement('div');
+            div.className = 'item-card';
+            div.innerHTML = `
+                <div class="item-header">
+                    <span class="item-key ${k.isUsed ? 'used' : ''}">${k.key}</span>
+                    <span class="item-days">${k.days}天</span>
+                </div>
+                <div class="item-footer">
+                    <span>${k.isUsed ? `已被 <b>${k.usedBy}</b> 使用` : '✨ 全新未使用'}</span>
+                    ${!k.isUsed ? `<button class="btn-copy" onclick="copyToClipboard('${k.key}', '已复制卡密')">一键复制</button>` : ''}
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function copyToClipboard(text, successMsg) {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => showToast(successMsg));
+        } else {
+            // 兼容老版本浏览器或非 HTTPS 环境
+            let textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; document.body.appendChild(textArea);
+            textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); showToast(successMsg); } catch (err) { showToast('复制失败，请手动复制'); }
+            document.body.removeChild(textArea);
+        }
+    }
+
+    // ================= 风控逻辑 =================
+    
+    function renderUsers() {
+        const list = document.getElementById('user-list');
+        list.innerHTML = '';
+        let hasUser = false;
+        
+        const now = Date.now();
+
+        for (let u in db.users) {
+            if (u === 'yishuyangguang') continue; // 站长免检
+            hasUser = true; 
+            const user = db.users[u]; 
+            
+            let daysLeft = Math.ceil(((user.expireAt || 0) - now) / (1000 * 60 * 60 * 24)); 
+            
+            let statusHtml = '';
+            let btnHtml = '';
+
+            // 严格的权限状态机
+            if (user.status === 'banned') {
+                statusHtml = `<span class="user-status status-banned">🚫 已限制</span>`;
+                btnHtml = `<button class="btn btn-green-outline" onclick="toggleUserStatus('${u}', 'normal')">解 除 限 制</button>`;
+            } else if (!user.expireAt || daysLeft <= 0) {
+                statusHtml = `<span class="user-status status-expired">⚠️ 已到期</span>`;
+                btnHtml = `<button class="btn btn-red-outline" onclick="toggleUserStatus('${u}', 'banned')">限 制 使 用</button>`;
+            } else {
+                statusHtml = `<span class="user-status status-active">✅ 未到期 (余 ${daysLeft} 天)</span>`;
+                btnHtml = `<button class="btn btn-red-outline" onclick="toggleUserStatus('${u}', 'banned')">限 制 使 用</button>`;
+            }
+
+            const div = document.createElement('div');
+            div.className = 'item-card';
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 8px;">
+                    <div>
+                        <div class="user-name">${user.nickname || '未命名'} <span class="user-id">(${u})</span></div>
+                        ${statusHtml}
+                    </div>
+                </div>
+                ${btnHtml}
+            `;
+            list.appendChild(div);
+        }
+        if(!hasUser) list.innerHTML = `<div style="text-align:center; padding:20px; color:#9ca3af; font-size:0.9rem;">暂无普通用户</div>`;
+    }
+
+    window.toggleUserStatus = async function(u, newStatus) {
+        if (!db.users[u]) return; 
+        const isBanning = newStatus === 'banned';
+        if(confirm(`确定要对用户 ${u} 执行【${isBanning ? '限制使用' : '解除限制'}】操作吗？`)) {
+            db.users[u].status = newStatus; 
+            await saveDB(); 
+            renderUsers(); 
+        }
+    }
+
+    // 页面加载完成执行
+    window.onload = loadDB;
+
+</script>
+</body>
+</html>
