@@ -3,13 +3,25 @@ const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期'
 
 const defaultDB = {
     users: { 
-        'yishuyangguang': { nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } 
+        'yishuyangguang': { 
+            nickname: '站长', 
+            avatar: '', 
+            favorites: [], 
+            expireAt: 4102444800000, 
+            status: 'normal' 
+        } 
     }, 
     licenseKeys: {},
     topModules: [
         { id: 'tm_music', name: '印记音律', icon: 'apple-touch-icon.png', actionType: 'music', url: '' }
     ],
-    globalMusicConfig: { categories: [{ id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' }], library: { 'mcat_1': [], 'mcat_2': [] } },
+    globalMusicConfig: { 
+        categories: [
+            { id: 'mcat_1', name: '纯乐伴奏' }, 
+            { id: 'mcat_2', name: '歌曲演唱' }
+        ], 
+        library: { 'mcat_1': [], 'mcat_2': [] } 
+    },
     stages: {
         '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
         '恋爱期': { themeParams: { dark: { bg: '#1a1114', p: '#d4af37', s: '#ec4899' }, light: { bg: '#fcf2f5', p: '#d97706', s: '#f472b6' } }, icon: '', name: '恋爱期', prepText: '相对而坐，保持一臂距离，深呼吸两次，放下外界的喧嚣，预备心灵进入交流。', categories: [{ id: 'cat_l1', name: '核心操练' }], cards: [{ id: 'c_l_1', categoryId: 'cat_l1', title: '倾听的艺术', steps: [{title:'行为意义',text:'倾听是心灵的交融。'},{title:'具体操练',text:'注视对方眼睛，放下手机。'},{title:'同心宣告',text:'我愿将你放在心上如印记。'}] }] },
@@ -28,8 +40,30 @@ const particleInterval = 1000 / particleFPS;
 let isPressing = false; 
 let pressProgress = 0; 
 let pressFrame = null;
-let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true, isModalOpen: false };
-let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let particles = []; let animationId; window.isDraggingProgress = false;
+
+let state = { 
+    isLoggedIn: false, 
+    isAdmin: false, 
+    isEditMode: false, 
+    stage: '', 
+    activeCategoryId: '', 
+    currentCard: null, 
+    role: '', 
+    currentStep: 0, 
+    isLightTheme: true, 
+    isModalOpen: false 
+};
+
+let toastTimeout; 
+let currentUserAccount = null; 
+let uploadQueue = []; 
+let isUploading = false; 
+let selectedAudioFiles = []; 
+let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; 
+let favDebounce = null; 
+let particles = []; 
+let animationId; 
+window.isDraggingProgress = false;
 
 let cachedPrimaryColorStr = '212,175,55';
 window.updateThemeCache = function(hexColor) {
@@ -71,10 +105,13 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('btn-theme').innerText = '☀️';
     window.updateThemeCache('#d99a29');
     
-    // 🛡️ 严格锁死熄屏与挂后台时的渲染引擎
+    // 🛡️ 严格锁死熄屏与挂后台时的渲染引擎，防止发热
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
+            if (animationId) { 
+                cancelAnimationFrame(animationId); 
+                animationId = null; 
+            }
         } else {
             if (!state.isModalOpen && !animationId) {
                 lastParticleTime = performance.now();
@@ -90,7 +127,10 @@ document.addEventListener("DOMContentLoaded", () => {
 window.showModal = function(id) { 
     document.getElementById(id).style.display = 'flex'; 
     state.isModalOpen = true; 
-    if(animationId) { cancelAnimationFrame(animationId); animationId = null; }
+    if(animationId) { 
+        cancelAnimationFrame(animationId); 
+        animationId = null; 
+    }
 }
 
 window.hideModal = function(id) { 
@@ -100,6 +140,7 @@ window.hideModal = function(id) {
         if(window.getComputedStyle(m).display !== 'none') anyOpen = true; 
     });
     state.isModalOpen = anyOpen;
+    
     if (!state.isModalOpen && !document.hidden && !animationId) {
         lastParticleTime = performance.now();
         window.animateParticles();
@@ -119,17 +160,22 @@ window.animateParticles = function(timestamp) {
     
     if (!timestamp) timestamp = performance.now();
     const elapsed = timestamp - lastParticleTime;
+    
     if (elapsed > particleInterval) {
         lastParticleTime = timestamp - (elapsed % particleInterval);
         const canvas = document.getElementById('particle-canvas'); 
         if(!canvas || !window.ctx) return; 
+        
         window.ctx.clearRect(0, 0, canvas.width, canvas.height); 
-        particles.forEach(p => { p.update(); p.draw(); }); 
+        particles.forEach(p => { 
+            p.update(); 
+            p.draw(); 
+        }); 
     }
 }
 
 window.cleanupOldLocalStorage = function() { 
-    const currentVersion = 'sealOfLoveDB_v42'; 
+    const currentVersion = 'sealOfLoveDB_v50'; 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
@@ -159,12 +205,18 @@ window.upgradeDBStructure = function(source) {
     
     if (source.stages) { 
         target.stages = {};
-        Object.keys(source.stages).forEach(s => { target.stages[s] = source.stages[s]; }); 
+        Object.keys(source.stages).forEach(s => { 
+            target.stages[s] = source.stages[s]; 
+        }); 
     }
     
+    // 同步新增的文档存储结构
     if (source.customDocs) { target.customDocs = source.customDocs; }
+    if (source.docSystems) { target.docSystems = source.docSystems; }
+    
     if (source.globalMusicConfig) { target.globalMusicConfig = source.globalMusicConfig; }
     if (source.licenseKeys) { target.licenseKeys = source.licenseKeys; }
+    
     return target;
 }
 
@@ -173,7 +225,9 @@ window.initDB = async function() {
     let fetchOk = false;
     try { 
         const headers = {};
-        if (state.isAdmin && currentUserAccount === 'yishuyangguang') headers['x-admin-auth'] = 'yishuyangguang';
+        if (state.isAdmin && currentUserAccount === 'yishuyangguang') {
+            headers['x-admin-auth'] = 'yishuyangguang';
+        }
         const res = await fetch('/api/db?t=' + Date.now(), { headers }); 
         if (res.ok) { 
             fetchOk = true;
@@ -182,7 +236,8 @@ window.initDB = async function() {
         } 
     } catch (e) {} 
     
-    let bestLocalDb = null; let maxLen = 0;
+    let bestLocalDb = null; 
+    let maxLen = 0;
     for (let i = 0; i < localStorage.length; i++) { 
         const key = localStorage.key(i); 
         if (key && key.startsWith('sealOfLoveDB_')) { 
@@ -194,9 +249,13 @@ window.initDB = async function() {
         } 
     }
     
-    if (cloudDb) db = window.upgradeDBStructure(cloudDb);
-    else if (bestLocalDb) db = window.upgradeDBStructure(bestLocalDb);
-    else db = JSON.parse(JSON.stringify(defaultDB));
+    if (cloudDb) {
+        db = window.upgradeDBStructure(cloudDb);
+    } else if (bestLocalDb) {
+        db = window.upgradeDBStructure(bestLocalDb);
+    } else {
+        db = JSON.parse(JSON.stringify(defaultDB));
+    }
 
     if (!db.users['yishuyangguang']) {
         db.users['yishuyangguang'] = { nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' };
@@ -204,11 +263,22 @@ window.initDB = async function() {
     
     try { 
         window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v42', JSON.stringify(db)); 
+        localStorage.setItem('sealOfLoveDB_v50', JSON.stringify(db)); 
     } catch(e){} 
     
+    // 安全调用 UI 更新方法（因为这些方法现在由 stage-layout.js 接管）
     if (document.getElementById('screen-stage').classList.contains('active')) {
         if(typeof window.initStageScreen === 'function') window.initStageScreen();
+    }
+    if (document.getElementById('screen-card-list').classList.contains('active')) {
+        if(typeof window.renderCardList === 'function') window.renderCardList();
+    }
+    
+    if (document.getElementById('vinyl-player-modal').style.display === 'flex' && musicState.type !== 'favorites') {
+        if (db.globalMusicConfig && db.globalMusicConfig.library[musicState.type]) { 
+            musicState.playlist = db.globalMusicConfig.library[musicState.type]; 
+            window.renderVinylPlaylist(); 
+        }
     }
     
     if (bestLocalDb && !cloudDb && fetchOk) window.saveDB();
@@ -218,14 +288,16 @@ window.saveDB = async function() {
     let localSaved = false; 
     try { 
         window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v42', JSON.stringify(db)); 
+        localStorage.setItem('sealOfLoveDB_v50', JSON.stringify(db)); 
         localSaved = true; 
     } catch (e) {} 
     
     try { 
         window.showGlobalToast('正在同步至云端...', 'loading'); 
         const headers = { 'Content-Type': 'application/json' };
-        if (state.isAdmin && currentUserAccount === 'yishuyangguang') headers['x-admin-auth'] = 'yishuyangguang';
+        if (state.isAdmin && currentUserAccount === 'yishuyangguang') {
+            headers['x-admin-auth'] = 'yishuyangguang';
+        }
         
         const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers }); 
         if(res.ok) {
@@ -243,11 +315,14 @@ window.showGlobalToast = function(text, type = 'loading') {
     const icon = document.getElementById('toast-icon'); 
     const msg = document.getElementById('toast-text'); 
     if(!toast) return; 
+    
     toast.className = `global-toast show ${type}`; 
     msg.innerText = text; 
+    
     if(type === 'loading') icon.innerText = '⏳'; 
     if(type === 'success') icon.innerText = '✓'; 
     if(type === 'error') icon.innerText = '✖'; 
+    
     clearTimeout(toastTimeout); 
     if(type !== 'loading') { 
         toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 3000); 
@@ -261,15 +336,24 @@ window.compressImageFile = function(file, callback) {
         img.onload = function() { 
             const canvas = document.createElement('canvas'); 
             const MAX_SIZE = 240; 
-            let width = img.width; let height = img.height; 
-            if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
-            else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } 
-            canvas.width = width; canvas.height = height; 
+            let width = img.width; 
+            let height = img.height; 
+            
+            if (width > height) { 
+                if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } 
+            } else { 
+                if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } 
+            } 
+            
+            canvas.width = width; 
+            canvas.height = height; 
             const ctx = canvas.getContext('2d'); 
             ctx.drawImage(img, 0, 0, width, height); 
             callback(canvas.toDataURL('image/webp', 0.75)); 
-        }; img.src = e.target.result; 
-    }; reader.readAsDataURL(file); 
+        }; 
+        img.src = e.target.result; 
+    }; 
+    reader.readAsDataURL(file); 
 }
 
 window.toggleTheme = function() { 
@@ -277,9 +361,11 @@ window.toggleTheme = function() {
     document.getElementById('btn-theme').innerText = state.isLightTheme ? '☀️' : '🌙'; 
     
     if (!state.isLightTheme) { 
-        document.body.classList.add('dark-theme'); document.body.classList.remove('light-theme'); 
+        document.body.classList.add('dark-theme'); 
+        document.body.classList.remove('light-theme'); 
     } else { 
-        document.body.classList.remove('dark-theme'); document.body.classList.add('light-theme'); 
+        document.body.classList.remove('dark-theme'); 
+        document.body.classList.add('light-theme'); 
     } 
     
     if(state.stage) {
@@ -336,7 +422,8 @@ class Particle {
         
         window.ctx.save(); 
         window.ctx.globalAlpha = alpha;
-        // 使用纯净的单一色值进行高斯扩散渲染，避免几何级的浮点运算
+        
+        // 使用纯净的单一色值渲染，避免几何级的渐变浮点运算
         window.ctx.fillStyle = state.isLightTheme ? `rgb(${cachedPrimaryColorStr})` : '#b4ff64'; 
         
         window.ctx.beginPath(); 
@@ -353,7 +440,7 @@ class Particle {
 
 window.initParticles = function() { 
     particles = []; 
-    // 手机端将粒子数量从20直降至10，进一步解放GPU
+    // 手机端将粒子数量降低，进一步解放GPU
     const count = window.innerWidth < 600 ? 10 : 25; 
     for (let i = 0; i < count; i++) {
         particles.push(new Particle()); 
@@ -422,6 +509,7 @@ window.loginSuccess = async function(baseUser, isAdmin) {
     state.isLoggedIn = true; 
     state.isAdmin = isAdmin; 
     currentUserAccount = baseUser; 
+    
     document.getElementById('user-widget').style.display = 'flex'; 
     window.updateUserWidgetIcon(); 
     
@@ -433,6 +521,7 @@ window.loginSuccess = async function(baseUser, isAdmin) {
     } else {
         window.showGlobalToast('数据同步成功', 'success');
     }
+    
     if(typeof window.initStageScreen === 'function') window.initStageScreen(); 
 }
 
@@ -471,9 +560,11 @@ window.logout = function() {
     state.isAdmin = false; 
     state.isEditMode = false; 
     currentUserAccount = null; 
+    
     document.getElementById('top-admin-controls').style.display = 'none'; 
     document.getElementById('user-widget').style.display = 'none'; 
     window.navigateTo('screen-login'); 
+    
     document.body.classList.remove('dark-theme'); 
     document.body.classList.add('light-theme'); 
     state.isLightTheme = true; 
@@ -533,6 +624,7 @@ window.openUserProfile = function() {
 window.handleRenew = async function() {
     const k = document.getElementById('ipt-renew-key').value.trim().toUpperCase();
     if(!k) return alert('请输入续费卡密');
+    
     window.showGlobalToast('正在向时空网络验证...', 'loading');
     try {
         const res = await fetch('/api/verifyKey', {
@@ -547,6 +639,7 @@ window.handleRenew = async function() {
         db.users[currentUserAccount].expireAt = data.expireAt; 
         db.users[currentUserAccount].status = 'normal';
         document.getElementById('ipt-renew-key').value = '';
+        
         window.showGlobalToast(`续费成功！已为您叠加 ${data.days} 天`, 'success');
         window.openUserProfile(); 
     } catch(e) { 
@@ -590,106 +683,10 @@ window.saveUserProfile = async function() {
     window.hideModal('user-profile-modal'); 
 }
 
+// 🛡️ 打开全新的独立管理控制台 (Admin Dashboard)
 window.openAuthAdmin = function() {
     if (!state.isAdmin) return;
-    if (!db.licenseKeys) db.licenseKeys = {};
-    window.renderLicenseKeys(); 
-    window.renderUserControlList(); 
-    window.showModal('auth-admin-modal');
-}
-
-window.generateKey = async function(days) {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
-    let key = 'YJ-';
-    for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length)); 
-    key += '-';
-    for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length)); 
-    key += '-';
-    for(let i=0; i<4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
-    
-    if (!db.licenseKeys) db.licenseKeys = {};
-    db.licenseKeys[key] = { days: days, isUsed: false, createdAt: Date.now() };
-    await window.saveDB(); 
-    window.renderLicenseKeys(); 
-    window.showGlobalToast(`成功铸造一张 ${days} 天卡密`, 'success');
-}
-
-window.renderLicenseKeys = function() {
-    const list = document.getElementById('admin-key-list'); 
-    list.innerHTML = '';
-    let keys = Object.keys(db.licenseKeys || {}).map(k => ({ key: k, ...db.licenseKeys[k] })).sort((a,b) => b.createdAt - a.createdAt);
-    
-    if(keys.length === 0) {
-        return list.innerHTML = '<div style="opacity:0.5;text-align:center;padding:10px;">暂无卡密，请点击上方生成</div>';
-    }
-    
-    keys.forEach(k => {
-        const div = document.createElement('div');
-        div.style.padding = '10px 12px'; 
-        div.style.background = 'rgba(0,0,0,0.2)'; 
-        div.style.borderRadius = '10px'; 
-        div.style.marginBottom = '8px';
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-family:monospace; color:${k.isUsed ? '#94a3b8' : '#38bdf8'}; font-size:13px; text-decoration:${k.isUsed ? 'line-through' : 'none'};">${k.key}</span>
-                <span style="font-size:12px; font-weight:bold; color:#fde68a;">${k.days}天</span>
-            </div>
-            <div style="font-size:11px; opacity:0.6; margin-top:6px; display:flex; justify-content:space-between;">
-                <span>${k.isUsed ? `已被 ${k.usedBy} 使用` : '全新未使用'}</span>
-            </div>
-        `;
-        list.appendChild(div);
-    });
-}
-
-window.renderUserControlList = function() {
-    const list = document.getElementById('admin-user-list'); 
-    list.innerHTML = '';
-    let hasUser = false;
-    
-    for (let u in db.users) {
-        if (u === 'yishuyangguang') continue; 
-        hasUser = true; 
-        const user = db.users[u]; 
-        const now = Date.now();
-        let days = Math.ceil(((user.expireAt || 0) - now) / (1000 * 60 * 60 * 24)); 
-        if (days < 0) days = 0;
-        
-        const isBanned = user.status === 'banned';
-        const div = document.createElement('div');
-        div.style.padding = '12px'; 
-        div.style.background = 'rgba(0,0,0,0.2)'; 
-        div.style.borderRadius = '10px'; 
-        div.style.marginBottom = '8px';
-        div.style.display = 'flex'; 
-        div.style.justifyContent = 'space-between'; 
-        div.style.alignItems = 'center';
-        div.innerHTML = `
-            <div>
-                <div style="font-weight:bold; color:#fff; font-size:13px;">${user.nickname || '未命名'} <span style="font-size:11px; opacity:0.6; font-weight:normal;">(${u})</span></div>
-                <div style="font-size:12px; font-weight:bold; color:${isBanned ? '#ef4444' : (days === 0 ? '#f59e0b' : '#10b981')}; margin-top:6px;">
-                    ${isBanned ? '🚫 强制封禁中' : (days === 0 ? '⚠️ 已到期' : `✅ 正常 (余 ${days} 天)`)}
-                </div>
-            </div>
-            <button class="btn-glass" style="margin:0; padding:6px 12px; font-size:12px; border-radius:8px; border-color:${isBanned ? '#10b981' : '#ef4444'}; color:${isBanned ? '#10b981' : '#ef4444'};" onclick="window.toggleUserStatus('${u}')">
-                ${isBanned ? '解 除 封 禁' : '限 制 使 用'}
-            </button>
-        `;
-        list.appendChild(div);
-    }
-    
-    if(!hasUser) list.innerHTML = '<div style="opacity:0.5;text-align:center;padding:10px;">暂无普通用户</div>';
-}
-
-window.toggleUserStatus = async function(u) {
-    if (!db.users[u]) return; 
-    const isBanned = db.users[u].status === 'banned';
-    if(confirm(`确定要对用户 ${u} 执行【${isBanned ? '解除封禁' : '强制限制使用'}】操作吗？`)) {
-        db.users[u].status = isBanned ? 'normal' : 'banned'; 
-        await window.saveDB(); 
-        window.renderUserControlList(); 
-        window.showGlobalToast(`风控指令下达成功`, 'success');
-    }
+    window.open('admin-dashboard.html', '_blank');
 }
 
 window.updateUserWidgetIcon = function() { 
@@ -714,6 +711,7 @@ window.updateUserWidgetIcon = function() {
 window.toggleEditMode = function() { 
     state.isEditMode = !state.isEditMode; 
     document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑'; 
+    
     if(state.isEditMode) {
         document.body.classList.add('edit-mode'); 
     } else {
@@ -731,6 +729,7 @@ window.navigateTo = function(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
     document.getElementById(screenId).classList.add('active'); 
     document.getElementById(screenId).scrollTop = 0; 
+    
     if(!state.isModalOpen) { 
         lastParticleTime = performance.now(); 
         window.animateParticles(); 
@@ -747,7 +746,8 @@ window.applyStageTheme = function(stageName) {
     window.updateThemeCache(currentParams.p); 
 }
 
-// ============== 音乐库与上传云端核心逻辑 ==============
+// ======================= R2 上传与音乐库 =======================
+
 window.processUploadQueue = async function() { 
     if(isUploading || uploadQueue.length === 0) return; 
     isUploading = true; 
@@ -810,6 +810,7 @@ window.processUploadQueue = async function() {
 
 window.initAdminMusicCatSelect = function() { 
     const catSel = document.getElementById('admin-music-cat'); 
+    if(!catSel) return;
     catSel.innerHTML = ''; 
     const cats = db.globalMusicConfig.categories || []; 
     cats.forEach(c => { catSel.innerHTML += `<option value="${c.id}">${c.name}</option>`; }); 
@@ -899,6 +900,7 @@ window.bindAudioDragDrop = function() {
     const zone = document.getElementById('music-upload-zone'); 
     const fileInput = document.getElementById('new-music-file'); 
     const text = document.getElementById('music-upload-text'); 
+    if(!zone || !fileInput) return;
     
     zone.onclick = () => fileInput.click(); 
     zone.ondragover = (e) => { e.preventDefault(); zone.style.backgroundColor = 'rgba(99, 102, 241, 0.1)'; }; 
@@ -992,6 +994,8 @@ window.deleteAdminMusic = async function(catId, idx) {
         window.renderAdminMusicList(); 
     } 
 }
+
+// ======================= 音乐播放器引擎 =======================
 
 window.initProgressDrag = function() {
     const track = document.getElementById('progress-track');
@@ -1331,4 +1335,177 @@ window.showPlayerFromFloat = function() {
     if(state.isLoggedIn && !state.isEditMode && document.getElementById('vinyl-player-modal').style.display !== 'flex') {
         window.showModal('vinyl-player-modal'); 
     }
+}
+
+// ======================= 卡片与打卡同步引擎 =======================
+
+window.startCardFlow = function(card) { 
+    state.currentCard = card; 
+    document.getElementById('prep-text').innerText = db.stages[state.stage].prepText; 
+    const prepBtn = document.getElementById('btn-prep-confirm'); 
+    if (state.stage === '单身期') { prepBtn.innerText = '我已准备好'; } else { prepBtn.innerText = '我们已预备好'; } 
+    window.navigateTo('screen-prep'); 
+}
+
+window.confirmPrepAndNavigate = function() { 
+    if (state.stage === '单身期') { 
+        const syncBox = document.getElementById('sync-animation-box'); 
+        syncBox.classList.remove('merged'); 
+        const iconB64 = db.stages[state.stage].icon; 
+        const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; 
+        document.getElementById('sync-title').innerText = "抬头仰望"; 
+        
+        const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || ''; 
+        let subText = "愿你在静谧中得着内心的力量与安宁。"; 
+        if (catName.includes('不想') || catName.includes('单身')) subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。"; 
+        else if (catName.includes('想') || catName.includes('进入婚姻')) subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。"; 
+        
+        document.getElementById('sync-subtitle').innerText = subText; 
+        document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望"; 
+        document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)"; 
+        syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`; 
+        window.navigateTo('screen-sync'); 
+    } else { 
+        document.getElementById('sync-title').innerText = "双向奔赴"; 
+        document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并"; 
+        document.getElementById('btn-sync-confirm').innerText = "确 认 合 并"; 
+        document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)"; 
+        window.navigateTo('screen-role'); 
+    } 
+}
+
+window.selectRole = function(role) { 
+    state.role = role; 
+    const syncBox = document.getElementById('sync-animation-box'); 
+    syncBox.classList.remove('merged'); 
+    const iconB64 = db.stages[state.stage].icon; 
+    const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; 
+    
+    if (role === 'boy') syncBox.innerHTML = `<div class="sync-half boy" style="${bgStyle} background-size: cover;"></div>`; 
+    else syncBox.innerHTML = `<div class="sync-half girl" style="${bgStyle} background-size: cover;"></div>`; 
+    
+    window.navigateTo('screen-sync'); 
+}
+
+window.triggerSync = function() { 
+    document.getElementById('sync-animation-box').classList.add('merged'); 
+    state.currentStep = 0; 
+    setTimeout(() => { 
+        window.renderContentStep(); 
+        window.navigateTo('screen-content'); 
+    }, 1800); 
+}
+
+window.renderContentStep = function() { 
+    const stepData = state.currentCard.steps[state.currentStep]; 
+    document.getElementById('content-type-title').innerText = `【${db.stages[state.stage].categories.find(c => c.id === state.currentCard.categoryId)?.name || '印记'}】的连结`; 
+    document.getElementById('step-title').innerText = stepData.title; 
+    document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>'); 
+    
+    for(let i=1; i<=3; i++) { 
+        const dot = document.getElementById(`dot-${i}`); 
+        if (i - 1 === state.currentStep) dot.classList.add('active'); 
+        else dot.classList.remove('active'); 
+    } 
+    
+    const nextBtn = document.getElementById('btn-next-step'); 
+    const longPressBtn = document.getElementById('btn-long-press'); 
+    if (state.currentStep < 2) { 
+        nextBtn.style.display = 'flex'; 
+        longPressBtn.style.display = 'none'; 
+    } else { 
+        nextBtn.style.display = 'none'; 
+        longPressBtn.style.display = 'flex'; 
+    } 
+}
+
+window.nextContentStep = function() { 
+    if (state.currentStep < 2) { 
+        state.currentStep++; 
+        const t = document.getElementById('step-title'); 
+        const p = document.getElementById('step-text'); 
+        t.style.opacity = 0; 
+        p.style.opacity = 0; 
+        setTimeout(() => { 
+            window.renderContentStep(); 
+            t.style.transition = 'opacity 0.5s'; 
+            p.style.transition = 'opacity 0.5s'; 
+            t.style.opacity = 1; 
+            p.style.opacity = 1; 
+        }, 300); 
+    } 
+}
+
+window.startPress = function(e) { 
+    if(e && e.type === 'touchstart') e.preventDefault(); 
+    if(isPressing) return; 
+    const pressArea = document.getElementById('btn-long-press');
+    const pressFill = document.getElementById('press-fill'); 
+    isPressing = true; 
+    pressProgress = 0; 
+    
+    if (pressArea) pressArea.classList.add('pressing');
+    
+    if(pressFill) {
+        pressFill.style.transition = 'none'; 
+        pressFill.style.height = '0%';
+    }
+    if(pressFrame) cancelAnimationFrame(pressFrame); 
+    
+    let startTime = null;
+    const duration = 1500; 
+    
+    function up(timestamp) { 
+        if(!isPressing) return; 
+        if(!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        
+        pressProgress = Math.min((elapsed / duration) * 100, 100); 
+        if(pressFill) pressFill.style.height = `${pressProgress}%`; 
+        
+        if (pressProgress >= 100) { 
+            isPressing = false; 
+            if (pressArea) pressArea.classList.remove('pressing');
+            window.completeAction(); 
+        } else { 
+            pressFrame = requestAnimationFrame(up); 
+        } 
+    } 
+    pressFrame = requestAnimationFrame(up); 
+}
+
+window.endPress = function(e) { 
+    if(e && e.type === 'touchend') e.preventDefault(); 
+    isPressing = false; 
+    const pressArea = document.getElementById('btn-long-press');
+    if (pressArea) pressArea.classList.remove('pressing');
+    if(pressFrame) cancelAnimationFrame(pressFrame); 
+    
+    if (pressProgress < 100) { 
+        pressProgress = 0; 
+        const pressFill = document.getElementById('press-fill'); 
+        if(pressFill) {
+            pressFill.style.transition = 'height 0.3s ease-out';
+            pressFill.style.height = `0%`; 
+            setTimeout(() => { if(!isPressing) pressFill.style.transition = ''; }, 300);
+        }
+    } 
+}
+
+window.completeAction = function() { 
+    if(pressFrame) cancelAnimationFrame(pressFrame); 
+    window.navigateTo('screen-finish'); 
+}
+
+window.resetToStage = function() { 
+    const pressFill = document.getElementById('press-fill'); 
+    if(pressFill) {
+        pressFill.style.transition = ''; 
+        pressFill.style.height = `0%`; 
+    }
+    state.currentCard = null; 
+    state.role = ''; 
+    state.currentStep = 0; 
+    
+    if(typeof window.initStageScreen === 'function') window.initStageScreen(); 
 }
