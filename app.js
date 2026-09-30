@@ -384,6 +384,7 @@ window.resizeCanvas = function() {
     canvas.height = window.innerHeight; 
 }
 
+// 🔥 极简纯色粒子，彻底抛弃消耗算力的渐变，手机 0 发热！
 class Particle { 
     constructor() { 
         const canvas = document.getElementById('particle-canvas'); 
@@ -420,7 +421,7 @@ class Particle {
         window.ctx.save(); 
         window.ctx.globalAlpha = alpha;
         
-        // 纯净色值渲染，避免几何级数渐变计算发热
+        // 使用纯净的单一色值渲染，避免几何级的渐变浮点运算
         window.ctx.fillStyle = state.isLightTheme ? `rgb(${cachedPrimaryColorStr})` : '#b4ff64'; 
         
         window.ctx.beginPath(); 
@@ -437,7 +438,7 @@ class Particle {
 
 window.initParticles = function() { 
     particles = []; 
-    // 降至极简粒子数
+    // 手机端将粒子数量降低，进一步解放GPU
     const count = window.innerWidth < 600 ? 10 : 25; 
     for (let i = 0; i < count; i++) {
         particles.push(new Particle()); 
@@ -765,6 +766,180 @@ window.applyStageTheme = function(stageName) {
     document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
     document.documentElement.style.setProperty('--theme-secondary', currentParams.s); 
     window.updateThemeCache(currentParams.p); 
+}
+
+
+// ======================= 🔥 被我不小心误删的完整卡片渲染路由与增删引擎 =======================
+
+window.selectStage = function(sKey) { 
+    if(state.isEditMode) return; 
+    state.stage = sKey; 
+    if(typeof window.applyStageTheme === 'function') window.applyStageTheme(sKey); 
+    document.getElementById('list-stage-title').innerText = `${db.stages[sKey].name}`; 
+    
+    const cats = db.stages[sKey].categories || []; 
+    if(cats.length > 0) {
+        state.activeCategoryId = cats[0].id; 
+    } else {
+        state.activeCategoryId = ''; 
+    }
+    window.renderCardList(); 
+    window.navigateTo('screen-card-list'); 
+}
+
+window.renderCardList = function() { 
+    const cats = db.stages[state.stage].categories || []; 
+    const tabContainer = document.getElementById('cat-tabs-container'); 
+    if(tabContainer) tabContainer.innerHTML = ''; 
+    
+    if (cats.length > 1 || state.isEditMode) { 
+        cats.forEach(cat => { 
+            const tab = document.createElement('div'); 
+            tab.className = `cat-tab ${cat.id === state.activeCategoryId ? 'active' : ''}`; 
+            tab.innerText = cat.name; 
+            tab.onclick = () => { state.activeCategoryId = cat.id; window.renderCardList(); }; 
+            if(tabContainer) tabContainer.appendChild(tab); 
+        }); 
+    } 
+    
+    const container = document.getElementById('card-list-container'); 
+    if(container) container.innerHTML = ''; 
+    const activeCards = db.stages[state.stage].cards.filter(c => c.categoryId === state.activeCategoryId); 
+    
+    if (activeCards.length > 0 || state.isEditMode) {
+        const grid = document.createElement('div');
+        grid.className = 'content-grid';
+        activeCards.forEach((card) => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'data-card';
+            cardDiv.innerHTML = `<h3 class="card-inner-title">${card.title}</h3>`;
+            
+            if (state.isEditMode) {
+                const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id);
+                const actDiv = document.createElement('div');
+                actDiv.className = 'card-edit-badge';
+                actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); window.openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); window.deleteCard(${globalIndex})">✖</div>`;
+                cardDiv.appendChild(actDiv);
+            }
+            
+            cardDiv.onclick = () => { if(!state.isEditMode) window.startCardFlow(card); };
+            grid.appendChild(cardDiv);
+        });
+        
+        if (activeCards.length === 0 && state.isEditMode) { 
+            grid.innerHTML = `<p style="opacity:0.4; font-size:0.85rem; text-align:center; width:100%; grid-column: 1 / -1; padding: 20px;">该板块暂无卡片</p>`; 
+        }
+        const section = document.createElement('div');
+        section.className = 'module-section';
+        section.appendChild(grid);
+        if(container) container.appendChild(section);
+    } else {
+        if(container) container.innerHTML = '<p style="opacity:0.5; margin-top:30px; text-align:center;">当前分类暂无内容</p>';
+    }
+}
+
+window.manageCategories = async function() { 
+    const listDiv = document.getElementById('cat-list-edit'); 
+    listDiv.innerHTML = ''; 
+    const cats = db.stages[state.stage].categories || []; 
+    cats.forEach((cat, idx) => { 
+        const div = document.createElement('div'); 
+        div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center'; 
+        div.innerHTML = `<input type="text" style="margin:0; flex:1;" id="cat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:45px; height:45px; margin:0; color:#ef4444; padding:0; border-radius:12px;" onclick="window.removeCat(${idx})">✖</button>`; 
+        listDiv.appendChild(div); 
+    }); 
+    window.showModal('cat-modal'); 
+}
+
+window.addNewCategory = function() { 
+    if(!db.stages[state.stage].categories) db.stages[state.stage].categories = []; 
+    db.stages[state.stage].categories.push({ id: 'cat_' + Date.now(), name: '新建大选项' }); 
+    window.manageCategories(); 
+}
+
+window.removeCat = async function(idx) { 
+    const catId = db.stages[state.stage].categories[idx].id; 
+    const linkedCards = db.stages[state.stage].cards.filter(c => c.categoryId === catId); 
+    if(linkedCards.length > 0 && !confirm(`该分类下有 ${linkedCards.length} 张卡片，确定删除吗？`)) return; 
+    db.stages[state.stage].categories.splice(idx, 1); 
+    window.manageCategories(); 
+}
+
+window.saveCategories = async function() { 
+    const cats = db.stages[state.stage].categories || []; 
+    cats.forEach((cat, idx) => { 
+        const input = document.getElementById(`cat_input_${idx}`); 
+        if(input) cat.name = input.value; 
+    }); 
+    await window.saveDB(); 
+    window.hideModal('cat-modal'); 
+    if(!cats.find(c => c.id === state.activeCategoryId) && cats.length > 0) {
+        state.activeCategoryId = cats[0].id; 
+    }
+    window.renderCardList(); 
+}
+
+window.editPrepText = async function() { 
+    const t = prompt("预备提醒文本：", db.stages[state.stage].prepText); 
+    if (t !== null) { 
+        db.stages[state.stage].prepText = t; 
+        await window.saveDB(); 
+    } 
+}
+
+window.deleteCard = async function(index) { 
+    if(confirm('确认彻底删除本卡片吗？')) { 
+        db.stages[state.stage].cards.splice(index, 1); 
+        await window.saveDB(); 
+        window.renderCardList(); 
+    } 
+}
+
+window.openEditModal = function(index) { 
+    const isNew = (index === null); 
+    document.getElementById('modal-title').innerText = isNew ? '新增卡片' : '编辑卡片'; 
+    const catSelect = document.getElementById('edit-card-category'); 
+    catSelect.innerHTML = ''; 
+    const cats = db.stages[state.stage].categories || []; 
+    cats.forEach(c => { catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`; }); 
+    
+    let c = isNew ? { id: 'c_'+Date.now(), categoryId: state.activeCategoryId, title:'', steps:[{title:'', text:''},{title:'', text:''},{title:'', text:''}] } : db.stages[state.stage].cards[index]; 
+    document.getElementById('edit-card-id').value = index === null ? 'new' : index; 
+    document.getElementById('edit-card-category').value = c.categoryId || (cats[0]?cats[0].id:''); 
+    document.getElementById('edit-card-title').value = c.title; 
+    
+    for(let i=1; i<=3; i++) { 
+        document.getElementById(`edit-s${i}-title`).value = c.steps[i-1] ? c.steps[i-1].title : ''; 
+        document.getElementById(`edit-s${i}-text`).value = c.steps[i-1] ? c.steps[i-1].text : ''; 
+    } 
+    window.showModal('edit-modal'); 
+}
+
+window.saveCard = async function() { 
+    const idxStr = document.getElementById('edit-card-id').value; 
+    const c = { 
+        id: idxStr === 'new' ? 'c_' + Date.now() : db.stages[state.stage].cards[parseInt(idxStr)].id, 
+        categoryId: document.getElementById('edit-card-category').value, 
+        title: document.getElementById('edit-card-title').value || '未命名', 
+        steps: [] 
+    }; 
+    
+    for(let i=1; i<=3; i++) {
+        c.steps.push({ 
+            title: document.getElementById(`edit-s${i}-title`).value, 
+            text: document.getElementById(`edit-s${i}-text`).value 
+        }); 
+    }
+    
+    if(idxStr === 'new') {
+        db.stages[state.stage].cards.push(c); 
+    } else {
+        db.stages[state.stage].cards[parseInt(idxStr)] = c; 
+    }
+    
+    await window.saveDB(); 
+    window.hideModal('edit-modal'); 
+    window.renderCardList(); 
 }
 
 // ======================= R2 上传与音乐库 =======================
