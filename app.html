@@ -68,7 +68,9 @@
 
         #bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top center, var(--theme-secondary) 0%, var(--theme-bg-color) 80%); opacity: 0.12; z-index: 1; transition: background 1s ease; pointer-events: none; }
         #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; transform: translateZ(0); will-change: transform; }
-        #app-container { position: relative; z-index: 10; width: 100%; max-width: 650px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* 🚀 彻底放开最大宽度限制，交由弹性引擎管理对称与铺展 */
+        #app-container { position: relative; z-index: 10; width: 100%; max-width: 100vw; height: 100%; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; }
 
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: calc(env(safe-area-inset-top) + 2rem) 1.5rem calc(env(safe-area-inset-bottom) + 2rem) 1.5rem; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); transform: scale(0.97) translateY(15px); overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; }
         .screen::-webkit-scrollbar { display: none; }
@@ -132,32 +134,6 @@
         .user-avatar-preview { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
         .user-svg-icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .link-text { color: var(--theme-text); font-size: 0.9rem; opacity: 0.7; text-decoration: underline; cursor: pointer; margin-top: 15px; display: inline-block; }
-
-        .brand-capsule { display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: var(--theme-glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--theme-glass-border); border-radius: 50px; padding: 6px 20px 6px 6px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); margin: 0 auto 1.5rem auto; color: var(--theme-text); }
-        .brand-capsule:active { transform: scale(0.95); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .brand-capsule img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-        .brand-capsule span { font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; font-family: var(--font-title); white-space: nowrap; }
-
-        /* 🔥 全新响应式网格流布局 (适配任意数量模块) */
-        .stage-array-wrapper { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); 
-            gap: clamp(12px, 2.5vw, 20px); 
-            width: 100%; 
-            align-items: start; 
-            padding: 10px 0; 
-            justify-content: center; 
-        }
-        
-        .stage-card { background: var(--theme-glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--theme-glass-border); border-radius: 18px; padding: clamp(15px, 4vw, 25px) 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative; }
-        .stage-card:active { transform: translateY(2px) scale(0.96); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        
-        .stage-card-title { margin-top: 15px; font-weight: bold; font-size: clamp(0.85rem, 3vw, 1.05rem); color: var(--theme-text); letter-spacing: 1px; text-align: center; width: 90%; background: transparent; border: none; outline: none; pointer-events: none; }
-        .edit-mode .stage-card-title { pointer-events: auto; border-bottom: 1px dashed var(--theme-primary); }
-
-        .stage-icon-dropzone { width: clamp(55px, 15vw, 80px); height: clamp(55px, 15vw, 80px); border-radius: 50%; background-size: cover; background-position: center; background-color: rgba(255,255,255,0.05); border: 2px dashed var(--theme-primary); transition: all 0.3s; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        .stage-icon-dropzone img { width: 100%; height: 100%; object-fit: cover; }
-        .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
         .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
@@ -346,11 +322,6 @@
         <h1 style="margin-top:10px;">恒久印记</h1>
         <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
         
-        <div class="brand-capsule" onclick="window.openMusicTypeModal()">
-            <img src="apple-touch-icon.png" alt="印记" onerror="this.src='favicon-32x32.png'">
-            <span>印记音律</span>
-        </div>
-
         <div class="stage-admin-bar edit-mode-only" style="margin-bottom: 20px;">
             <button class="btn-glass btn-small btn-blue-gradient" onclick="window.addNewStage()">+ 动态新增模块</button>
         </div>
@@ -660,7 +631,6 @@ document.addEventListener("DOMContentLoaded", () => {
     state.isLightTheme = true; document.getElementById('btn-theme').innerText = '☀️';
     window.updateThemeCache('#d99a29');
     
-    // 🛡️ CPU休眠引擎升级版：严格嗅探活动视图
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
@@ -678,6 +648,9 @@ document.addEventListener("DOMContentLoaded", () => {
 const defaultDB = {
     users: { 'yishuyangguang': { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } }, 
     licenseKeys: {},
+    topModules: [
+        { id: 'tm_music', name: '印记音律', icon: 'apple-touch-icon.png', actionType: 'music', url: '' }
+    ],
     globalMusicConfig: { categories: [{ id: 'mcat_1', name: '纯乐伴奏' }, { id: 'mcat_2', name: '歌曲演唱' }], library: { 'mcat_1': [], 'mcat_2': [] } },
     stages: {
         '单身期': { themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } }, icon: '', name: '单身期', prepText: '静心安息，在独处的时光中沉淀自我。请找一个安静的地方，深呼吸，预备进入内心的探索。', categories: [{ id: 'cat_s1', name: '不想进入婚姻' }, { id: 'cat_s2', name: '我想进入婚姻' }], cards: [{ id: 'c_s_1', categoryId: 'cat_s1', title: '拥抱此刻的完整', steps: [{title:'认知',text:'单身本身即是完整，非过渡期。'},{title:'操练',text:'今日为自己做一顿精美的晚餐。'},{title:'宣告',text:'我在爱中富足，不因外在状态而匮乏。'}] }] },
@@ -709,7 +682,6 @@ window.hideModal = function(id) {
 }
 
 window.animateParticles = function(timestamp) { 
-    // 🛡️ 终极降频引擎：一旦处于阅读、列表等重绘密集区域，或者模态框打开，彻底切断底层画布算力
     const activeScreen = document.querySelector('.screen.active');
     const isLightWeightScreen = activeScreen && (activeScreen.id === 'screen-card-list' || activeScreen.id === 'screen-content' || activeScreen.id === 'screen-finish' || activeScreen.id === 'screen-prep');
     
@@ -732,7 +704,7 @@ window.animateParticles = function(timestamp) {
 }
 
 window.cleanupOldLocalStorage = function() { 
-    const currentVersion = 'sealOfLoveDB_v35'; 
+    const currentVersion = 'sealOfLoveDB_v36'; 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) localStorage.removeItem(key);
@@ -742,9 +714,15 @@ window.cleanupOldLocalStorage = function() {
 window.upgradeDBStructure = function(source) {
     let target = JSON.parse(JSON.stringify(defaultDB));
     if(!source) return target;
+    
+    if (!source.topModules) {
+        target.topModules = [{ id: 'tm_music', name: '印记音律', icon: 'apple-touch-icon.png', actionType: 'music', url: '' }];
+    } else {
+        target.topModules = source.topModules;
+    }
+
     if (source.users) { for (let u in source.users) { target.users[u] = source.users[u]; if (!target.users[u].favorites) target.users[u].favorites = []; if (!target.users[u].status) target.users[u].status = 'normal'; if (!target.users[u].expireAt) target.users[u].expireAt = 0; } }
     
-    // 动态融合：放弃固定 stagesList 束缚，直接克隆全集
     if (source.stages) { 
         target.stages = {};
         Object.keys(source.stages).forEach(s => { target.stages[s] = source.stages[s]; }); 
@@ -784,7 +762,7 @@ window.initDB = async function() {
 
     if (!db.users['yishuyangguang']) db.users['yishuyangguang'] = { password: 'caoheng199410', nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' };
     
-    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v35', JSON.stringify(db)); } catch(e){} 
+    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v36', JSON.stringify(db)); } catch(e){} 
     
     if (document.getElementById('screen-stage').classList.contains('active')) window.initStageScreen();
     if (document.getElementById('screen-card-list').classList.contains('active')) window.renderCardList();
@@ -797,7 +775,7 @@ window.initDB = async function() {
 
 window.saveDB = async function() { 
     let localSaved = false; 
-    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v35', JSON.stringify(db)); localSaved = true; } catch (e) {} 
+    try { window.cleanupOldLocalStorage(); localStorage.setItem('sealOfLoveDB_v36', JSON.stringify(db)); localSaved = true; } catch (e) {} 
     try { 
         window.showGlobalToast('正在同步至云端...', 'loading'); 
         const headers = { 'Content-Type': 'application/json' };
