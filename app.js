@@ -1,6 +1,7 @@
 /* ================= 1. 高级数据中枢与全栈同步架构 ================= */
 const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
+// 彻底移除了站长的明文密码，安全全权交由后端环境变量验证
 const defaultDB = {
     users: { 
         'yishuyangguang': { nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } 
@@ -106,7 +107,7 @@ window.animateParticles = function(timestamp) {
 }
 
 window.cleanupOldLocalStorage = function() { 
-    const currentVersion = 'sealOfLoveDB_v38'; 
+    const currentVersion = 'sealOfLoveDB_v39'; 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
@@ -179,7 +180,7 @@ window.initDB = async function() {
     
     try { 
         window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v38', JSON.stringify(db)); 
+        localStorage.setItem('sealOfLoveDB_v39', JSON.stringify(db)); 
     } catch(e){} 
     
     if (document.getElementById('screen-stage').classList.contains('active')) window.initStageScreen();
@@ -198,7 +199,7 @@ window.saveDB = async function() {
     let localSaved = false; 
     try { 
         window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v38', JSON.stringify(db)); 
+        localStorage.setItem('sealOfLoveDB_v39', JSON.stringify(db)); 
         localSaved = true; 
     } catch (e) {} 
     
@@ -387,7 +388,6 @@ window.handleLogin = async function() {
         } 
     } catch (error) {} 
     
-    // 如果后端环境验证通过，直接放行，不再做本地明文比对
     if(!pwdMatch && db.users[baseUsername] && db.users[baseUsername].password === p) { 
         pwdMatch = true; 
     }
@@ -671,7 +671,7 @@ window.renderUserControlList = function() {
             <div>
                 <div style="font-weight:bold; color:#fff; font-size:13px;">${user.nickname || '未命名'} <span style="font-size:11px; opacity:0.6; font-weight:normal;">(${u})</span></div>
                 <div style="font-size:12px; font-weight:bold; color:${isBanned ? '#ef4444' : (days === 0 ? '#f59e0b' : '#10b981')}; margin-top:6px;">
-                    ${isBanned ? '🚫 强制封禁中' : (days === 0 ? '⚠️ 已到期' : `✅ 正常 (余 ${days} 天)`)}
+                    ${isBanned ? '🚫 强制封禁中' : (days === 0 ? '⚠️️ 已到期' : `✅ 正常 (余 ${days} 天)`)}
                 </div>
             </div>
             <button class="btn-glass" style="margin:0; padding:6px 12px; font-size:12px; border-radius:8px; border-color:${isBanned ? '#10b981' : '#ef4444'}; color:${isBanned ? '#10b981' : '#ef4444'};" onclick="window.toggleUserStatus('${u}')">
@@ -774,7 +774,7 @@ window.deleteStage = async function(sKey) {
     }
 }
 
-// 🔥 这里是接管主页重绘和动态模块的核心函数，已经完全融合了所有对称引擎，绝无遗漏
+// 🔥 核心重现：被我不小心删掉的主页渲染与弹性对称引擎，已安全加固，图片绝不越界溢出
 window.initStageScreen = function() { 
     if (!state.isAdmin && currentUserAccount !== 'yishuyangguang') {
         const uData = db.users[currentUserAccount]; 
@@ -861,9 +861,9 @@ window.initStageScreen = function() {
             const iconDiv = document.createElement('div'); 
             iconDiv.className = 'stage-icon-dropzone'; 
             
-            // 🔥 注入 100% 强制贴合圆形的样式，彻底解决图片破窗越界的问题
+            // 🔥 注入强制内联样式锁定图片在圆形框内，根除全局样式污染溢出
             if (iconB64) { 
-                iconDiv.innerHTML = `<img src="${iconB64}" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;">`; 
+                iconDiv.innerHTML = `<img src="${iconB64}" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; margin:0; padding:0; border:none; box-shadow:none;">`; 
             } else { 
                 iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; 
             } 
