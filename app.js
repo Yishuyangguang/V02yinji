@@ -175,7 +175,7 @@ window.animateParticles = function(timestamp) {
 }
 
 window.cleanupOldLocalStorage = function() { 
-    const currentVersion = 'sealOfLoveDB_v50'; 
+    const currentVersion = 'sealOfLoveDB_v60'; 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
@@ -263,10 +263,10 @@ window.initDB = async function() {
     
     try { 
         window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v50', JSON.stringify(db)); 
+        localStorage.setItem('sealOfLoveDB_v60', JSON.stringify(db)); 
     } catch(e){} 
     
-    // 安全调用 UI 更新方法（因为这些方法现在由 stage-layout.js 接管）
+    // 安全调用 UI 更新方法
     if (document.getElementById('screen-stage').classList.contains('active')) {
         if(typeof window.initStageScreen === 'function') window.initStageScreen();
     }
@@ -288,7 +288,7 @@ window.saveDB = async function() {
     let localSaved = false; 
     try { 
         window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v50', JSON.stringify(db)); 
+        localStorage.setItem('sealOfLoveDB_v60', JSON.stringify(db)); 
         localSaved = true; 
     } catch (e) {} 
     
@@ -361,11 +361,9 @@ window.toggleTheme = function() {
     document.getElementById('btn-theme').innerText = state.isLightTheme ? '☀️' : '🌙'; 
     
     if (!state.isLightTheme) { 
-        document.body.classList.add('dark-theme'); 
-        document.body.classList.remove('light-theme'); 
+        document.body.classList.add('dark-theme'); document.body.classList.remove('light-theme'); 
     } else { 
-        document.body.classList.remove('dark-theme'); 
-        document.body.classList.add('light-theme'); 
+        document.body.classList.remove('dark-theme'); document.body.classList.add('light-theme'); 
     } 
     
     if(state.stage) {
@@ -386,7 +384,6 @@ window.resizeCanvas = function() {
     canvas.height = window.innerHeight; 
 }
 
-// 🔥 核心重写：极简纯色粒子，彻底抛弃消耗算力的渐变，手机 0 发热！
 class Particle { 
     constructor() { 
         const canvas = document.getElementById('particle-canvas'); 
@@ -423,7 +420,7 @@ class Particle {
         window.ctx.save(); 
         window.ctx.globalAlpha = alpha;
         
-        // 使用纯净的单一色值渲染，避免几何级的渐变浮点运算
+        // 纯净色值渲染，避免几何级数渐变计算发热
         window.ctx.fillStyle = state.isLightTheme ? `rgb(${cachedPrimaryColorStr})` : '#b4ff64'; 
         
         window.ctx.beginPath(); 
@@ -440,18 +437,22 @@ class Particle {
 
 window.initParticles = function() { 
     particles = []; 
-    // 手机端将粒子数量降低，进一步解放GPU
+    // 降至极简粒子数
     const count = window.innerWidth < 600 ? 10 : 25; 
     for (let i = 0; i < count; i++) {
         particles.push(new Particle()); 
     }
 }
 
+// 🔥 核心重写：绝不抛弃老用户的无缝登陆与续费引擎
 window.handleLogin = async function() { 
     const inputU = document.getElementById('ipt-username').value.trim(); 
     const p = document.getElementById('ipt-pwd').value.trim(); 
+    const k = document.getElementById('ipt-key').value.trim().toUpperCase(); // 抓取卡密输入框
+    
     if(!inputU || !p) return alert('请输入账号/昵称和密码'); 
     
+    // 匹配原始ID
     let baseUsername = inputU; 
     if (!db.users[inputU]) { 
         for (let key in db.users) { 
@@ -459,6 +460,7 @@ window.handleLogin = async function() {
         } 
     } 
     
+    // 密码校验环节
     let pwdMatch = false;
     try { 
         const response = await fetch('/api/login', { 
@@ -472,36 +474,54 @@ window.handleLogin = async function() {
         } 
     } catch (error) {} 
     
+    // 老密码本地匹配，确保旧用户密码一直好用
     if(!pwdMatch && db.users[baseUsername] && db.users[baseUsername].password === p) { 
         pwdMatch = true; 
     }
     
     if (!pwdMatch) return alert('账号或密码错误。');
 
+    // 核心风控与激活通道
     if (baseUsername !== 'yishuyangguang') {
-        window.showGlobalToast('正在核实时空权限...', 'loading');
+        window.showGlobalToast('正在跨时空核实权限...', 'loading');
         try {
+            let actionParams = { action: 'check_status', username: baseUsername };
+            
+            // 🚀 核心升级：如果老用户在登录时输入了新卡密，直接将请求升级为“激活/续费”！
+            if (k) {
+                actionParams = { action: 'renew', username: baseUsername, key: k };
+            }
+
             const res = await fetch('/api/verifyKey', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'check_status', username: baseUsername })
+                body: JSON.stringify(actionParams)
             });
             const data = await res.json();
+            
             if (!res.ok || !data.success) {
                 return window.showGlobalToast(data.error || '权限拦截：您的账号状态异常', 'error');
             }
             
+            // 更新同步本地最新状态
             db.users[baseUsername].expireAt = data.expireAt;
-            db.users[baseUsername].status = data.status;
+            db.users[baseUsername].status = data.status || 'normal';
 
-            const daysLeft = Math.ceil((data.expireAt - data.now) / (1000 * 60 * 60 * 24));
-            if (daysLeft <= 7) {
-                alert(`【临期预警】您的印记时空仅剩 ${daysLeft} 天即将封存。为了您的专属回忆永不褪色，请进入个人中心提前续费。`);
+            if (k) {
+                window.showGlobalToast(`激活成功！已为您续约 ${data.days} 天`, 'success');
+                document.getElementById('ipt-key').value = ''; // 清空已使用的卡密
+                await window.saveDB(); 
+            } else {
+                const daysLeft = Math.ceil((data.expireAt - data.now) / (1000 * 60 * 60 * 24));
+                if (daysLeft <= 7) {
+                    alert(`【临期预警】您的印记时空仅剩 ${daysLeft} 天即将封存。\n若已过期，请在登录框下方直接输入新卡密，与账号密码一起点击登录即可快速激活。`);
+                }
             }
         } catch(e) {
             return window.showGlobalToast('防篡改网络校验失败，请检查网络连接', 'error');
         }
     }
     
+    // 如果一切畅通无阻，放行！
     window.loginSuccess(baseUsername, baseUsername === 'yishuyangguang'); 
 }
 
@@ -549,6 +569,7 @@ window.handleRegister = async function() {
         await window.saveDB();
         
         window.showGlobalToast(`注册成功！已为您赋予 ${data.days} 天时空权限`, 'success');
+        document.getElementById('ipt-key').value = '';
         window.loginSuccess(u, false);
     } catch(e) { 
         window.showGlobalToast('网络异常，卡密核验失败', 'error'); 
