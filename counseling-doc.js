@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 新增分类重命名、修复全局居中污染、新增两端对齐、修复下拉菜单失焦导致字体修改无效的史诗级Bug
+ * 更新内容: 新增分类重命名、修复排版对齐、修复选区防丢，新增【云端同步按钮状态机与防抖引擎】
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.4 (终极选区防丢与字体修复版)");
+    console.log("🚀 成功加载知识库引擎 V7.5 (完美交互与状态机防抖版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -76,9 +76,9 @@
             .admin-mode .doc-title-input { pointer-events: auto; }
             .admin-mode .doc-title-input:focus { background: #f1f3f4; border-bottom: 2px solid #1a73e8; }
             
-            /* 站长：保存按钮区 */
+            /* 站长：保存按钮区 (注入了 transition 动画引擎) */
             .doc-actions-admin { display: none; gap: 10px; align-items: center; }
-            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
             .btn-doc-save:active { transform: scale(0.95); }
             .admin-mode .doc-actions-admin { display: flex; }
 
@@ -125,7 +125,7 @@
                 box-shadow: 0 2px 6px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1);
                 outline: none; font-size: 12pt; line-height: 1.8; word-wrap: break-word;
                 font-family: Arial, "Microsoft YaHei", sans-serif;
-                text-align: left; /* 默认左对齐，去除 !important，允许富文本编辑器和粘贴的内联样式覆盖 */
+                text-align: left;
             }
             
             /* 💥核心拦截：彻底阻断 app.html 中 p { text-align-last: center } 的全局污染 */
@@ -178,18 +178,16 @@
     }
 
     // ================== 核心修复：富文本选区追踪引擎 ==================
-    // 解决因点击下拉菜单、颜色选择器导致编辑器失焦，从而格式修改无效的史诗级 Bug
     window.docSavedRange = null;
     document.addEventListener('selectionchange', () => {
         const sel = window.getSelection();
         const editor = document.getElementById('doc-editor');
-        // 严格边界防御：确保只有当选区在富文本编辑器内部时，才去记录快照
         if (sel.rangeCount > 0 && editor && editor.contains(sel.anchorNode)) {
             window.docSavedRange = sel.getRangeAt(0);
         }
     });
 
-    // 2. 注入文档系统的 HTML 骨架
+    // 2. 注入文档系统的 HTML 骨架 (为按钮挂载 id="btn-doc-save")
     const docModalHTML = `
         <div class="doc-modal-overlay" id="counseling-doc-modal">
             <!-- 左侧：知识库导航 -->
@@ -215,9 +213,9 @@
                             <input type="text" class="doc-title-input" id="doc-title" placeholder="无标题文档" onblur="window.kbSaveDocMeta()">
                         </div>
                         
-                        <!-- 管理员控制台 -->
+                        <!-- 🚀 核心修复：管理员控制台，为按钮精准赋能 ID -->
                         <div class="doc-actions-admin">
-                            <button class="btn-doc-save" onclick="window.saveCounselingDoc()">☁ 云端保存</button>
+                            <button class="btn-doc-save" id="btn-doc-save" onclick="window.saveCounselingDoc()">☁ 云端保存</button>
                         </div>
 
                         <!-- 游客自动全屏阅读控制台 -->
@@ -236,7 +234,6 @@
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
                         <div class="doc-tool-separator"></div>
                         
-                        <!-- 🔥修复点：加入隐藏的占位符，并在执行后重置selectedIndex，解决同一字体无法二次点击的Bug -->
                         <select class="doc-tool-select" onchange="window.docExec('fontName', this.value); this.selectedIndex=0;" title="字体集">
                             <option value="" disabled selected hidden>修改字体</option>
                             <option value="Arial">默认字体</option>
@@ -247,7 +244,6 @@
                         </select>
                         <div class="doc-tool-separator"></div>
 
-                        <!-- 🔥修复点：加入隐藏的占位符，并在执行后重置selectedIndex -->
                         <select class="doc-tool-select" onchange="window.docExec('fontSize', this.value); this.selectedIndex=0;" title="文章字号排版">
                             <option value="" disabled selected hidden>修改字号</option>
                             <option value="3">稍小 (Small)</option>
@@ -344,7 +340,7 @@
 
         window.renderKBSidebar();
         
-        // 🔥 自动展示第一篇文章逻辑
+        // 自动展示第一篇文章逻辑
         let hasArticle = false;
         const sys = db.docSystems[currentSystemId];
         if (sys && sys.categories) {
@@ -376,7 +372,7 @@
         sidebar.classList.toggle('collapsed');
     };
 
-    // 游客沉浸式阅读字号引擎 (CSS Zoom无损缩放)
+    // 游客沉浸式阅读字号引擎
     window.setDocZoom = function(scale, btnId) {
         const wrapper = document.getElementById('doc-paper-wrapper');
         wrapper.style.zoom = scale;
@@ -396,7 +392,6 @@
             
             const catTitle = document.createElement('div');
             catTitle.className = 'kb-category-title';
-            // 🔥 新增：分类名称的重命名(✎)按钮
             catTitle.innerHTML = `
                 <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cat.name}</span>
                 <div style="display:flex; flex-shrink:0;">
@@ -410,7 +405,6 @@
             cat.articles.forEach(art => {
                 const artItem = document.createElement('div');
                 artItem.className = `kb-article-item ${art.id === activeArticleId ? 'active' : ''}`;
-                // 🔥 新增：文章标题的重命名(✎)按钮
                 artItem.innerHTML = `
                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">📄 ${art.title}</span>
                     <div style="display:flex; flex-shrink:0;">
@@ -439,7 +433,6 @@
         window.renderKBSidebar();
     };
 
-    // 🔥 新增：重命名分类功能
     window.kbEditCategory = async function(catId) {
         const sys = db.docSystems[currentSystemId];
         const cat = sys.categories.find(c => c.id === catId);
@@ -473,7 +466,6 @@
         window.kbSelectArticle(catId, newArt.id);
     };
 
-    // 🔥 新增：重命名文章功能
     window.kbEditArticle = async function(catId, artId) {
         const sys = db.docSystems[currentSystemId];
         const cat = sys.categories.find(c => c.id === catId);
@@ -484,13 +476,10 @@
         const newTitle = prompt("请输入新的文章标题:", art.title);
         if (newTitle && newTitle.trim() !== '') {
             art.title = newTitle.trim();
-            
-            // 如果修改的是当前正在阅读的文章，同步更新右侧顶部的标题栏
             if (activeArticleId === artId) {
                 const titleInput = document.getElementById('doc-title');
                 if (titleInput) titleInput.value = art.title;
             }
-            
             if(typeof window.saveDB === 'function') await window.saveDB();
             window.renderKBSidebar();
         }
@@ -540,17 +529,37 @@
         }
     };
 
-    // 🔥 新增安全锁的云端保存引擎
+    // 🚀 核心修复：注入企业级按钮防抖与视觉流转引擎
     window.saveCounselingDoc = async function() {
         if (!activeArticleId) return window.showGlobalToast('请先选择或创建一篇文档', 'error');
         const editor = document.getElementById('doc-editor');
+        const saveBtn = document.getElementById('btn-doc-save'); // 锁定焦点按钮
         if (!editor) return;
+
         const content = editor.innerHTML;
         
+        // 步骤1：拦截并发，锁定状态
+        if (saveBtn) {
+            saveBtn.innerHTML = '⏳ 保存中...';
+            saveBtn.style.pointerEvents = 'none'; // 物理禁用连击
+            saveBtn.style.opacity = '0.8';
+        }
+
+        // 统一的回滚重置闭包
+        const resetBtn = () => {
+            if (saveBtn) {
+                saveBtn.innerHTML = '☁ 云端保存';
+                saveBtn.style.pointerEvents = 'auto';
+                saveBtn.style.opacity = '1';
+                saveBtn.style.backgroundColor = '';
+                saveBtn.style.boxShadow = '';
+            }
+        };
+
         // 核心安全防崩溃判定
-        if (!db) return window.showGlobalToast('数据库未就绪', 'error');
+        if (!db) { resetBtn(); return window.showGlobalToast('数据库未就绪', 'error'); }
         if (!db.docSystems) db.docSystems = {};
-        if (!db.docSystems[currentSystemId]) return window.showGlobalToast('知识库异常', 'error');
+        if (!db.docSystems[currentSystemId]) { resetBtn(); return window.showGlobalToast('知识库异常', 'error'); }
         
         let found = false;
         db.docSystems[currentSystemId].categories.forEach(c => {
@@ -565,7 +574,19 @@
         if (found && typeof window.saveDB === 'function') {
             await window.saveDB();
             window.showGlobalToast('文档已安全同步至云端', 'success');
+            
+            // 步骤2：数据落盘成功，执行绿灯视觉流转
+            if (saveBtn) {
+                saveBtn.innerHTML = '✅ 已同步';
+                saveBtn.style.backgroundColor = '#10b981'; // 成功色
+                saveBtn.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.4)';
+                saveBtn.style.opacity = '1';
+                
+                // 步骤3：2秒后完美复原，静候下一次动作
+                setTimeout(() => { resetBtn(); }, 2000);
+            }
         } else {
+            resetBtn();
             window.showGlobalToast('保存失败：文档被删除或同步引擎丢失', 'error');
         }
     };
@@ -575,7 +596,6 @@
         const editor = document.getElementById('doc-editor');
         editor.focus();
         
-        // 💥 终极修复：从失焦的控件（如下拉菜单、颜色选择器）回来时，精准还原高亮选区
         if (window.docSavedRange) {
             const sel = window.getSelection();
             sel.removeAllRanges();
