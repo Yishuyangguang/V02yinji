@@ -92,8 +92,6 @@
         .btn-glass:active { transform: translateY(3px) scale(0.97); box-shadow: 0 2px 10px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1); }
         .btn-primary { background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); border: none; color: #111 !important; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5); }
         .btn-type-dark { background: #2d3748 !important; color: #e2e8f0 !important; border: 1px solid rgba(255,255,255,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        
-        .btn-favorite-cat { background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%) !important; border: 1px solid var(--theme-primary) !important; color: var(--theme-primary) !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; font-weight: bold !important; box-shadow: 0 8px 25px rgba(212,175,55,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important; letter-spacing: 2px; }
 
         input, textarea, select { width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); padding: 14px 18px; border-radius: 16px; margin-bottom: 14px; font-size: 1rem; outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
         input[type="search"] { padding: 10px 18px; border-radius: 20px; margin-bottom: 12px; font-size: 0.95rem; }
@@ -247,7 +245,7 @@
             width: 92% !important; 
             max-width: 760px !important; /* 电脑端适度拓宽，让内容更有空间 */
             min-height: 45vh !important;
-            margin: 0 auto 50px auto !important; /* 底部预留充足的呼吸空间，推开按钮 */
+            margin: 0 auto 20px auto !important; /* 底部预留充足的呼吸空间，推开按钮 */
             padding: 45px 35px !important;
             border-radius: 28px !important;
             background: rgba(255, 255, 255, 0.95) !important; /* 贴近设计的纯白磨砂 */
@@ -259,16 +257,16 @@
 
         .btn-beautiful {
             width: 85% !important;
-            max-width: 260px !important; /* 严格缩短宽度，拒绝巨型按钮 */
+            max-width: 240px !important; /* 严格缩短宽度，拒绝巨型按钮 */
             border-radius: 50px !important;
             padding: 16px !important;
             font-size: 1.1rem !important;
             font-weight: bold !important;
             letter-spacing: 2px !important;
-            margin: 0 auto !important; /* 绝对居中 */
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
+            margin: 40px auto 0 auto !important; /* 绝对居中，强制下移 */
+            display: flex; /* ⚠️ 核心修复：移除 !important，允许 JS 控制隐藏 */
+            justify-content: center;
+            align-items: center;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
         }
 
@@ -302,7 +300,7 @@
             border: 1px solid #e2e8f0 !important;
             box-shadow: 0 15px 35px rgba(0,0,0,0.08), inset 0 4px 10px rgba(255,255,255,0.8) !important;
             display: flex; justify-content: center; align-items: center;
-            margin: 30px auto 0 auto !important; /* 核心：大幅下移，让出上方空间 */
+            margin: 40px auto 0 auto !important; /* 核心：大幅下移，让出上方空间 */
             overflow: hidden; position: relative;
             cursor: pointer; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
             -webkit-user-select: none; user-select: none; touch-action: none;
@@ -448,7 +446,7 @@
             <div class="progress-dot" id="dot-1"></div><div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
         </div>
         
-        <div class="glass-panel content-card-beautiful" style="min-height: 45vh; margin-bottom: 50px;">
+        <div class="glass-panel content-card-beautiful">
             <h2 id="content-type-title" style="display: none;"></h2>
             <h1 id="step-title" style="color: #6366f1; font-size: 1.8rem; margin-bottom: 2rem; text-align: center;"></h1>
             <p id="step-text" style="font-size: 1.15rem; color: #1e293b; text-align: justify; text-align-last: left; line-height: 2.2; padding: 0 10px;"></p>
