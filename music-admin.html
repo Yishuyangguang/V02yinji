@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>全局音律库指挥中心 - 恒久印记</title>
+    <style>
+        :root {
+            --theme-bg: #1c1d22;
+            --theme-panel: rgba(255, 255, 255, 0.03);
+            --theme-text: #ffffff;
+            --theme-text-light: #9ca3af;
+            --theme-primary: #6366f1;
+            --theme-primary-hover: #4f46e5;
+            --theme-border: rgba(255, 255, 255, 0.1);
+            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background: radial-gradient(circle at top right, #2a2d3e 0%, var(--theme-bg) 100%);
+            color: var(--theme-text); 
+            font-family: var(--font-main); 
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden;
+        }
+
+        /* Mac 风格宽屏容器 */
+        .dashboard-container {
+            width: 95%; max-width: 1400px; height: 90vh;
+            background: rgba(20, 21, 26, 0.6);
+            backdrop-filter: blur(40px) saturate(150%);
+            -webkit-backdrop-filter: blur(40px) saturate(150%);
+            border-radius: 24px; border: 1px solid var(--theme-border);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.05);
+            display: flex; overflow: hidden;
+        }
+
+        /* ================= 左侧：分类导航栏 ================= */
+        .sidebar {
+            width: 320px; background: rgba(0, 0, 0, 0.2);
+            border-right: 1px solid var(--theme-border);
+            display: flex; flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 25px; border-bottom: 1px solid var(--theme-border);
+        }
+        .sidebar-header h2 { font-size: 1.4rem; color: #818cf8; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;}
+
+        .cat-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .cat-list::-webkit-scrollbar { width: 6px; }
+        .cat-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        .cat-item {
+            padding: 12px 18px; border-radius: 12px; cursor: pointer; transition: all 0.2s;
+            display: flex; justify-content: space-between; align-items: center; color: var(--theme-text-light);
+            border: 1px solid transparent;
+        }
+        .cat-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .cat-item.active { background: rgba(99, 102, 241, 0.15); color: #818cf8; border-color: rgba(99, 102, 241, 0.3); font-weight: 600; }
+        
+        .cat-actions button { background: transparent; border: none; color: inherit; cursor: pointer; padding: 4px; opacity: 0; transition: 0.2s; font-size: 1rem; }
+        .cat-item:hover .cat-actions button { opacity: 0.7; }
+        .cat-actions button:hover { opacity: 1 !important; transform: scale(1.1); }
+        .cat-actions .del { color: #ef4444; }
+
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--theme-border); }
+
+        /* ================= 右侧：内容管理区 ================= */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column; background: transparent; position: relative;
+        }
+
+        .main-header {
+            padding: 25px 40px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--theme-border);
+        }
+        
+        .search-bar {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--theme-border); color: #fff;
+            padding: 12px 20px; border-radius: 20px; width: 350px; outline: none; transition: 0.3s;
+        }
+        .search-bar:focus { border-color: var(--theme-primary); background: rgba(0,0,0,0.5); }
+
+        .content-body {
+            flex: 1; display: flex; overflow: hidden;
+        }
+
+        /* 音乐列表区 */
+        .music-list-wrap {
+            flex: 1; padding: 30px 40px; overflow-y: auto;
+        }
+        .music-list-wrap::-webkit-scrollbar { width: 8px; }
+        .music-list-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        .music-card {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--theme-border);
+            border-radius: 16px; padding: 18px 25px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .music-card:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); border-color: rgba(255,255,255,0.15); }
+        
+        .music-info { flex: 1; overflow: hidden; padding-right: 20px; }
+        .music-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #e2e8f0; }
+        .music-url { font-size: 0.85rem; color: #64748b; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .music-actions { display: flex; gap: 10px; flex-shrink: 0; }
+        .action-btn { 
+            width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--theme-border);
+            background: rgba(0,0,0,0.2); color: #fff; cursor: pointer; transition: 0.2s;
+            display: flex; justify-content: center; align-items: center; font-size: 1.1rem;
+        }
+        .action-btn.edit:hover { background: #f59e0b; border-color: #f59e0b; }
+        .action-btn.del:hover { background: #ef4444; border-color: #ef4444; }
+
+        /* 上传与编辑控制台 (右侧悬浮固定) */
+        .upload-panel {
+            width: 400px; background: rgba(0,0,0,0.15); border-left: 1px solid var(--theme-border);
+            padding: 30px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
+        }
+
+        .panel-title { font-size: 1.2rem; font-weight: bold; color: #818cf8; margin-bottom: 10px; border-bottom: 1px dashed var(--theme-border); padding-bottom: 15px; }
+
+        .input-group input {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--theme-border); color: #fff;
+            padding: 14px 18px; border-radius: 14px; outline: none; transition: 0.3s; font-size: 0.95rem; margin-bottom: 15px;
+        }
+        .input-group input:focus { border-color: var(--theme-primary); }
+
+        .dropzone {
+            width: 100%; height: 180px; border: 2px dashed #6366f1; border-radius: 16px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;
+            cursor: pointer; transition: 0.3s; background: rgba(99, 102, 241, 0.05); text-align: center; padding: 20px;
+        }
+        .dropzone:hover, .dropzone.dragover { background: rgba(99, 102, 241, 0.15); border-color: #818cf8; }
+        .dropzone-icon { font-size: 2.5rem; color: #818cf8; }
+        .dropzone-text { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
+
+        .btn {
+            width: 100%; padding: 15px; border-radius: 14px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-primary { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3); }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-outline { background: transparent; border: 1px dashed var(--theme-text-light); color: var(--theme-text-light); margin-top: 10px; }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: #fff; }
+
+        /* 上传进度胶囊 */
+        .upload-capsule {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: rgba(30, 41, 59, 0.95); width: 400px; height: 50px; border-radius: 25px;
+            z-index: 9999; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); overflow: hidden; display: flex; justify-content: center; align-items: center; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0; pointer-events: none;
+        }
+        .upload-capsule.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+        .upload-capsule-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: linear-gradient(90deg, #6366f1, #a855f7); z-index: 1; transition: width 0.3s ease; opacity: 0.8; }
+        .upload-capsule-text { position: relative; z-index: 2; color: #fff; font-size: 0.95rem; font-weight: bold; letter-spacing: 1px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+
+        /* 全局吐司 */
+        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 0.95rem; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.4); transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: bold; border: 1px solid rgba(255,255,255,0.1); }
+        .toast.show { top: 30px; }
+        
+        /* 遮罩加载 */
+        .loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); display:flex; justify-content:center; align-items:center; z-index: 500; font-weight:bold; color:#818cf8; font-size: 1.2rem; backdrop-filter: blur(5px); transition: 0.3s; }
+
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ 操作成功</div>
+
+<div class="upload-capsule" id="upload-capsule">
+    <div class="upload-capsule-fill" id="upload-capsule-fill"></div>
+    <span class="upload-capsule-text" id="upload-capsule-text">准备上传...</span>
+</div>
+
+<div class="dashboard-container">
+    <div class="loading-overlay" id="loading-overlay">⏳ 时空数据同步中...</div>
+
+    <!-- 左侧：分类导航 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>⚙️ 全局音律库管理</h2>
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px;">Mac 桌面级专属控制台</p>
+        </div>
+        
+        <div class="cat-list" id="cat-list">
+            <!-- 分类渲染区 -->
+        </div>
+
+        <div class="sidebar-footer">
+            <button class="btn btn-outline" style="margin: 0;" onclick="addCategory()">+ 添加新分类</button>
+        </div>
+    </div>
+
+    <!-- 右侧：主控区 -->
+    <div class="main-content">
+        <div class="main-header">
+            <h3 id="current-cat-title" style="color: #fff; font-size: 1.3rem;">请选择左侧分类</h3>
+            <input type="search" class="search-bar" id="search-input" placeholder="🔍 模糊搜索音乐库..." oninput="renderMusicList()">
+        </div>
+
+        <div class="content-body">
+            <!-- 中间：音乐列表 -->
+            <div class="music-list-wrap" id="music-list">
+                <!-- 列表渲染区 -->
+            </div>
+
+            <!-- 右侧：上传与编辑面板 -->
+            <div class="upload-panel">
+                <div class="panel-title" id="action-title">✨ 新增曲目至当前分类</div>
+                
+                <input type="hidden" id="edit-idx" value="">
+                
+                <div class="input-group">
+                    <input type="text" id="music-name" placeholder="自定义曲目名称 (选填)">
+                    <input type="text" id="music-url" placeholder="或输入外部云端直链 URL (单文件)">
+                </div>
+
+                <div class="dropzone" id="dropzone" onclick="document.getElementById('file-upload').click()">
+                    <div class="dropzone-icon">☁️</div>
+                    <div class="dropzone-text" id="dropzone-text">点击或将音频文件拖拽至此<br><span style="font-size:0.8rem; color:#64748b;">支持批量多选，极速直传 R2 云端</span></div>
+                    <input type="file" id="file-upload" accept="audio/*" multiple style="display: none;" onchange="handleFiles(this.files)">
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-primary" id="btn-save" onclick="saveMusic()">保 存 / 上 传</button>
+                    <button class="btn btn-outline" id="btn-cancel" style="display: none;" onclick="resetEditForm()">取 消 修 改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ADMIN_AUTH_HEADER = 'yishuyangguang';
+    let db = {};
+    let activeCatId = null;
+    let selectedFiles = [];
+    let uploadQueue = [];
+    let isUploading = false;
+    let toastTimer;
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // 初始化加载云端数据
+    async function loadDB() {
+        try {
+            const res = await fetch('/api/db?t=' + Date.now(), { 
+                headers: { 'x-admin-auth': ADMIN_AUTH_HEADER } 
+            });
+            if (!res.ok) throw new Error("Network Error");
+            db = await res.json();
+            
+            if (!db.globalMusicConfig) {
+                db.globalMusicConfig = { categories: [], library: {} };
+            }
+            
+            document.getElementById('loading-overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 300);
+
+            renderCategories();
+        } catch (e) {
+            showToast('⚠️ 无法连接云端数据库，请检查鉴权或网络');
+        }
+    }
+
+    // 保存数据至云端
+    async function saveDB() {
+        try {
+            const res = await fetch('/api/db', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-admin-auth': ADMIN_AUTH_HEADER },
+                body: JSON.stringify(db)
+            });
+            if (!res.ok) throw new Error("Save Error");
+        } catch (e) {
+            showToast('⚠️ 云端同步异常');
+        }
+    }
+
+    // ================= 分类管理 =================
+    function renderCategories() {
+        const list = document.getElementById('cat-list');
+        list.innerHTML = '';
+        const cats = db.globalMusicConfig.categories || [];
+
+        cats.forEach((cat, idx) => {
+            const div = document.createElement('div');
+            div.className = `cat-item ${cat.id === activeCatId ? 'active' : ''}`;
+            div.innerHTML = `
+                <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" onclick="selectCategory('${cat.id}')">${cat.name}</span>
+                <div class="cat-actions">
+                    <button onclick="editCategory(${idx})" title="重命名">✎</button>
+                    <button class="del" onclick="deleteCategory(${idx})" title="删除">✖</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+
+        if (cats.length > 0 && !activeCatId) {
+            selectCategory(cats[0].id);
+        } else if (cats.length === 0) {
+            activeCatId = null;
+            renderMusicList();
+        }
+    }
+
+    function selectCategory(id) {
+        activeCatId = id;
+        const cat = db.globalMusicConfig.categories.find(c => c.id === id);
+        if(cat) document.getElementById('current-cat-title').innerText = `🎶 库: ${cat.name}`;
+        resetEditForm();
+        renderCategories();
+        renderMusicList();
+    }
+
+    async function addCategory() {
+        const name = prompt("请输入新音律分类名称:");
+        if (!name) return;
+        const newId = 'mcat_' + Date.now();
+        db.globalMusicConfig.categories.push({ id: newId, name: name });
+        db.globalMusicConfig.library[newId] = [];
+        await saveDB();
+        showToast('分类已添加');
+        selectCategory(newId);
+    }
+
+    async function editCategory(idx) {
+        const cat = db.globalMusicConfig.categories[idx];
+        const newName = prompt("重命名分类:", cat.name);
+        if (newName && newName.trim() !== '') {
+            cat.name = newName.trim();
+            await saveDB();
+            renderCategories();
+            if(activeCatId === cat.id) document.getElementById('current-cat-title').innerText = `🎶 库: ${cat.name}`;
+        }
+    }
+
+    async function deleteCategory(idx) {
+        const catId = db.globalMusicConfig.categories[idx].id;
+        const linkedMusic = db.globalMusicConfig.library[catId] || [];
+        if(linkedMusic.length > 0 && !confirm(`该分类下有 ${linkedMusic.length} 首音乐，确定彻底删除吗？`)) return;
+        
+        db.globalMusicConfig.categories.splice(idx, 1);
+        delete db.globalMusicConfig.library[catId];
+        
+        if (activeCatId === catId) activeCatId = null;
+        await saveDB();
+        renderCategories();
+    }
+
+    // ================= 音乐列表与增删改 =================
+    function renderMusicList() {
+        const list = document.getElementById('music-list');
+        list.innerHTML = '';
+
+        if (!activeCatId) {
+            list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:50px;">👈 请先在左侧选择或创建一个分类</div>';
+            return;
+        }
+
+        const query = document.getElementById('search-input').value.trim().toLowerCase();
+        const musicArr = db.globalMusicConfig.library[activeCatId] || [];
+        let matchCount = 0;
+
+        musicArr.forEach((m, idx) => {
+            if (query && !m.name.toLowerCase().includes(query)) return;
+            matchCount++;
+            
+            const div = document.createElement('div');
+            div.className = 'music-card';
+            div.innerHTML = `
+                <div class="music-info">
+                    <div class="music-title">${m.name}</div>
+                    <div class="music-url">${m.url}</div>
+                </div>
+                <div class="music-actions">
+                    <button class="action-btn edit" onclick="editMusic(${idx})" title="编辑">✎</button>
+                    <button class="action-btn del" onclick="deleteMusic(${idx})" title="删除">✖</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+
+        if (matchCount === 0) {
+            list.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:50px;">暂无匹配的曲目</div>';
+        }
+    }
+
+    function editMusic(idx) {
+        const m = db.globalMusicConfig.library[activeCatId][idx];
+        document.getElementById('music-name').value = m.name;
+        document.getElementById('music-url').value = m.url;
+        document.getElementById('edit-idx').value = idx;
+        
+        document.getElementById('action-title').innerText = "✎ 修改现有曲目";
+        document.getElementById('btn-save').innerText = "保 存 修 改";
+        document.getElementById('btn-cancel').style.display = "block";
+        document.getElementById('dropzone').style.display = "none";
+    }
+
+    function resetEditForm() {
+        document.getElementById('music-name').value = '';
+        document.getElementById('music-name').disabled = false;
+        document.getElementById('music-url').value = '';
+        document.getElementById('edit-idx').value = '';
+        
+        document.getElementById('action-title').innerText = "✨ 新增曲目至当前分类";
+        document.getElementById('btn-save').innerText = "保 存 / 上 传";
+        document.getElementById('btn-cancel').style.display = "none";
+        document.getElementById('dropzone').style.display = "flex";
+        
+        selectedFiles = [];
+        document.getElementById('dropzone-text').innerHTML = `点击或将音频文件拖拽至此<br><span style="font-size:0.8rem; color:#64748b;">支持批量多选，极速直传 R2 云端</span>`;
+    }
+
+    async function deleteMusic(idx) {
+        if(confirm('🚨 危险操作：确认彻底删除此曲（将同时尝试从云端物理移除）？')) { 
+            const track = db.globalMusicConfig.library[activeCatId][idx];
+            if (track && track.url) { 
+                try { await fetch(track.url, { method: 'DELETE' }); } catch (e) {} 
+            }
+            db.globalMusicConfig.library[activeCatId].splice(idx, 1); 
+            await saveDB(); 
+            renderMusicList(); 
+            showToast('已彻底删除');
+        } 
+    }
+
+    // ================= 拖拽与直传引擎 =================
+    const dropzone = document.getElementById('dropzone');
+    dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover'); };
+    dropzone.ondragleave = (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); };
+    dropzone.ondrop = (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); };
+
+    function handleFiles(files) {
+        selectedFiles = Array.from(files).filter(f => f.type.startsWith('audio/'));
+        if(selectedFiles.length === 0) return alert('请选择有效的音频文件');
+        
+        const text = document.getElementById('dropzone-text');
+        const nameInput = document.getElementById('music-name');
+
+        if (selectedFiles.length === 1) {
+            text.innerHTML = `<span style="color:#10b981; font-weight:bold;">✅ 已选择:</span><br>${selectedFiles[0].name}<br><span style="font-size:0.8rem;">(${(selectedFiles[0].size/1024/1024).toFixed(2)}MB)</span>`;
+            if(!nameInput.value) nameInput.value = selectedFiles[0].name.replace(/\.[^/.]+$/, "");
+        } else {
+            text.innerHTML = `<span style="color:#10b981; font-weight:bold;">✅ 已选择 ${selectedFiles.length} 个音频</span><br>将开启高并发批量直传模式`;
+            nameInput.value = "批量自动取名模式";
+            nameInput.disabled = true;
+        }
+    }
+
+    async function saveMusic() {
+        if (!activeCatId) return alert('请先在左侧选择一个分类');
+        
+        const name = document.getElementById('music-name').value.trim();
+        const url = document.getElementById('music-url').value.trim();
+        const editIdx = document.getElementById('edit-idx').value;
+
+        // 编辑模式，或者单纯的外部URL插入模式 (无需上传)
+        if (editIdx !== '' || (url && selectedFiles.length === 0)) {
+            if(!name) return alert('请输入曲目名称');
+            if(!db.globalMusicConfig.library[activeCatId]) db.globalMusicConfig.library[activeCatId] = [];
+            
+            if (editIdx !== '') {
+                db.globalMusicConfig.library[activeCatId][parseInt(editIdx)] = { name, url };
+            } else {
+                db.globalMusicConfig.library[activeCatId].push({ name, url });
+            }
+            await saveDB();
+            resetEditForm();
+            renderMusicList();
+            showToast('✅ 保存成功');
+            return;
+        }
+
+        // 上传模式
+        if (selectedFiles.length > 0) {
+            selectedFiles.forEach(file => {
+                let taskName = (name === "批量自动取名模式" || !name) ? file.name.replace(/\.[^/.]+$/, "") : name;
+                uploadQueue.push({ file: file, catId: activeCatId, name: taskName });
+            });
+            resetEditForm();
+            processUploadQueue();
+        } else {
+            alert('请拖入本地音频，或填写云端直链 URL');
+        }
+    }
+
+    async function processUploadQueue() {
+        if(isUploading || uploadQueue.length === 0) return;
+        isUploading = true;
+        
+        const capsule = document.getElementById('upload-capsule');
+        const capsuleText = document.getElementById('upload-capsule-text');
+        const capsuleFill = document.getElementById('upload-capsule-fill');
+        capsule.classList.add('show');
+        
+        const totalTasks = uploadQueue.length;
+        let completedTasks = 0;
+
+        while(uploadQueue.length > 0) {
+            const task = uploadQueue.shift();
+            completedTasks++;
+            try {
+                const url = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/api/upload');
+                    xhr.upload.onprogress = (e) => {
+                        if(e.lengthComputable) {
+                            const percent = (e.loaded / e.total) * 100;
+                            capsuleText.innerText = `云传中 (${completedTasks}/${totalTasks}) ${Math.round(percent)}%`;
+                            capsuleFill.style.width = `${percent}%`;
+                        }
+                    };
+                    xhr.onload = () => {
+                        if(xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText).url);
+                        else reject(new Error('Failed'));
+                    };
+                    xhr.onerror = () => reject(new Error('Network'));
+                    const formData = new FormData(); formData.append('file', task.file);
+                    xhr.send(formData);
+                });
+
+                if(!db.globalMusicConfig.library[task.catId]) db.globalMusicConfig.library[task.catId] = [];
+                db.globalMusicConfig.library[task.catId].unshift({ name: task.name, url: url }); // 插入到最前面
+                
+                // 实时渲染并静默保存，防止中途断网数据丢失
+                await saveDB();
+                if(activeCatId === task.catId) renderMusicList();
+                
+            } catch(e) {
+                showToast(`❌ [${task.name}] 上传失败`);
+            }
+        }
+
+        capsuleText.innerText = "✨ 全网同步完成";
+        capsuleFill.style.width = "100%";
+        setTimeout(() => {
+            capsule.classList.remove('show');
+            setTimeout(() => capsuleFill.style.width = "0%", 500);
+        }, 2000);
+        
+        isUploading = false;
+    }
+
+    // 启动引擎
+    window.onload = loadDB;
+
+</script>
+</body>
+</html>
