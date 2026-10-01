@@ -109,7 +109,7 @@
         #screen-login .btn-glass:not(.btn-primary) { background: var(--theme-input-bg); border-radius: 14px; border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 100%; font-weight: 600; box-shadow: 0 4px 15px var(--theme-glass-shadow); }
 
         h1, h2, h3 { font-family: var(--font-title); letter-spacing: 1px; }
-        h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 1rem; color: var(--theme-text); transition: color 0.5s; font-weight: 700; }
+        h1 { margin-bottom: 1rem; color: var(--theme-text); transition: color 0.5s; font-weight: 700; }
         p { font-size: clamp(1rem, 4vw, 1.15rem); line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; text-align-last: center; }
         .slogan-verse { font-family: var(--font-title); font-size: 1.1rem; opacity: 0.8; margin-bottom: 2.5rem; letter-spacing: 2px; }
         .text-gradient-blue { background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: bold; }
@@ -138,75 +138,6 @@
 
         .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
-
-        /* 🔥 全端响应式引擎核心样式 (强制防止图片和输入框崩塌) */
-        .top-modules-wrapper {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; 
-            width: 100%; margin-bottom: 30px; position: relative; z-index: 10;
-        }
-        .brand-capsule-dynamic {
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-            background: var(--theme-glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--theme-glass-border); border-radius: 50px; padding: 6px 20px 6px 6px;
-            box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); color: var(--theme-text);
-            position: relative;
-        }
-        .brand-capsule-dynamic:active { transform: scale(0.95); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .brand-capsule-dynamic img { width: 36px !important; height: 36px !important; border-radius: 50% !important; object-fit: cover !important; flex-shrink: 0 !important; border: 1px solid rgba(255,255,255,0.1) !important; margin: 0 !important; padding: 0 !important; }
-        .brand-capsule-dynamic input { 
-            background: transparent !important; border: none !important; color: inherit !important; font-weight: bold; 
-            font-size: 1.1rem; letter-spacing: 2px; font-family: var(--font-title); padding: 0 !important; margin: 0 !important;
-            outline: none; max-width: 120px; text-align: center; pointer-events: none; box-shadow: none !important;
-        }
-        .edit-mode .brand-capsule-dynamic input { pointer-events: auto; border-bottom: 1px dashed var(--theme-primary) !important; padding: 2px 5px !important; }
-
-        .stage-array-flex {
-            display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;
-            gap: clamp(15px, 3vw, 25px); width: 100%; padding: 10px 20px; max-width: 1000px; margin: 0 auto;
-        }
-        .stage-card-flex {
-            flex: 0 1 calc(25% - 20px);
-            min-width: 110px; max-width: 160px;
-            background: var(--theme-glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--theme-glass-border); border-radius: 24px; padding: 25px 10px 20px 10px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 15px 35px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
-            cursor: pointer; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); position: relative;
-        }
-        .stage-card-flex:active { transform: translateY(3px) scale(0.95); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        
-        .stage-card-title { 
-            background: transparent !important; border: none !important; color: var(--theme-text) !important; 
-            font-weight: bold; font-size: clamp(0.95rem, 3.5vw, 1.15rem); letter-spacing: 1px; 
-            text-align: center; width: 100%; padding: 0 !important; margin: 0 !important; 
-            outline: none; pointer-events: none; box-shadow: none !important; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-        .edit-mode .stage-card-title { 
-            pointer-events: auto; background: rgba(0,0,0,0.3) !important; 
-            border-bottom: 1px dashed var(--theme-primary) !important; padding: 5px !important; border-radius: 8px !important;
-        }
-
-        .stage-icon-dropzone { 
-            width: clamp(65px, 18vw, 85px) !important; height: clamp(65px, 18vw, 85px) !important; 
-            border-radius: 50% !important; overflow: hidden !important; margin-bottom: 15px !important; position: relative !important;
-            display: flex; justify-content: center; align-items: center;
-            background: rgba(255,255,255,0.05); border: 2px solid var(--theme-primary); 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.2); transition: all 0.3s; 
-        }
-        .stage-icon-dropzone img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; border-radius: 50% !important; margin: 0 !important; padding: 0 !important; border: none !important; }
-        .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
-
-        .del-badge {
-            position: absolute; top: -10px; right: -10px; width: 28px; height: 28px; border-radius: 50%;
-            background: #ef4444; color: white; display: flex; justify-content: center; align-items: center;
-            font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(239,68,68,0.5);
-            z-index: 10; transition: transform 0.2s;
-        }
-        .del-badge:active { transform: scale(0.85); }
-
-        @media (max-width: 850px) { .stage-card-flex { flex: 0 1 calc(33.333% - 20px); min-width: 100px; } }
-        @media (max-width: 480px) { .stage-card-flex { flex: 0 1 calc(33.333% - 15px); min-width: 90px; padding: 20px 5px 15px 5px; } }
 
         .cat-tabs-container { display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 5px 5px 20px 5px; scrollbar-width: none; flex-shrink: 0; justify-content: center; flex-wrap: wrap; }
         .cat-tabs-container::-webkit-scrollbar { display: none; }
@@ -384,20 +315,17 @@
         </div>
     </div>
 
-    <!-- 主页模块：弹性对称流体排版 -->
-    <div class="screen center-content" id="screen-stage">
-        <h1 style="margin-top:10px;">恒久印记</h1>
-        <p class="slogan-verse">选择生命当前的季节，开始今日的探索</p>
+    <!-- 🚀 核心修复：解除垂直居中锁定，注入向上挤压的流体力学排版 -->
+    <div class="screen" id="screen-stage" style="justify-content: flex-start; padding-top: calc(env(safe-area-inset-top) + 8vh);">
+        <h1 style="margin-top:0; font-size: clamp(2.2rem, 6vw, 3.2rem); letter-spacing: 4px;">恒久印记</h1>
+        <p class="slogan-verse" style="margin-bottom: 50px; font-size: clamp(1rem, 4vw, 1.2rem);">选择生命当前的季节，开始今日的探索</p>
         
         <div class="stage-admin-bar edit-mode-only" style="margin-bottom: 20px;">
             <button class="btn-glass btn-small" onclick="window.addNewTopModule()">+ 动态新增顶栏模块</button>
             <button class="btn-glass btn-small btn-blue-gradient" onclick="window.addNewStage()">+ 动态新增主模块</button>
         </div>
 
-        <!-- 🚀 弹性对称顶栏模块 -->
         <div class="top-modules-wrapper" id="top-modules-dynamic-container"></div>
-
-        <!-- 🚀 弹性对称主模块 -->
         <div class="stage-array-flex" id="stage-buttons-container"></div>
     </div>
 
@@ -496,7 +424,7 @@
                     </div>
                     <div class="ctrl-group center">
                         <div class="ctrl-btn" onclick="window.prevTrack()" title="上一首">⏮</div>
-                        <div class="ctrl-btn play-pause" onclick="window.togglePlayPause()" id="btn-play-pause">▶️</div>
+                        <div class="ctrl-btn play-pause" onclick="window.togglePlayPause()" id="btn-play-pause">▶️️</div>
                         <div class="ctrl-btn" onclick="window.nextTrack()" title="下一首">⏭</div>
                     </div>
                     <div class="ctrl-group right">
