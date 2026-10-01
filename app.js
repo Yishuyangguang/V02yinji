@@ -1,15 +1,9 @@
-/* ================= 1. 高级数据中枢与全栈同步架构 ================= */
+/* ================= 1. 静态配置与基础状态中枢 ================= */
 const stagesList = ['单身期', '恋爱期', '定婚期', '结婚', '备孕期', '孕后初期', '婚后进阶'];
 
 const defaultDB = {
     users: { 
-        'yishuyangguang': { 
-            nickname: '站长', 
-            avatar: '', 
-            favorites: [], 
-            expireAt: 4102444800000, 
-            status: 'normal' 
-        } 
+        'yishuyangguang': { nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' } 
     }, 
     licenseKeys: {},
     topModules: [
@@ -33,45 +27,25 @@ const defaultDB = {
     }
 };
 
-let db = JSON.parse(JSON.stringify(defaultDB));
+let db = null;
 let lastParticleTime = 0; 
 const particleFPS = 30; 
 const particleInterval = 1000 / particleFPS;
 let isPressing = false; 
 let pressProgress = 0; 
 let pressFrame = null;
-
-let state = { 
-    isLoggedIn: false, 
-    isAdmin: false, 
-    isEditMode: false, 
-    stage: '', 
-    activeCategoryId: '', 
-    currentCard: null, 
-    role: '', 
-    currentStep: 0, 
-    isLightTheme: true, 
-    isModalOpen: false 
-};
-
-let toastTimeout; 
-let currentUserAccount = null; 
-let uploadQueue = []; 
-let isUploading = false; 
-let selectedAudioFiles = []; 
-let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; 
-let favDebounce = null; 
-let particles = []; 
-let animationId; 
-window.isDraggingProgress = false;
-
+let state = { isLoggedIn: false, isAdmin: false, isEditMode: false, stage: '', activeCategoryId: '', currentCard: null, role: '', currentStep: 0, isLightTheme: true, isModalOpen: false };
+let toastTimeout; let currentUserAccount = null; let uploadQueue = []; let isUploading = false; let selectedAudioFiles = []; let musicState = { type: 'instrumental', playlist: [], currentIndex: 0, mode: 'sequence', tracksLimit: -1 }; let favDebounce = null; let particles = []; let animationId; window.isDraggingProgress = false;
 let cachedPrimaryColorStr = '212,175,55';
+
 window.updateThemeCache = function(hexColor) {
     if (!hexColor) return;
     let r = parseInt(hexColor.slice(1, 3), 16), g = parseInt(hexColor.slice(3, 5), 16), b = parseInt(hexColor.slice(5, 7), 16);
     if (!isNaN(r)) cachedPrimaryColorStr = `${r},${g},${b}`;
 }
 
+
+/* ================= 2. 核心交互事件监听与挂载 ================= */
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById('particle-canvas');
     if (canvas) { 
@@ -108,10 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 🛡️ 严格锁死熄屏与挂后台时的渲染引擎，防止发热
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            if (animationId) { 
-                cancelAnimationFrame(animationId); 
-                animationId = null; 
-            }
+            if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
         } else {
             if (!state.isModalOpen && !animationId) {
                 lastParticleTime = performance.now();
@@ -120,17 +91,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
-    window.initDB(); 
+    // 初始化同步与鉴权由 auth-sync-engine.js 接管
+    if(typeof window.initDB === 'function') window.initDB(); 
     window.initProgressDrag();
 });
 
+
+/* ================= 3. 基础工具类与弹窗调度 ================= */
 window.showModal = function(id) { 
     document.getElementById(id).style.display = 'flex'; 
     state.isModalOpen = true; 
-    if(animationId) { 
-        cancelAnimationFrame(animationId); 
-        animationId = null; 
-    }
+    if(animationId) { cancelAnimationFrame(animationId); animationId = null; } 
 }
 
 window.hideModal = function(id) { 
@@ -138,175 +109,21 @@ window.hideModal = function(id) {
     let anyOpen = false; 
     document.querySelectorAll('.modal-overlay').forEach(m => { 
         if(window.getComputedStyle(m).display !== 'none') anyOpen = true; 
-    });
-    state.isModalOpen = anyOpen;
-    
-    if (!state.isModalOpen && !document.hidden && !animationId) {
-        lastParticleTime = performance.now();
-        window.animateParticles();
-    }
-}
-
-window.animateParticles = function(timestamp) { 
-    const activeScreen = document.querySelector('.screen.active');
-    const isLightWeightScreen = activeScreen && (activeScreen.id === 'screen-card-list' || activeScreen.id === 'screen-content' || activeScreen.id === 'screen-finish' || activeScreen.id === 'screen-prep');
-    
-    if (document.hidden || state.isModalOpen || isLightWeightScreen) { 
-        animationId = null; 
-        return; 
-    }
-    
-    animationId = requestAnimationFrame(window.animateParticles); 
-    
-    if (!timestamp) timestamp = performance.now();
-    const elapsed = timestamp - lastParticleTime;
-    
-    if (elapsed > particleInterval) {
-        lastParticleTime = timestamp - (elapsed % particleInterval);
-        const canvas = document.getElementById('particle-canvas'); 
-        if(!canvas || !window.ctx) return; 
-        
-        window.ctx.clearRect(0, 0, canvas.width, canvas.height); 
-        particles.forEach(p => { 
-            p.update(); 
-            p.draw(); 
-        }); 
-    }
-}
-
-window.cleanupOldLocalStorage = function() { 
-    const currentVersion = 'sealOfLoveDB_v60'; 
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) {
-            localStorage.removeItem(key);
-        }
+    }); 
+    state.isModalOpen = anyOpen; 
+    if (!state.isModalOpen && !document.hidden && !animationId) { 
+        lastParticleTime = performance.now(); 
+        window.animateParticles(); 
     } 
 }
 
-window.upgradeDBStructure = function(source) {
-    let target = JSON.parse(JSON.stringify(defaultDB));
-    if(!source) return target;
-    
-    if (!source.topModules) {
-        target.topModules = [{ id: 'tm_music', name: '印记音律', icon: 'apple-touch-icon.png', actionType: 'music', url: '' }];
-    } else {
-        target.topModules = source.topModules;
-    }
-
-    if (source.users) { 
-        for (let u in source.users) { 
-            target.users[u] = source.users[u]; 
-            if (!target.users[u].favorites) target.users[u].favorites = []; 
-            if (!target.users[u].status) target.users[u].status = 'normal'; 
-            if (!target.users[u].expireAt) target.users[u].expireAt = 0; 
-        } 
-    }
-    
-    if (source.stages) { 
-        target.stages = {};
-        Object.keys(source.stages).forEach(s => { 
-            target.stages[s] = source.stages[s]; 
-        }); 
-    }
-    
-    // 同步新增的文档存储结构
-    if (source.customDocs) { target.customDocs = source.customDocs; }
-    if (source.docSystems) { target.docSystems = source.docSystems; }
-    
-    if (source.globalMusicConfig) { target.globalMusicConfig = source.globalMusicConfig; }
-    if (source.licenseKeys) { target.licenseKeys = source.licenseKeys; }
-    
-    return target;
-}
-
-window.initDB = async function() { 
-    let cloudDb = null;
-    let fetchOk = false;
-    try { 
-        const headers = {};
-        if (state.isAdmin && currentUserAccount === 'yishuyangguang') {
-            headers['x-admin-auth'] = 'yishuyangguang';
-        }
-        const res = await fetch('/api/db?t=' + Date.now(), { headers }); 
-        if (res.ok) { 
-            fetchOk = true;
-            const remoteDb = await res.json(); 
-            if (remoteDb && remoteDb.stages) { cloudDb = remoteDb; } 
-        } 
-    } catch (e) {} 
-    
-    let bestLocalDb = null; 
-    let maxLen = 0;
+window.cleanupOldLocalStorage = function() { 
+    const currentVersion = 'sealOfLoveDB_v80'; 
     for (let i = 0; i < localStorage.length; i++) { 
         const key = localStorage.key(i); 
-        if (key && key.startsWith('sealOfLoveDB_')) { 
-            const val = localStorage.getItem(key); 
-            if (val && val.length > maxLen) { 
-                maxLen = val.length; 
-                try { bestLocalDb = JSON.parse(val); } catch(e){} 
-            } 
+        if (key && key.startsWith('sealOfLoveDB_') && key !== currentVersion) { 
+            localStorage.removeItem(key); 
         } 
-    }
-    
-    if (cloudDb) {
-        db = window.upgradeDBStructure(cloudDb);
-    } else if (bestLocalDb) {
-        db = window.upgradeDBStructure(bestLocalDb);
-    } else {
-        db = JSON.parse(JSON.stringify(defaultDB));
-    }
-
-    if (!db.users['yishuyangguang']) {
-        db.users['yishuyangguang'] = { nickname: '站长', avatar: '', favorites: [], expireAt: 4102444800000, status: 'normal' };
-    }
-    
-    try { 
-        window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v60', JSON.stringify(db)); 
-    } catch(e){} 
-    
-    // 安全调用 UI 更新方法
-    if (document.getElementById('screen-stage').classList.contains('active')) {
-        if(typeof window.initStageScreen === 'function') window.initStageScreen();
-    }
-    if (document.getElementById('screen-card-list').classList.contains('active')) {
-        if(typeof window.renderCardList === 'function') window.renderCardList();
-    }
-    
-    if (document.getElementById('vinyl-player-modal').style.display === 'flex' && musicState.type !== 'favorites') {
-        if (db.globalMusicConfig && db.globalMusicConfig.library[musicState.type]) { 
-            musicState.playlist = db.globalMusicConfig.library[musicState.type]; 
-            window.renderVinylPlaylist(); 
-        }
-    }
-    
-    if (bestLocalDb && !cloudDb && fetchOk) window.saveDB();
-}
-
-window.saveDB = async function() { 
-    let localSaved = false; 
-    try { 
-        window.cleanupOldLocalStorage(); 
-        localStorage.setItem('sealOfLoveDB_v60', JSON.stringify(db)); 
-        localSaved = true; 
-    } catch (e) {} 
-    
-    try { 
-        window.showGlobalToast('正在同步至云端...', 'loading'); 
-        const headers = { 'Content-Type': 'application/json' };
-        if (state.isAdmin && currentUserAccount === 'yishuyangguang') {
-            headers['x-admin-auth'] = 'yishuyangguang';
-        }
-        
-        const res = await fetch('/api/db', { method: 'POST', body: JSON.stringify(db), headers }); 
-        if(res.ok) {
-            window.showGlobalToast(localSaved ? '已极速同步至云端' : '云端同步成功', 'success'); 
-        } else {
-            window.showGlobalToast('云端同步异常', 'error'); 
-        }
-    } catch(e) { 
-        window.showGlobalToast('网络异常，数据未保存至云端', 'error'); 
     } 
 }
 
@@ -318,7 +135,6 @@ window.showGlobalToast = function(text, type = 'loading') {
     
     toast.className = `global-toast show ${type}`; 
     msg.innerText = text; 
-    
     if(type === 'loading') icon.innerText = '⏳'; 
     if(type === 'success') icon.innerText = '✓'; 
     if(type === 'error') icon.innerText = '✖'; 
@@ -336,17 +152,13 @@ window.compressImageFile = function(file, callback) {
         img.onload = function() { 
             const canvas = document.createElement('canvas'); 
             const MAX_SIZE = 240; 
-            let width = img.width; 
-            let height = img.height; 
-            
+            let width = img.width; let height = img.height; 
             if (width > height) { 
                 if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } 
             } else { 
                 if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } 
             } 
-            
-            canvas.width = width; 
-            canvas.height = height; 
+            canvas.width = width; canvas.height = height; 
             const ctx = canvas.getContext('2d'); 
             ctx.drawImage(img, 0, 0, width, height); 
             callback(canvas.toDataURL('image/webp', 0.75)); 
@@ -359,32 +171,38 @@ window.compressImageFile = function(file, callback) {
 window.toggleTheme = function() { 
     state.isLightTheme = !state.isLightTheme; 
     document.getElementById('btn-theme').innerText = state.isLightTheme ? '☀️' : '🌙'; 
-    
     if (!state.isLightTheme) { 
         document.body.classList.add('dark-theme'); document.body.classList.remove('light-theme'); 
     } else { 
         document.body.classList.remove('dark-theme'); document.body.classList.add('light-theme'); 
     } 
     
-    if(state.stage) {
+    if(state.stage) { 
         if(typeof window.applyStageTheme === 'function') window.applyStageTheme(state.stage); 
-    } else {
-        const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' };
+    } else { 
+        const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' }; 
         document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); 
         document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
-        document.documentElement.style.setProperty('--theme-secondary', currentParams.s);
-        window.updateThemeCache(currentParams.p);
-    }
+        document.documentElement.style.setProperty('--theme-secondary', currentParams.s); 
+        window.updateThemeCache(currentParams.p); 
+    } 
 }
 
+window.navigateTo = function(screenId) { 
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+    document.getElementById(screenId).classList.add('active'); 
+    document.getElementById(screenId).scrollTop = 0; 
+    if(!state.isModalOpen) { lastParticleTime = performance.now(); window.animateParticles(); } 
+}
+
+
+/* ================= 4. GPU降频粒子系统 ================= */
 window.resizeCanvas = function() { 
     const canvas = document.getElementById('particle-canvas'); 
     if(!canvas) return; 
-    canvas.width = window.innerWidth; 
-    canvas.height = window.innerHeight; 
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight; 
 }
 
-// 🔥 极简纯色粒子，彻底抛弃消耗算力的渐变，手机 0 发热！
 class Particle { 
     constructor() { 
         const canvas = document.getElementById('particle-canvas'); 
@@ -397,284 +215,68 @@ class Particle {
         this.pulse = Math.random() * Math.PI; 
     } 
     update() { 
-        const canvas = document.getElementById('particle-canvas'); 
-        if(!canvas) return; 
+        const canvas = document.getElementById('particle-canvas'); if(!canvas) return; 
         if (state.isLightTheme) { 
-            this.y -= Math.abs(this.speedY) + 0.3; 
-            this.x += Math.sin(this.pulse) * 0.5; 
+            this.y -= Math.abs(this.speedY) + 0.3; this.x += Math.sin(this.pulse) * 0.5; 
             if (this.y < -20) { this.y = canvas.height + 20; this.x = Math.random() * (canvas.width / 2); } 
         } else { 
-            this.y += this.speedY * 0.6; 
-            this.x += this.speedX + (Math.random() * 0.4 - 0.2); 
-            if (this.y < 0) this.y = canvas.height; 
-            if (this.y > canvas.height) this.y = 0; 
-            if (this.x < 0) this.x = canvas.width / 2; 
-            if (this.x > canvas.width / 2) this.x = 0; 
-        }
+            this.y += this.speedY * 0.6; this.x += this.speedX + (Math.random() * 0.4 - 0.2); 
+            if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; 
+            if (this.x < 0) this.x = canvas.width / 2; if (this.x > canvas.width / 2) this.x = 0; 
+        } 
         this.pulse += 0.02; 
     } 
     draw() { 
         if(!window.ctx) return; 
         const canvas = document.getElementById('particle-canvas'); 
-        const alpha = Math.max(0, this.baseAlpha + Math.sin(this.pulse) * 0.2);
-        
-        window.ctx.save(); 
-        window.ctx.globalAlpha = alpha;
-        
-        // 使用纯净的单一色值渲染，避免几何级的渐变浮点运算
+        const alpha = Math.max(0, this.baseAlpha + Math.sin(this.pulse) * 0.2); 
+        window.ctx.save(); window.ctx.globalAlpha = alpha; 
         window.ctx.fillStyle = state.isLightTheme ? `rgb(${cachedPrimaryColorStr})` : '#b4ff64'; 
-        
-        window.ctx.beginPath(); 
-        window.ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2); 
-        window.ctx.fill(); 
-        
-        window.ctx.beginPath(); 
-        window.ctx.arc(canvas.width - this.x, this.y, this.size * 2, 0, Math.PI * 2); 
-        window.ctx.fill(); 
-        
-        window.ctx.restore();
+        window.ctx.beginPath(); window.ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2); window.ctx.fill(); 
+        window.ctx.beginPath(); window.ctx.arc(canvas.width - this.x, this.y, this.size * 2, 0, Math.PI * 2); window.ctx.fill(); 
+        window.ctx.restore(); 
     } 
 }
 
 window.initParticles = function() { 
     particles = []; 
-    // 手机端将粒子数量降低，进一步解放GPU
     const count = window.innerWidth < 600 ? 10 : 25; 
-    for (let i = 0; i < count; i++) {
-        particles.push(new Particle()); 
-    }
+    for (let i = 0; i < count; i++) { particles.push(new Particle()); } 
 }
 
-// 🔥 核心重写：绝不抛弃老用户的无缝登陆与续费引擎
-window.handleLogin = async function() { 
-    const inputU = document.getElementById('ipt-username').value.trim(); 
-    const p = document.getElementById('ipt-pwd').value.trim(); 
-    const k = document.getElementById('ipt-key').value.trim().toUpperCase(); // 抓取卡密输入框
-    
-    if(!inputU || !p) return alert('请输入账号/昵称和密码'); 
-    
-    // 匹配原始ID
-    let baseUsername = inputU; 
-    if (!db.users[inputU]) { 
-        for (let key in db.users) { 
-            if (db.users[key].nickname === inputU) { baseUsername = key; break; } 
-        } 
-    } 
-    
-    // 密码校验环节
-    let pwdMatch = false;
-    try { 
-        const response = await fetch('/api/login', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ username: baseUsername, password: p }) 
-        }); 
-        if (response.ok) { 
-            const result = await response.json(); 
-            if(result.success) pwdMatch = true; 
-        } 
-    } catch (error) {} 
-    
-    // 老密码本地匹配，确保旧用户密码一直好用
-    if(!pwdMatch && db.users[baseUsername] && db.users[baseUsername].password === p) { 
-        pwdMatch = true; 
-    }
-    
-    if (!pwdMatch) return alert('账号或密码错误。');
 
-    // 核心风控与激活通道
-    if (baseUsername !== 'yishuyangguang') {
-        window.showGlobalToast('正在跨时空核实权限...', 'loading');
-        try {
-            let actionParams = { action: 'check_status', username: baseUsername };
-            
-            // 🚀 核心升级：如果老用户在登录时输入了新卡密，直接将请求升级为“激活/续费”！
-            if (k) {
-                actionParams = { action: 'renew', username: baseUsername, key: k };
-            }
-
-            const res = await fetch('/api/verifyKey', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(actionParams)
-            });
-            const data = await res.json();
-            
-            if (!res.ok || !data.success) {
-                return window.showGlobalToast(data.error || '权限拦截：您的账号状态异常', 'error');
-            }
-            
-            // 更新同步本地最新状态
-            db.users[baseUsername].expireAt = data.expireAt;
-            db.users[baseUsername].status = data.status || 'normal';
-
-            if (k) {
-                window.showGlobalToast(`激活成功！已为您续约 ${data.days} 天`, 'success');
-                document.getElementById('ipt-key').value = ''; // 清空已使用的卡密
-                await window.saveDB(); 
-            } else {
-                const daysLeft = Math.ceil((data.expireAt - data.now) / (1000 * 60 * 60 * 24));
-                if (daysLeft <= 7) {
-                    alert(`【临期预警】您的印记时空仅剩 ${daysLeft} 天即将封存。\n若已过期，请在登录框下方直接输入新卡密，与账号密码一起点击登录即可快速激活。`);
-                }
-            }
-        } catch(e) {
-            return window.showGlobalToast('防篡改网络校验失败，请检查网络连接', 'error');
-        }
-    }
-    
-    // 如果一切畅通无阻，放行！
-    window.loginSuccess(baseUsername, baseUsername === 'yishuyangguang'); 
-}
-
-window.loginSuccess = async function(baseUser, isAdmin) { 
-    state.isLoggedIn = true; 
-    state.isAdmin = isAdmin; 
-    currentUserAccount = baseUser; 
-    
-    document.getElementById('user-widget').style.display = 'flex'; 
-    window.updateUserWidgetIcon(); 
-    
-    window.showGlobalToast('正在同步云端最新时空...', 'loading');
-    await window.initDB();
-    
-    if (isAdmin) {
-        window.showGlobalToast('管理模式已激活', 'success'); 
-    } else {
-        window.showGlobalToast('数据同步成功', 'success');
-    }
-    
-    if(typeof window.initStageScreen === 'function') window.initStageScreen(); 
-}
-
-window.handleRegister = async function() { 
-    const u = document.getElementById('ipt-username').value.trim(); 
-    const p = document.getElementById('ipt-pwd').value.trim(); 
-    const k = document.getElementById('ipt-key').value.trim().toUpperCase(); 
-    
-    if(!u || !p || !k) return alert('请完整填写账号、密码，以及有效的16位时空卡密'); 
-    if (!/^[a-zA-Z0-9]+$/.test(u)) return alert('原生账号仅限英文数字组合'); 
-
-    window.showGlobalToast('正在跨时空核验卡密...', 'loading');
-    try {
-        const res = await fetch('/api/verifyKey', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'register', username: u, password: p, key: k })
-        });
-        const data = await res.json();
-        
-        if (!res.ok || !data.success) {
-            return window.showGlobalToast(data.error || '注册失败', 'error');
-        }
-        
-        db.users[u] = { password: p, nickname: '', avatar: '', favorites: [], expireAt: data.expireAt, status: 'normal' };
-        await window.saveDB();
-        
-        window.showGlobalToast(`注册成功！已为您赋予 ${data.days} 天时空权限`, 'success');
-        document.getElementById('ipt-key').value = '';
-        window.loginSuccess(u, false);
-    } catch(e) { 
-        window.showGlobalToast('网络异常，卡密核验失败', 'error'); 
-    }
-}
-
-window.logout = function() { 
-    state.isLoggedIn = false; 
-    state.isAdmin = false; 
-    state.isEditMode = false; 
-    currentUserAccount = null; 
-    
-    document.getElementById('top-admin-controls').style.display = 'none'; 
-    document.getElementById('user-widget').style.display = 'none'; 
-    window.navigateTo('screen-login'); 
-    
-    document.body.classList.remove('dark-theme'); 
-    document.body.classList.add('light-theme'); 
-    state.isLightTheme = true; 
-    document.getElementById('btn-theme').innerText = '☀️'; 
-    document.documentElement.style.setProperty('--theme-bg-color', '#f8f6f0'); 
-    document.documentElement.style.setProperty('--theme-primary', '#d99a29'); 
-    document.documentElement.style.setProperty('--theme-secondary', '#f4c453'); 
-}
-
+/* ================= 5. 用户中心与控制台入口 ================= */
 window.openUserProfile = function() { 
     if(!currentUserAccount) return; 
-    if (!db.users[currentUserAccount]) {
-        db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [], expireAt: 0, status: 'normal' }; 
-    }
+    if (!db.users[currentUserAccount]) { db.users[currentUserAccount] = { nickname: '', avatar: '', favorites: [], expireAt: 0, status: 'normal' }; }
     const userData = db.users[currentUserAccount]; 
-    
     const imgEl = document.getElementById('profile-avatar-img'); 
     const svgEl = document.getElementById('profile-svg-placeholder'); 
     
-    if(userData && userData.avatar) { 
-        imgEl.src = userData.avatar; 
-        imgEl.style.display = 'block'; 
-        svgEl.style.display = 'none'; 
-    } else { 
-        imgEl.style.display = 'none'; 
-        svgEl.style.display = 'block'; 
-    } 
+    if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } 
+    else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } 
     document.getElementById('profile-nickname-input').value = userData.nickname || ''; 
     
     const daysLeftEl = document.getElementById('user-days-left');
-    if (currentUserAccount === 'yishuyangguang') {
-        daysLeftEl.innerText = '永久 (特权)'; 
-        daysLeftEl.style.color = '#fde68a';
-    } else {
-        const now = Date.now();
-        let days = Math.ceil(((userData.expireAt || 0) - now) / (1000 * 60 * 60 * 24));
-        if (days < 0) days = 0;
-        
-        if (userData.status === 'banned') { 
-            daysLeftEl.innerText = '被封禁'; 
-            daysLeftEl.style.color = '#ef4444'; 
-        } else { 
-            daysLeftEl.innerText = days; 
-            daysLeftEl.style.color = days <= 7 ? '#ef4444' : '#fde68a'; 
-        }
+    if (currentUserAccount === 'yishuyangguang') { 
+        daysLeftEl.innerText = '永久 (特权)'; daysLeftEl.style.color = '#fde68a'; 
+    } else { 
+        const now = Date.now(); 
+        let days = Math.ceil(((userData.expireAt || 0) - now) / (1000 * 60 * 60 * 24)); if (days < 0) days = 0; 
+        if (userData.status === 'banned') { daysLeftEl.innerText = '被封禁'; daysLeftEl.style.color = '#ef4444'; } 
+        else { daysLeftEl.innerText = days; daysLeftEl.style.color = days <= 7 ? '#ef4444' : '#fde68a'; } 
     }
-
-    const recoveryWrap = document.getElementById('admin-recovery-btn-wrap'); 
-    if (state.isAdmin) {
-        recoveryWrap.style.display = 'block'; 
-    } else {
-        recoveryWrap.style.display = 'none'; 
-    }
-    window.showModal('user-profile-modal'); 
-}
-
-window.handleRenew = async function() {
-    const k = document.getElementById('ipt-renew-key').value.trim().toUpperCase();
-    if(!k) return alert('请输入续费卡密');
     
-    window.showGlobalToast('正在向时空网络验证...', 'loading');
-    try {
-        const res = await fetch('/api/verifyKey', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'renew', username: currentUserAccount, key: k })
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success) { 
-            return window.showGlobalToast(data.error || '续费失败', 'error'); 
-        }
-        
-        db.users[currentUserAccount].expireAt = data.expireAt; 
-        db.users[currentUserAccount].status = 'normal';
-        document.getElementById('ipt-renew-key').value = '';
-        
-        window.showGlobalToast(`续费成功！已为您叠加 ${data.days} 天`, 'success');
-        window.openUserProfile(); 
-    } catch(e) { 
-        window.showGlobalToast('网络异常', 'error'); 
-    }
+    const recoveryWrap = document.getElementById('admin-recovery-btn-wrap'); 
+    if (state.isAdmin) { recoveryWrap.style.display = 'block'; } else { recoveryWrap.style.display = 'none'; }
+    window.showModal('user-profile-modal'); 
 }
 
 window.handleProfileAvatar = function(inputEl) { 
     if(inputEl.files.length > 0) { 
         window.compressImageFile(inputEl.files[0], (base64) => { 
             const imgEl = document.getElementById('profile-avatar-img'); 
-            imgEl.src = base64; 
-            imgEl.style.display = 'block'; 
+            imgEl.src = base64; imgEl.style.display = 'block'; 
             document.getElementById('profile-svg-placeholder').style.display = 'none'; 
         }); 
     } 
@@ -686,82 +288,215 @@ window.saveUserProfile = async function() {
     const imgEl = document.getElementById('profile-avatar-img'); 
     
     for(let key in db.users) { 
-        if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) { 
-            return alert('该昵称已被使用'); 
-        } 
+        if(key !== currentUserAccount && db.users[key].nickname && db.users[key].nickname === nick) return alert('该昵称已被使用'); 
     } 
-    
-    if (!db.users[currentUserAccount]) {
-        db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [], expireAt: 0, status: 'normal' }; 
-    }
+    if (!db.users[currentUserAccount]) { db.users[currentUserAccount] = { nickname: '', avatar: '', favorites: [], expireAt: 0, status: 'normal' }; }
     
     db.users[currentUserAccount].nickname = nick; 
-    if(imgEl.style.display === 'block') {
-        db.users[currentUserAccount].avatar = imgEl.src; 
-    }
+    if(imgEl.style.display === 'block') { db.users[currentUserAccount].avatar = imgEl.src; }
     
-    await window.saveDB(); 
-    window.updateUserWidgetIcon(); 
-    window.hideModal('user-profile-modal'); 
+    if(typeof window.saveDB === 'function') await window.saveDB(); 
+    window.updateUserWidgetIcon(); window.hideModal('user-profile-modal'); 
 }
 
-// 🛡️ 打开全新的独立管理控制台 (Admin Dashboard)
-window.openAuthAdmin = function() {
-    if (!state.isAdmin) return;
-    window.open('admin-dashboard.html', '_blank');
+window.openAuthAdmin = function() { 
+    if (!state.isAdmin) return; 
+    window.open('admin-dashboard.html', '_blank'); 
 }
 
 window.updateUserWidgetIcon = function() { 
     if(!currentUserAccount) return; 
-    if (!db.users[currentUserAccount]) {
-        db.users[currentUserAccount] = { password: '云端验证', nickname: '', avatar: '', favorites: [] }; 
-    }
+    if (!db.users[currentUserAccount]) { db.users[currentUserAccount] = { nickname: '', avatar: '', favorites: [] }; }
     const userData = db.users[currentUserAccount]; 
-    const imgEl = document.getElementById('user-widget-avatar'); 
-    const svgEl = document.getElementById('user-widget-svg'); 
-    
-    if(userData && userData.avatar) { 
-        imgEl.src = userData.avatar; 
-        imgEl.style.display = 'block'; 
-        svgEl.style.display = 'none'; 
-    } else { 
-        imgEl.style.display = 'none'; 
-        svgEl.style.display = 'block'; 
-    } 
+    const imgEl = document.getElementById('user-widget-avatar'); const svgEl = document.getElementById('user-widget-svg'); 
+    if(userData && userData.avatar) { imgEl.src = userData.avatar; imgEl.style.display = 'block'; svgEl.style.display = 'none'; } 
+    else { imgEl.style.display = 'none'; svgEl.style.display = 'block'; } 
 }
 
 window.toggleEditMode = function() { 
     state.isEditMode = !state.isEditMode; 
     document.getElementById('btn-edit-toggle').innerText = state.isEditMode ? '关闭深度编辑' : '开启深度编辑'; 
+    if(state.isEditMode) { document.body.classList.add('edit-mode'); } else { document.body.classList.remove('edit-mode'); }
     
-    if(state.isEditMode) {
-        document.body.classList.add('edit-mode'); 
-    } else {
-        document.body.classList.remove('edit-mode'); 
-    }
-    
-    if (document.getElementById('screen-stage').classList.contains('active')) {
-        if(typeof window.initStageScreen === 'function') window.initStageScreen();
-    } else if (document.getElementById('screen-card-list').classList.contains('active')) {
-        if(typeof window.renderCardList === 'function') window.renderCardList();
-    }
+    if (document.getElementById('screen-stage').classList.contains('active')) { window.initStageScreen(); } 
+    else if (document.getElementById('screen-card-list').classList.contains('active')) { window.renderCardList(); }
 }
 
-window.navigateTo = function(screenId) { 
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-    document.getElementById(screenId).classList.add('active'); 
-    document.getElementById(screenId).scrollTop = 0; 
+
+/* ================= 6. 首页流体网格与模块管理 (绝不遗漏版) ================= */
+window.initStageScreen = function() { 
+    if (!state.isAdmin && currentUserAccount !== 'yishuyangguang') {
+        const uData = db.users[currentUserAccount]; const nowTime = Date.now();
+        if (!uData || !uData.expireAt || uData.expireAt < nowTime) { 
+            alert("【系统拦截】您的时空印记已到期或未激活。请在登录界面联系站长获取新卡密续费。"); 
+            if(typeof window.logout === 'function') window.logout(); return; 
+        }
+        if (uData.status === 'banned') { 
+            alert("【系统拦截】您的账号已被限制使用。"); 
+            if(typeof window.logout === 'function') window.logout(); return; 
+        }
+    }
+
+    document.getElementById('top-admin-controls').style.display = state.isAdmin ? 'flex' : 'none'; 
+    const currentParams = state.isLightTheme ? { bg: '#f8f6f0', p: '#d99a29', s: '#f4c453' } : { bg: '#1c1d22', p: '#d4af37', s: '#ebd373' }; 
+    document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); 
+    document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
+    document.documentElement.style.setProperty('--theme-secondary', currentParams.s); 
+    window.updateThemeCache(currentParams.p);
+
+    // 渲染动态顶部模块
+    const topContainer = document.getElementById('top-modules-dynamic-container');
+    if (topContainer) {
+        topContainer.innerHTML = '';
+        (db.topModules || []).forEach((tm, idx) => {
+            const capsule = document.createElement('div');
+            capsule.className = 'brand-capsule-dynamic';
+            
+            capsule.onclick = (e) => {
+                if (state.isEditMode) return;
+                if (tm.actionType === 'music') {
+                    if(typeof window.openMusicTypeModal === 'function') window.openMusicTypeModal();
+                } else if (tm.actionType === 'link' && tm.url) {
+                    window.open(tm.url, '_blank');
+                } else if (tm.actionType === 'doc') {
+                    if(typeof window.openCounselingDoc === 'function') {
+                        window.openCounselingDoc(tm.url); 
+                    } else {
+                        window.showGlobalToast('文档引擎加载中...', 'loading');
+                    }
+                } else {
+                    window.showGlobalToast('该模块暂未配置功能', 'loading');
+                }
+            };
+
+            const imgEl = document.createElement('img');
+            imgEl.src = tm.icon || 'favicon-32x32.png';
+            imgEl.onerror = function() { this.src = 'favicon-32x32.png'; };
+            
+            const inputEl = document.createElement('input');
+            inputEl.value = tm.name;
+            
+            if (state.isEditMode) {
+                imgEl.onclick = (e) => {
+                    e.stopPropagation();
+                    const fileIpt = document.createElement('input'); fileIpt.type = 'file'; fileIpt.accept = 'image/*';
+                    fileIpt.onchange = ev => { if(ev.target.files[0]) window.handleTopModuleIconUpload(ev.target.files[0], idx); };
+                    fileIpt.click();
+                };
+                inputEl.onclick = (e) => e.stopPropagation();
+                inputEl.onblur = async (e) => { tm.name = e.target.value; await window.saveDB(); };
+
+                const delBtn = document.createElement('div');
+                delBtn.className = 'del-badge'; delBtn.innerHTML = '✖';
+                delBtn.onclick = (e) => { e.stopPropagation(); window.deleteTopModule(idx); };
+                capsule.appendChild(delBtn);
+            }
+
+            capsule.appendChild(imgEl); capsule.appendChild(inputEl); topContainer.appendChild(capsule);
+        });
+    }
+
+    // 渲染主模块 (全端弹性网格)
+    const mainContainer = document.getElementById('stage-buttons-container'); 
+    if (mainContainer) {
+        mainContainer.innerHTML = ''; 
+        
+        Object.keys(db.stages).forEach((sKey) => { 
+            const sData = db.stages[sKey]; const iconB64 = sData.icon; const displayName = sData.name || sKey; 
+            
+            const card = document.createElement('div'); 
+            card.className = 'stage-card-flex'; 
+            card.onclick = (e) => { if(!state.isEditMode) window.selectStage(sKey); }; 
+            
+            const iconDiv = document.createElement('div'); 
+            iconDiv.className = 'stage-icon-dropzone'; 
+            
+            if (iconB64) { 
+                iconDiv.innerHTML = `<img src="${iconB64}">`; 
+            } else { 
+                iconDiv.innerHTML = `<span style="font-size: clamp(16px, 5vw, 26px); color:var(--theme-text); font-family:var(--font-title); opacity:0.9;">${displayName.charAt(0)}</span>`; 
+            } 
+            
+            const titleInput = document.createElement('input'); 
+            titleInput.className = 'stage-card-title'; 
+            titleInput.value = displayName; 
+            
+            if (state.isEditMode) { 
+                iconDiv.addEventListener('click', (e) => { 
+                    e.stopPropagation(); 
+                    const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; 
+                    input.onchange = ev => {if(ev.target.files[0]) window.handleIconUpload(ev.target.files[0], sKey)}; 
+                    input.click(); 
+                }); 
+                titleInput.addEventListener('click', (e) => { e.stopPropagation(); }); 
+                titleInput.addEventListener('blur', (e) => { sData.name = e.target.value; window.saveDB(); }); 
+                
+                const delBtn = document.createElement('div');
+                delBtn.className = 'del-badge'; delBtn.innerHTML = '✖';
+                delBtn.onclick = (e) => { e.stopPropagation(); window.deleteStage(sKey); };
+                card.appendChild(delBtn);
+            } 
+            card.appendChild(iconDiv); card.appendChild(titleInput); mainContainer.appendChild(card);
+        }); 
+    }
+    window.navigateTo('screen-stage'); 
+}
+
+window.addNewTopModule = async function() {
+    const name = prompt("请输入顶部模块名称 (如: 婚前辅导/印记音律):", "新模块");
+    if(!name) return;
+    const type = prompt("请输入模块类型\n1: 音乐组件 (弹窗)\n2: 外部链接 (跳转URL)\n3: 云端富文本辅导文档 (多媒体版)", "3");
     
-    if(!state.isModalOpen) { 
-        lastParticleTime = performance.now(); 
-        window.animateParticles(); 
-    } 
+    let actionType = 'none'; let url = '';
+    if(type === '1') { actionType = 'music'; } 
+    else if (type === '2') { actionType = 'link'; url = prompt("请输入外部链接 (包含 https://):", "https://"); } 
+    else if (type === '3') { actionType = 'doc'; url = 'doc_' + Date.now(); }
+
+    if(!db.topModules) db.topModules = [];
+    db.topModules.push({ id: 'tm_' + Date.now(), name: name, icon: 'apple-touch-icon.png', actionType: actionType, url: url });
+    await window.saveDB();
+    window.initStageScreen();
+};
+
+window.deleteTopModule = async function(idx) {
+    if(confirm(`确定彻底删除顶部模块 [${db.topModules[idx].name}] 吗？`)) {
+        db.topModules.splice(idx, 1); await window.saveDB(); window.initStageScreen();
+    }
+};
+
+window.handleTopModuleIconUpload = function(file, idx) {
+    window.compressImageFile(file, async (base64Str) => {
+        db.topModules[idx].icon = base64Str; await window.saveDB(); window.initStageScreen();
+    });
+};
+
+window.addNewStage = async function() {
+    const stageName = prompt("请输入新主模块的名称 (如: 晚年期):");
+    if(!stageName) return;
+    const newKey = 'stage_' + Date.now();
+    db.stages[newKey] = {
+        name: stageName, icon: '', 
+        themeParams: { dark: { bg: '#16171b', p: '#6366f1', s: '#818cf8' }, light: { bg: '#f0f4f8', p: '#4f46e5', s: '#818cf8' } },
+        prepText: '请准备，预备进入内心的探索。', categories: [{ id: 'cat_default_' + Date.now(), name: '核心印记' }], cards: []
+    };
+    await window.saveDB(); window.initStageScreen();
+};
+
+window.deleteStage = async function(sKey) {
+    if(confirm(`确定要彻底删除大模块 [${db.stages[sKey].name}] 吗？\n删除后内部所有卡片将不可恢复！`)) {
+        delete db.stages[sKey]; await window.saveDB(); window.initStageScreen();
+    }
+};
+
+window.handleIconUpload = function(file, stageKey) { 
+    window.compressImageFile(file, async (base64Str) => { 
+        db.stages[stageKey].icon = base64Str; await window.saveDB(); window.initStageScreen(); 
+    }); 
 }
 
 window.applyStageTheme = function(stageName) { 
     if (!stageName || !db.stages[stageName]) return; 
-    const t = db.stages[stageName].themeParams; 
-    const currentParams = state.isLightTheme ? t.light : t.dark; 
+    const t = db.stages[stageName].themeParams; const currentParams = state.isLightTheme ? t.light : t.dark; 
     document.documentElement.style.setProperty('--theme-bg-color', currentParams.bg); 
     document.documentElement.style.setProperty('--theme-primary', currentParams.p); 
     document.documentElement.style.setProperty('--theme-secondary', currentParams.s); 
@@ -769,22 +504,16 @@ window.applyStageTheme = function(stageName) {
 }
 
 
-// ======================= 🔥 被我不小心误删的完整卡片渲染路由与增删引擎 =======================
-
+/* ================= 7. 卡片分类与编辑引擎 (绝不遗漏版) ================= */
 window.selectStage = function(sKey) { 
     if(state.isEditMode) return; 
     state.stage = sKey; 
-    if(typeof window.applyStageTheme === 'function') window.applyStageTheme(sKey); 
+    window.applyStageTheme(sKey); 
     document.getElementById('list-stage-title').innerText = `${db.stages[sKey].name}`; 
     
     const cats = db.stages[sKey].categories || []; 
-    if(cats.length > 0) {
-        state.activeCategoryId = cats[0].id; 
-    } else {
-        state.activeCategoryId = ''; 
-    }
-    window.renderCardList(); 
-    window.navigateTo('screen-card-list'); 
+    if(cats.length > 0) { state.activeCategoryId = cats[0].id; } else { state.activeCategoryId = ''; }
+    window.renderCardList(); window.navigateTo('screen-card-list'); 
 }
 
 window.renderCardList = function() { 
@@ -807,17 +536,14 @@ window.renderCardList = function() {
     const activeCards = db.stages[state.stage].cards.filter(c => c.categoryId === state.activeCategoryId); 
     
     if (activeCards.length > 0 || state.isEditMode) {
-        const grid = document.createElement('div');
-        grid.className = 'content-grid';
+        const grid = document.createElement('div'); grid.className = 'content-grid';
         activeCards.forEach((card) => {
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'data-card';
+            const cardDiv = document.createElement('div'); cardDiv.className = 'data-card';
             cardDiv.innerHTML = `<h3 class="card-inner-title">${card.title}</h3>`;
             
             if (state.isEditMode) {
                 const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id);
-                const actDiv = document.createElement('div');
-                actDiv.className = 'card-edit-badge';
+                const actDiv = document.createElement('div'); actDiv.className = 'card-edit-badge';
                 actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); window.openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); window.deleteCard(${globalIndex})">✖</div>`;
                 cardDiv.appendChild(actDiv);
             }
@@ -829,9 +555,7 @@ window.renderCardList = function() {
         if (activeCards.length === 0 && state.isEditMode) { 
             grid.innerHTML = `<p style="opacity:0.4; font-size:0.85rem; text-align:center; width:100%; grid-column: 1 / -1; padding: 20px;">该板块暂无卡片</p>`; 
         }
-        const section = document.createElement('div');
-        section.className = 'module-section';
-        section.appendChild(grid);
+        const section = document.createElement('div'); section.className = 'module-section'; section.appendChild(grid);
         if(container) container.appendChild(section);
     } else {
         if(container) container.innerHTML = '<p style="opacity:0.5; margin-top:30px; text-align:center;">当前分类暂无内容</p>';
@@ -839,12 +563,10 @@ window.renderCardList = function() {
 }
 
 window.manageCategories = async function() { 
-    const listDiv = document.getElementById('cat-list-edit'); 
-    listDiv.innerHTML = ''; 
+    const listDiv = document.getElementById('cat-list-edit'); listDiv.innerHTML = ''; 
     const cats = db.stages[state.stage].categories || []; 
     cats.forEach((cat, idx) => { 
-        const div = document.createElement('div'); 
-        div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center'; 
+        const div = document.createElement('div'); div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center'; 
         div.innerHTML = `<input type="text" style="margin:0; flex:1;" id="cat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:45px; height:45px; margin:0; color:#ef4444; padding:0; border-radius:12px;" onclick="window.removeCat(${idx})">✖</button>`; 
         listDiv.appendChild(div); 
     }); 
@@ -867,39 +589,27 @@ window.removeCat = async function(idx) {
 
 window.saveCategories = async function() { 
     const cats = db.stages[state.stage].categories || []; 
-    cats.forEach((cat, idx) => { 
-        const input = document.getElementById(`cat_input_${idx}`); 
-        if(input) cat.name = input.value; 
-    }); 
-    await window.saveDB(); 
-    window.hideModal('cat-modal'); 
-    if(!cats.find(c => c.id === state.activeCategoryId) && cats.length > 0) {
-        state.activeCategoryId = cats[0].id; 
-    }
+    cats.forEach((cat, idx) => { const input = document.getElementById(`cat_input_${idx}`); if(input) cat.name = input.value; }); 
+    await window.saveDB(); window.hideModal('cat-modal'); 
+    if(!cats.find(c => c.id === state.activeCategoryId) && cats.length > 0) { state.activeCategoryId = cats[0].id; }
     window.renderCardList(); 
 }
 
 window.editPrepText = async function() { 
     const t = prompt("预备提醒文本：", db.stages[state.stage].prepText); 
-    if (t !== null) { 
-        db.stages[state.stage].prepText = t; 
-        await window.saveDB(); 
-    } 
+    if (t !== null) { db.stages[state.stage].prepText = t; await window.saveDB(); } 
 }
 
 window.deleteCard = async function(index) { 
     if(confirm('确认彻底删除本卡片吗？')) { 
-        db.stages[state.stage].cards.splice(index, 1); 
-        await window.saveDB(); 
-        window.renderCardList(); 
+        db.stages[state.stage].cards.splice(index, 1); await window.saveDB(); window.renderCardList(); 
     } 
 }
 
 window.openEditModal = function(index) { 
     const isNew = (index === null); 
     document.getElementById('modal-title').innerText = isNew ? '新增卡片' : '编辑卡片'; 
-    const catSelect = document.getElementById('edit-card-category'); 
-    catSelect.innerHTML = ''; 
+    const catSelect = document.getElementById('edit-card-category'); catSelect.innerHTML = ''; 
     const cats = db.stages[state.stage].categories || []; 
     cats.forEach(c => { catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`; }); 
     
@@ -923,102 +633,58 @@ window.saveCard = async function() {
         title: document.getElementById('edit-card-title').value || '未命名', 
         steps: [] 
     }; 
+    for(let i=1; i<=3; i++) { c.steps.push({ title: document.getElementById(`edit-s${i}-title`).value, text: document.getElementById(`edit-s${i}-text`).value }); }
     
-    for(let i=1; i<=3; i++) {
-        c.steps.push({ 
-            title: document.getElementById(`edit-s${i}-title`).value, 
-            text: document.getElementById(`edit-s${i}-text`).value 
-        }); 
-    }
+    if(idxStr === 'new') { db.stages[state.stage].cards.push(c); } 
+    else { db.stages[state.stage].cards[parseInt(idxStr)] = c; }
     
-    if(idxStr === 'new') {
-        db.stages[state.stage].cards.push(c); 
-    } else {
-        db.stages[state.stage].cards[parseInt(idxStr)] = c; 
-    }
-    
-    await window.saveDB(); 
-    window.hideModal('edit-modal'); 
-    window.renderCardList(); 
+    await window.saveDB(); window.hideModal('edit-modal'); window.renderCardList(); 
 }
 
-// ======================= R2 上传与音乐库 =======================
 
+/* ================= 8. 全局音律库与云端R2管理 ================= */
 window.processUploadQueue = async function() { 
     if(isUploading || uploadQueue.length === 0) return; 
     isUploading = true; 
-    
-    const capsule = document.getElementById('upload-capsule'); 
-    const capsuleText = document.getElementById('upload-capsule-text'); 
-    const capsuleProgress = document.getElementById('upload-capsule-fill'); 
+    const capsule = document.getElementById('upload-capsule'); const capsuleText = document.getElementById('upload-capsule-text'); const capsuleProgress = document.getElementById('upload-capsule-fill'); 
     capsule.classList.add('show'); 
-    
-    const totalTasks = uploadQueue.length; 
-    let completedTasks = 0; 
+    const totalTasks = uploadQueue.length; let completedTasks = 0; 
     
     while(uploadQueue.length > 0) { 
-        const task = uploadQueue.shift(); 
-        completedTasks++; 
+        const task = uploadQueue.shift(); completedTasks++; 
         try { 
             const url = await new Promise((resolve, reject) => { 
-                const xhr = new XMLHttpRequest(); 
-                xhr.open('POST', '/api/upload'); 
+                const xhr = new XMLHttpRequest(); xhr.open('POST', '/api/upload'); 
                 xhr.upload.onprogress = (e) => { 
-                    if(e.lengthComputable) { 
-                        const percent = (e.loaded / e.total) * 100; 
-                        capsuleText.innerText = `正在云传 (${completedTasks}/${totalTasks}) ${Math.round(percent)}%`; 
-                        capsuleProgress.style.width = `${percent}%`; 
-                    } 
+                    if(e.lengthComputable) { const percent = (e.loaded / e.total) * 100; capsuleText.innerText = `正在云传 (${completedTasks}/${totalTasks}) ${Math.round(percent)}%`; capsuleProgress.style.width = `${percent}%`; } 
                 }; 
-                xhr.onload = () => { 
-                    if(xhr.status >= 200 && xhr.status < 300) {
-                        resolve(JSON.parse(xhr.responseText).url); 
-                    } else {
-                        reject(new Error('Upload failed')); 
-                    }
-                }; 
+                xhr.onload = () => { if(xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText).url); else reject(new Error('Upload failed')); }; 
                 xhr.onerror = () => reject(new Error('Network error')); 
-                const formData = new FormData(); 
-                formData.append('file', task.file); 
-                xhr.send(formData); 
+                const formData = new FormData(); formData.append('file', task.file); xhr.send(formData); 
             }); 
-            
-            if(!db.globalMusicConfig.library[task.catId]) {
-                db.globalMusicConfig.library[task.catId] = []; 
-            }
+            if(!db.globalMusicConfig.library[task.catId]) { db.globalMusicConfig.library[task.catId] = []; }
             db.globalMusicConfig.library[task.catId].push({name: task.name, url: url}); 
-        } catch(e) { 
-            window.showGlobalToast(`[${task.name}] 上传失败`, 'error'); 
-        } 
+        } catch(e) { window.showGlobalToast(`[${task.name}] 上传失败`, 'error'); } 
     } 
     
-    await window.saveDB(); 
-    if(typeof window.renderAdminMusicList === 'function') window.renderAdminMusicList(); 
-    
-    capsuleText.innerText = "全部极速上传完成"; 
-    capsuleProgress.style.width = "100%"; 
-    setTimeout(() => { 
-        capsule.classList.remove('show'); 
-        capsuleProgress.style.width = "0%"; 
-    }, 2000); 
+    if(typeof window.saveDB === 'function') await window.saveDB(); 
+    window.renderAdminMusicList(); 
+    capsuleText.innerText = "全部极速上传完成"; capsuleProgress.style.width = "100%"; 
+    setTimeout(() => { capsule.classList.remove('show'); capsuleProgress.style.width = "0%"; }, 2000); 
     isUploading = false; 
 }
 
 window.initAdminMusicCatSelect = function() { 
-    const catSel = document.getElementById('admin-music-cat'); 
-    if(!catSel) return;
-    catSel.innerHTML = ''; 
-    const cats = db.globalMusicConfig.categories || []; 
+    const catSel = document.getElementById('admin-music-cat'); if(!catSel) return; 
+    catSel.innerHTML = ''; const cats = db.globalMusicConfig.categories || []; 
     cats.forEach(c => { catSel.innerHTML += `<option value="${c.id}">${c.name}</option>`; }); 
 }
 
 window.manageMusicCategories = function() { 
-    const listDiv = document.getElementById('music-cat-list-edit'); 
-    listDiv.innerHTML = ''; 
+    const listDiv = document.getElementById('music-cat-list-edit'); listDiv.innerHTML = ''; 
     const cats = db.globalMusicConfig.categories || []; 
     cats.forEach((cat, idx) => { 
-        const div = document.createElement('div'); 
-        div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center'; 
+        const div = document.createElement('div'); div.style.display = 'flex'; div.style.gap = '10px'; div.style.alignItems = 'center'; 
         div.innerHTML = `<input type="text" style="margin:0; flex:1;" id="mcat_input_${idx}" value="${cat.name}"><button class="btn-glass" style="width:45px; height:45px; margin:0; color:#ef4444; padding:0; border-radius:12px;" onclick="window.removeMusicCategory(${idx})">✖</button>`; 
         listDiv.appendChild(div); 
     }); 
@@ -1044,22 +710,14 @@ window.removeMusicCategory = async function(idx) {
 
 window.saveMusicCategories = async function() { 
     const cats = db.globalMusicConfig.categories || []; 
-    cats.forEach((cat, idx) => { 
-        const input = document.getElementById(`mcat_input_${idx}`); 
-        if(input) cat.name = input.value; 
-    }); 
-    await window.saveDB(); 
-    window.hideModal('music-cat-modal'); 
-    window.initAdminMusicCatSelect(); 
+    cats.forEach((cat, idx) => { const input = document.getElementById(`mcat_input_${idx}`); if(input) cat.name = input.value; }); 
+    if(typeof window.saveDB === 'function') await window.saveDB(); 
+    window.hideModal('music-cat-modal'); window.initAdminMusicCatSelect(); 
 }
 
 window.manageMusicLibrary = function() { 
-    window.initAdminMusicCatSelect(); 
-    document.getElementById('admin-music-search').value = ''; 
-    window.resetMusicEdit(); 
-    window.renderAdminMusicList(); 
-    window.showModal('music-admin-modal'); 
-    window.bindAudioDragDrop(); 
+    window.initAdminMusicCatSelect(); document.getElementById('admin-music-search').value = ''; 
+    window.resetMusicEdit(); window.renderAdminMusicList(); window.showModal('music-admin-modal'); window.bindAudioDragDrop(); 
 }
 
 window.filterAdminMusicList = function() { window.renderAdminMusicList(); }
@@ -1067,35 +725,24 @@ window.filterAdminMusicList = function() { window.renderAdminMusicList(); }
 window.renderAdminMusicList = function() { 
     const catId = document.getElementById('admin-music-cat').value; 
     const query = document.getElementById('admin-music-search').value.trim().toLowerCase(); 
-    const listDiv = document.getElementById('admin-music-list'); 
-    listDiv.innerHTML = ''; 
+    const listDiv = document.getElementById('admin-music-list'); listDiv.innerHTML = ''; 
     
-    if(!catId) { 
-        listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">请先添加音乐分类</div>`; 
-        return; 
-    } 
-    
-    const list = db.globalMusicConfig.library[catId] || []; 
-    let matchCount = 0; 
+    if(!catId) { listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">请先添加分类</div>`; return; } 
+    const list = db.globalMusicConfig.library[catId] || []; let matchCount = 0; 
     
     list.forEach((m, idx) => { 
         if (query && !m.name.toLowerCase().includes(query)) return; 
         matchCount++; 
-        const div = document.createElement('div'); 
-        div.style.display='flex'; div.style.background='var(--theme-glass-bg)'; div.style.padding='15px'; div.style.borderRadius='16px'; div.style.alignItems='center'; div.style.justifyContent='space-between'; div.style.border='1px solid var(--theme-glass-border)'; div.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)'; 
+        const div = document.createElement('div'); div.style.display='flex'; div.style.background='var(--theme-glass-bg)'; div.style.padding='15px'; div.style.borderRadius='16px'; div.style.alignItems='center'; div.style.justifyContent='space-between'; div.style.border='1px solid var(--theme-glass-border)'; div.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)'; 
         div.innerHTML = `<div style="display:flex; flex-direction:column; width:65%; overflow:hidden;"><span style="font-weight:bold; color:var(--theme-text); font-size:1.05rem; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</span><span style="font-size:0.75rem; opacity:0.6; word-break:break-all; color:var(--theme-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.url}</span></div><div style="display:flex; gap:8px;"><div class="action-icon" style="background:#4f46e5;" onclick="window.editAdminMusic('${catId}', ${idx})">✎</div><div class="action-icon del" onclick="window.deleteAdminMusic('${catId}', ${idx})">✖</div></div>`; 
         listDiv.appendChild(div); 
     }); 
     
-    if (matchCount === 0) { 
-        listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">暂无匹配曲目</div>`; 
-    } 
+    if (matchCount === 0) { listDiv.innerHTML = `<div style="padding:15px; opacity:0.5; text-align:center;">暂无匹配曲目</div>`; } 
 }
 
 window.bindAudioDragDrop = function() { 
-    const zone = document.getElementById('music-upload-zone'); 
-    const fileInput = document.getElementById('new-music-file'); 
-    const text = document.getElementById('music-upload-text'); 
+    const zone = document.getElementById('music-upload-zone'); const fileInput = document.getElementById('new-music-file'); const text = document.getElementById('music-upload-text'); 
     if(!zone || !fileInput) return;
     
     zone.onclick = () => fileInput.click(); 
@@ -1107,113 +754,69 @@ window.bindAudioDragDrop = function() {
     function handleSelectedAudios(files) { 
         selectedAudioFiles = Array.from(files).filter(f => f.type.startsWith('audio/')); 
         if(selectedAudioFiles.length === 0) return alert('请选择有效的音频文件'); 
-        
         if (selectedAudioFiles.length === 1) { 
             text.innerText = `已选择: ${selectedAudioFiles[0].name} (${(selectedAudioFiles[0].size/1024/1024).toFixed(2)}MB)`; 
             const nameInput = document.getElementById('new-music-name'); 
             if(!nameInput.value) nameInput.value = selectedAudioFiles[0].name.replace(/\.[^/.]+$/, ""); 
         } else { 
             text.innerText = `已选择 ${selectedAudioFiles.length} 个音频，批量直传中...`; 
-            document.getElementById('new-music-name').value = "自动取名模式"; 
-            document.getElementById('new-music-name').disabled = true; 
+            document.getElementById('new-music-name').value = "自动取名模式"; document.getElementById('new-music-name').disabled = true; 
         } 
     } 
 }
 
 window.editAdminMusic = function(catId, idx) { 
     const m = db.globalMusicConfig.library[catId][idx]; 
-    document.getElementById('new-music-name').value = m.name; 
-    document.getElementById('new-music-url').value = m.url; 
-    document.getElementById('edit-music-idx').value = idx; 
-    document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目"; 
-    document.getElementById('btn-admin-music-save').innerText = "保 存 修 改"; 
-    document.getElementById('btn-admin-music-cancel').style.display = "block"; 
-    document.getElementById('music-upload-zone').style.display = "none"; 
+    document.getElementById('new-music-name').value = m.name; document.getElementById('new-music-url').value = m.url; document.getElementById('edit-music-idx').value = idx; 
+    document.getElementById('admin-music-action-title').innerText = "✎ 修改曲目"; document.getElementById('btn-admin-music-save').innerText = "保 存 修 改"; document.getElementById('btn-admin-music-cancel').style.display = "block"; document.getElementById('music-upload-zone').style.display = "none"; 
 }
 
 window.resetMusicEdit = function() { 
-    document.getElementById('new-music-name').value = ''; 
-    document.getElementById('new-music-url').value = ''; 
-    document.getElementById('edit-music-idx').value = ''; 
-    document.getElementById('new-music-name').disabled = false; 
-    document.getElementById('admin-music-action-title').innerText = "+ 新增曲目"; 
-    document.getElementById('btn-admin-music-save').innerText = "添 加 到 库"; 
-    document.getElementById('btn-admin-music-cancel').style.display = "none"; 
-    document.getElementById('music-upload-zone').style.display = "block"; 
-    selectedAudioFiles = []; 
-    document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (支持多选直传)'; 
+    document.getElementById('new-music-name').value = ''; document.getElementById('new-music-url').value = ''; document.getElementById('edit-music-idx').value = ''; 
+    document.getElementById('new-music-name').disabled = false; document.getElementById('admin-music-action-title').innerText = "+ 新增曲目"; document.getElementById('btn-admin-music-save').innerText = "添 加 到 库"; document.getElementById('btn-admin-music-cancel').style.display = "none"; document.getElementById('music-upload-zone').style.display = "block"; 
+    selectedAudioFiles = []; document.getElementById('music-upload-text').innerText = '点击或拖拽音频文件 (支持多选直传)'; 
 }
 
 window.saveMusicToLibrary = async function() { 
-    const name = document.getElementById('new-music-name').value.trim(); 
-    let url = document.getElementById('new-music-url').value.trim(); 
-    const catId = document.getElementById('admin-music-cat').value; 
-    const editIdx = document.getElementById('edit-music-idx').value; 
+    const name = document.getElementById('new-music-name').value.trim(); let url = document.getElementById('new-music-url').value.trim(); 
+    const catId = document.getElementById('admin-music-cat').value; const editIdx = document.getElementById('edit-music-idx').value; 
     
     if(!catId) return alert('请先创建分类'); 
-    
     if (editIdx !== '' || (url && selectedAudioFiles.length === 0)) { 
         if(!name) return alert('请输入曲目名称'); 
         if(!db.globalMusicConfig.library[catId]) db.globalMusicConfig.library[catId] = []; 
-        if (editIdx !== '') {
-            db.globalMusicConfig.library[catId][parseInt(editIdx)] = { name, url }; 
-        } else {
-            db.globalMusicConfig.library[catId].push({name, url}); 
-        }
-        await window.saveDB(); 
-        window.resetMusicEdit(); 
-        window.renderAdminMusicList(); 
-        return; 
+        if (editIdx !== '') { db.globalMusicConfig.library[catId][parseInt(editIdx)] = { name, url }; } 
+        else { db.globalMusicConfig.library[catId].push({name, url}); }
+        if(typeof window.saveDB === 'function') await window.saveDB(); 
+        window.resetMusicEdit(); window.renderAdminMusicList(); return; 
     } 
-    
     if(selectedAudioFiles.length > 0) { 
-        selectedAudioFiles.forEach(file => { 
-            let taskName = name === "自动取名模式" || !name ? file.name.replace(/\.[^/.]+$/, "") : name; 
-            uploadQueue.push({ file: file, catId: catId, name: taskName }); 
-        }); 
-        window.resetMusicEdit(); 
-        window.hideModal('music-admin-modal'); 
-        window.processUploadQueue(); 
-    } else { 
-        alert('请拖入音频或填写链接'); 
-    } 
+        selectedAudioFiles.forEach(file => { let taskName = name === "自动取名模式" || !name ? file.name.replace(/\.[^/.]+$/, "") : name; uploadQueue.push({ file: file, catId: catId, name: taskName }); }); 
+        window.resetMusicEdit(); window.hideModal('music-admin-modal'); 
+        if(typeof window.processUploadQueue === 'function') window.processUploadQueue(); 
+    } else { alert('请拖入音频或填写链接'); } 
 }
 
 window.deleteAdminMusic = async function(catId, idx) { 
-    if(confirm('确认彻底删除此曲（将同时从云端存储桶物理移除）？')) { 
+    if(confirm('确认彻底删除此曲（将同时从云端物理移除）？')) { 
         const track = db.globalMusicConfig.library[catId][idx];
-        if (track && track.url) {
-            try { await fetch(track.url, { method: 'DELETE' }); } catch (e) {}
-        }
+        if (track && track.url) { try { await fetch(track.url, { method: 'DELETE' }); } catch (e) {} }
         db.globalMusicConfig.library[catId].splice(idx, 1); 
-        await window.saveDB(); 
+        if(typeof window.saveDB === 'function') await window.saveDB(); 
         window.renderAdminMusicList(); 
     } 
 }
 
-// ======================= 音乐播放器引擎 =======================
 
+/* ================= 9. 黑胶唱片机播放器引擎 ================= */
 window.initProgressDrag = function() {
-    const track = document.getElementById('progress-track');
-    if (!track) return;
+    const track = document.getElementById('progress-track'); if (!track) return;
     const updatePos = (clientX) => { 
-        const rect = track.getBoundingClientRect(); 
-        let percent = (clientX - rect.left) / rect.width; 
-        percent = Math.max(0, Math.min(1, percent)); 
-        const fill = document.getElementById('progress-fill'); 
-        const thumb = document.getElementById('progress-thumb'); 
-        if(fill) fill.style.width = `${percent * 100}%`; 
-        if(thumb) thumb.style.left = `${percent * 100}%`; 
-        return percent; 
+        const rect = track.getBoundingClientRect(); let percent = (clientX - rect.left) / rect.width; percent = Math.max(0, Math.min(1, percent)); 
+        const fill = document.getElementById('progress-fill'); const thumb = document.getElementById('progress-thumb'); 
+        if(fill) fill.style.width = `${percent * 100}%`; if(thumb) thumb.style.left = `${percent * 100}%`; return percent; 
     };
-    
-    const finalizeDrag = (clientX) => { 
-        const audio = document.getElementById('bgm-player'); 
-        if (audio && !isNaN(audio.duration) && audio.duration > 0 && isFinite(audio.duration)) { 
-            audio.currentTime = updatePos(clientX) * audio.duration; 
-        } 
-    };
-    
+    const finalizeDrag = (clientX) => { const audio = document.getElementById('bgm-player'); if (audio && !isNaN(audio.duration) && audio.duration > 0 && isFinite(audio.duration)) { audio.currentTime = updatePos(clientX) * audio.duration; } };
     track.addEventListener('touchstart', (e) => { window.isDraggingProgress = true; updatePos(e.touches[0].clientX); }, {passive: false});
     track.addEventListener('touchmove', (e) => { if(window.isDraggingProgress) { e.preventDefault(); updatePos(e.touches[0].clientX); } }, {passive: false});
     track.addEventListener('touchend', (e) => { if(window.isDraggingProgress) { finalizeDrag(e.changedTouches[0].clientX); window.isDraggingProgress = false; } });
@@ -1222,450 +825,186 @@ window.initProgressDrag = function() {
     document.addEventListener('mouseup', (e) => { if(window.isDraggingProgress) { finalizeDrag(e.clientX); window.isDraggingProgress = false; } });
 };
 
-window.formatTime = function(seconds) { 
-    if(isNaN(seconds) || !isFinite(seconds)) return "00:00"; 
-    const m = Math.floor(seconds / 60).toString().padStart(2, '0'); 
-    const s = Math.floor(seconds % 60).toString().padStart(2, '0'); 
-    return `${m}:${s}`; 
-}
+window.formatTime = function(seconds) { if(isNaN(seconds) || !isFinite(seconds)) return "00:00"; const m = Math.floor(seconds / 60).toString().padStart(2, '0'); const s = Math.floor(seconds % 60).toString().padStart(2, '0'); return `${m}:${s}`; }
 
 window.updateProgress = function() {
     if(window.isDraggingProgress) return; 
-    const now = Date.now(); 
-    if (now - (window.lastTimeUpdate || 0) < 100) return; 
-    window.lastTimeUpdate = now;
-    
-    const audio = document.getElementById('bgm-player'); 
-    if (!audio || isNaN(audio.duration) || !isFinite(audio.duration)) return;
-    
-    const currentTime = audio.currentTime; 
-    const duration = audio.duration; 
-    const percent = (currentTime / duration) * 100;
-    
-    const fill = document.getElementById('progress-fill'); 
-    const thumb = document.getElementById('progress-thumb');
-    
-    if(fill) fill.style.width = `${percent}%`; 
-    if(thumb) thumb.style.left = `${percent}%`;
-    
+    const now = Date.now(); if (now - (window.lastTimeUpdate || 0) < 100) return; window.lastTimeUpdate = now;
+    const audio = document.getElementById('bgm-player'); if (!audio || isNaN(audio.duration) || !isFinite(audio.duration)) return;
+    const currentTime = audio.currentTime; const duration = audio.duration; const percent = (currentTime / duration) * 100;
+    const fill = document.getElementById('progress-fill'); const thumb = document.getElementById('progress-thumb');
+    if(fill) fill.style.width = `${percent}%`; if(thumb) thumb.style.left = `${percent}%`;
     document.getElementById('player-time-current').innerText = window.formatTime(currentTime);
     document.getElementById('player-time-total').innerText = window.formatTime(duration);
 }
 
 window.seekAudio = function(e) {
-    const track = document.getElementById('progress-track'); 
-    const audio = document.getElementById('bgm-player');
+    const track = document.getElementById('progress-track'); const audio = document.getElementById('bgm-player');
     if (!track || !audio || isNaN(audio.duration) || !isFinite(audio.duration)) return;
-    
-    const rect = track.getBoundingClientRect(); 
-    const clickX = e.clientX - rect.left;
-    let percent = clickX / rect.width; 
-    if(percent < 0) percent = 0; 
-    if(percent > 1) percent = 1;
+    const rect = track.getBoundingClientRect(); const clickX = e.clientX - rect.left;
+    let percent = clickX / rect.width; if(percent < 0) percent = 0; if(percent > 1) percent = 1;
     audio.currentTime = percent * audio.duration;
 }
 
 window.openMusicTypeModal = function() { 
-    const container = document.getElementById('music-type-btn-container'); 
-    container.innerHTML = ''; 
-    const favBtn = document.createElement('button'); 
-    favBtn.className = 'btn-glass btn-type-blue btn-favorite-cat'; 
-    favBtn.style.margin = '0'; 
-    favBtn.style.width = '100%'; 
-    favBtn.style.padding = '1.2rem'; 
-    favBtn.style.fontSize = '1.15rem'; 
-    favBtn.innerText = '⭐ 我 的 收 藏'; 
-    favBtn.onclick = () => window.openVinylPlayer('favorites'); 
-    container.appendChild(favBtn);
-    
+    const container = document.getElementById('music-type-btn-container'); container.innerHTML = ''; 
+    const favBtn = document.createElement('button'); favBtn.className = 'btn-glass btn-type-blue btn-favorite-cat'; favBtn.style.margin = '0'; favBtn.style.width = '100%'; favBtn.style.padding = '1.2rem'; favBtn.style.fontSize = '1.15rem'; favBtn.innerText = '⭐ 我 的 收 藏'; favBtn.onclick = () => window.openVinylPlayer('favorites'); container.appendChild(favBtn);
     const cats = db.globalMusicConfig.categories || []; 
-    if(cats.length === 0) { 
-        container.innerHTML += '<p style="opacity:0.5; font-size:0.9rem; margin-top:10px;">暂无其他音律分类，请联系管理员添加。</p>'; 
-    } else { 
-        cats.forEach((cat, index) => { 
-            const btn = document.createElement('button'); 
-            btn.className = 'btn-glass btn-type-dark'; 
-            btn.style.margin = '0'; 
-            btn.style.width = '100%'; 
-            btn.style.padding = '1.2rem'; 
-            btn.style.fontSize = '1.15rem'; 
-            btn.innerText = cat.name; 
-            btn.onclick = () => window.openVinylPlayer(cat.id); 
-            container.appendChild(btn); 
-        }); 
-    } 
+    if(cats.length === 0) { container.innerHTML += '<p style="opacity:0.5; font-size:0.9rem; margin-top:10px;">暂无其他音律分类，请联系管理员添加。</p>'; } 
+    else { cats.forEach((cat, index) => { const btn = document.createElement('button'); btn.className = 'btn-glass btn-type-dark'; btn.style.margin = '0'; btn.style.width = '100%'; btn.style.padding = '1.2rem'; btn.style.fontSize = '1.15rem'; btn.innerText = cat.name; btn.onclick = () => window.openVinylPlayer(cat.id); container.appendChild(btn); }); } 
     window.showModal('music-type-modal'); 
 }
 
 window.openVinylPlayer = function(catId) { 
-    window.hideModal('music-type-modal'); 
-    musicState.type = catId; 
-    
-    if (catId === 'favorites') { 
-        if(!currentUserAccount || !db.users[currentUserAccount].favorites) { 
-            musicState.playlist = []; 
-        } else { 
-            musicState.playlist = db.users[currentUserAccount].favorites; 
-        } 
-    } else { 
-        musicState.playlist = db.globalMusicConfig.library[catId] || []; 
-    } 
-    
-    musicState.currentIndex = 0; 
-    musicState.mode = 'sequence'; 
-    musicState.tracksLimit = -1; 
-    
-    const modeBtn = document.getElementById('btn-play-mode'); 
-    if(modeBtn) modeBtn.innerText = '🔁';
-    const limitBtn = document.getElementById('btn-timer'); 
-    if(limitBtn) limitBtn.style.color = '#fff';
-    
-    document.getElementById('vinyl-search').value = ''; 
-    window.renderVinylPlaylist(); 
-    window.showModal('vinyl-player-modal'); 
-    
-    if(musicState.playlist.length > 0) {
-        window.playCurrentTrack(); 
-    } else {
-        window.pauseTrack(); 
-    }
+    window.hideModal('music-type-modal'); musicState.type = catId; 
+    if (catId === 'favorites') { if(!currentUserAccount || !db.users[currentUserAccount].favorites) { musicState.playlist = []; } else { musicState.playlist = db.users[currentUserAccount].favorites; } } 
+    else { musicState.playlist = db.globalMusicConfig.library[catId] || []; } 
+    musicState.currentIndex = 0; musicState.mode = 'sequence'; musicState.tracksLimit = -1; 
+    const modeBtn = document.getElementById('btn-play-mode'); if(modeBtn) modeBtn.innerText = '🔁';
+    const limitBtn = document.getElementById('btn-timer'); if(limitBtn) limitBtn.style.color = '#fff';
+    document.getElementById('vinyl-search').value = ''; window.renderVinylPlaylist(); window.showModal('vinyl-player-modal'); 
+    if(musicState.playlist.length > 0) { window.playCurrentTrack(); } else { window.pauseTrack(); }
 }
 
 window.filterVinylPlaylist = function() { window.renderVinylPlaylist(); }
 
 window.renderVinylPlaylist = function() { 
-    const box = document.getElementById('playlist-ui'); 
-    box.innerHTML = ''; 
-    if(musicState.playlist.length === 0) { 
-        box.innerHTML = '<p style="padding:15px; opacity:0.5; text-align:center;">这里空空如也...</p>'; 
-        return; 
-    } 
-    
+    const box = document.getElementById('playlist-ui'); box.innerHTML = ''; 
+    if(musicState.playlist.length === 0) { box.innerHTML = '<p style="padding:15px; opacity:0.5; text-align:center;">这里空空如也...</p>'; return; } 
     const query = document.getElementById('vinyl-search').value.toLowerCase().trim(); 
     musicState.playlist.forEach((track, idx) => { 
-        const item = document.createElement('div'); 
-        item.className = `netease-item ${idx === musicState.currentIndex ? 'active' : ''}`; 
-        item.id = `track-item-${idx}`; 
-        
-        if(query && !track.name.toLowerCase().includes(query)) { 
-            item.style.display = 'none'; 
-        } 
-        
+        const item = document.createElement('div'); item.className = `netease-item ${idx === musicState.currentIndex ? 'active' : ''}`; item.id = `track-item-${idx}`; 
+        if(query && !track.name.toLowerCase().includes(query)) { item.style.display = 'none'; } 
         const numPad = (idx + 1).toString().padStart(2, '0'); 
         item.innerHTML = ` <div class="netease-index">${numPad}</div> <div class="netease-info"><div class="netease-title">${track.name}</div></div> <div class="netease-action">▶</div> `; 
-        item.onclick = () => { musicState.currentIndex = idx; window.playCurrentTrack(); }; 
-        box.appendChild(item); 
+        item.onclick = () => { musicState.currentIndex = idx; window.playCurrentTrack(); }; box.appendChild(item); 
     }); 
 }
 
 window.toggleFavorite = async function() { 
     if(!currentUserAccount || musicState.playlist.length === 0) return window.showGlobalToast('请先登录即可收藏', 'error'); 
     if(favDebounce) clearTimeout(favDebounce); 
-    
     const track = musicState.playlist[musicState.currentIndex]; 
     if(!db.users[currentUserAccount].favorites) db.users[currentUserAccount].favorites = []; 
-    const favs = db.users[currentUserAccount].favorites; 
-    const index = favs.findIndex(f => f.url === track.url); 
-    
-    if(index > -1) { 
-        favs.splice(index, 1); 
-        document.getElementById('btn-favorite').innerText = '🤍'; 
-        window.showGlobalToast('已取消收藏', 'success'); 
-    } else { 
-        favs.push({name: track.name, url: track.url}); 
-        document.getElementById('btn-favorite').innerText = '❤️'; 
-        window.showGlobalToast('已存入云端收藏', 'success'); 
-    } 
-    
-    favDebounce = setTimeout(async () => { 
-        await window.saveDB(); 
-        if (musicState.type === 'favorites') { 
-            musicState.playlist = db.users[currentUserAccount].favorites; 
-            window.renderVinylPlaylist(); 
-        } 
-    }, 1000); 
+    const favs = db.users[currentUserAccount].favorites; const index = favs.findIndex(f => f.url === track.url); 
+    if(index > -1) { favs.splice(index, 1); document.getElementById('btn-favorite').innerText = '🤍'; window.showGlobalToast('已取消收藏', 'success'); } 
+    else { favs.push({name: track.name, url: track.url}); document.getElementById('btn-favorite').innerText = '❤️'; window.showGlobalToast('已存入云端收藏', 'success'); } 
+    favDebounce = setTimeout(async () => { if(typeof window.saveDB === 'function') await window.saveDB(); if (musicState.type === 'favorites') { musicState.playlist = db.users[currentUserAccount].favorites; window.renderVinylPlaylist(); } }, 1000); 
 }
 
 window.playCurrentTrack = function() { 
-    const audioPlayer = document.getElementById('bgm-player'); 
-    if(musicState.playlist.length === 0 || !audioPlayer) return; 
-    const track = musicState.playlist[musicState.currentIndex]; 
-    document.getElementById('player-track-name').innerText = track.name; 
-    
-    if (currentUserAccount && db.users[currentUserAccount].favorites) { 
-        const isFav = db.users[currentUserAccount].favorites.findIndex(f => f.url === track.url) > -1; 
-        document.getElementById('btn-favorite').innerText = isFav ? '❤️' : '🤍'; 
-    } else { 
-        document.getElementById('btn-favorite').innerText = '🤍'; 
-    } 
-    
+    const audioPlayer = document.getElementById('bgm-player'); if(musicState.playlist.length === 0 || !audioPlayer) return; 
+    const track = musicState.playlist[musicState.currentIndex]; document.getElementById('player-track-name').innerText = track.name; 
+    if (currentUserAccount && db.users[currentUserAccount].favorites) { const isFav = db.users[currentUserAccount].favorites.findIndex(f => f.url === track.url) > -1; document.getElementById('btn-favorite').innerText = isFav ? '❤️' : '🤍'; } 
+    else { document.getElementById('btn-favorite').innerText = '🤍'; } 
     if(audioPlayer.src !== track.url) {
-        audioPlayer.src = track.url; 
-        audioPlayer.load(); 
-        const fill = document.getElementById('progress-fill'); 
-        const thumb = document.getElementById('progress-thumb');
-        if(fill) fill.style.width = `0%`; 
-        if(thumb) thumb.style.left = `0%`;
+        audioPlayer.src = track.url; audioPlayer.load(); 
+        const fill = document.getElementById('progress-fill'); const thumb = document.getElementById('progress-thumb');
+        if(fill) fill.style.width = `0%`; if(thumb) thumb.style.left = `0%`;
         document.getElementById('player-time-current').innerText = "00:00";
     } 
-    
-    audioPlayer.volume = 1; 
-    audioPlayer.play().then(() => { 
-        document.getElementById('vinyl-disc-ui').classList.add('playing'); 
-        document.getElementById('btn-play-pause').innerText = '⏸️'; 
-        document.getElementById('apple-music-box').classList.add('playing'); 
-    }).catch(e=>{}); 
-    
-    window.renderVinylPlaylist(); 
-    const activeItem = document.getElementById(`track-item-${musicState.currentIndex}`); 
-    if(activeItem) { activeItem.scrollIntoView({ behavior: "smooth", block: "center" }); } 
+    audioPlayer.volume = 1; audioPlayer.play().then(() => { document.getElementById('vinyl-disc-ui').classList.add('playing'); document.getElementById('btn-play-pause').innerText = '⏸️'; document.getElementById('apple-music-box').classList.add('playing'); }).catch(e=>{}); 
+    window.renderVinylPlaylist(); const activeItem = document.getElementById(`track-item-${musicState.currentIndex}`); if(activeItem) { activeItem.scrollIntoView({ behavior: "smooth", block: "center" }); } 
 }
 
-window.pauseTrack = function() { 
-    const audioPlayer = document.getElementById('bgm-player'); 
-    if(!audioPlayer) return; 
-    audioPlayer.pause(); 
-    document.getElementById('vinyl-disc-ui').classList.remove('playing'); 
-    document.getElementById('btn-play-pause').innerText = '▶️'; 
-}
-
-window.togglePlayPause = function() { 
-    const audioPlayer = document.getElementById('bgm-player'); 
-    if(!audioPlayer) return; 
-    if(audioPlayer.paused) window.playCurrentTrack(); 
-    else window.pauseTrack(); 
-}
-
-window.prevTrack = function() { 
-    if(musicState.playlist.length===0) return; 
-    if(musicState.mode === 'random') { 
-        musicState.currentIndex = Math.floor(Math.random() * musicState.playlist.length); 
-    } else { 
-        musicState.currentIndex = (musicState.currentIndex - 1 + musicState.playlist.length) % musicState.playlist.length; 
-    }
-    window.playCurrentTrack(); 
-}
-
-window.nextTrack = function() { 
-    if(musicState.playlist.length===0) return; 
-    if(musicState.mode === 'random') { 
-        musicState.currentIndex = Math.floor(Math.random() * musicState.playlist.length); 
-    } else { 
-        musicState.currentIndex = (musicState.currentIndex + 1) % musicState.playlist.length; 
-    }
-    window.playCurrentTrack(); 
-}
+window.pauseTrack = function() { const audioPlayer = document.getElementById('bgm-player'); if(!audioPlayer) return; audioPlayer.pause(); document.getElementById('vinyl-disc-ui').classList.remove('playing'); document.getElementById('btn-play-pause').innerText = '▶️'; }
+window.togglePlayPause = function() { const audioPlayer = document.getElementById('bgm-player'); if(!audioPlayer) return; if(audioPlayer.paused) window.playCurrentTrack(); else window.pauseTrack(); }
+window.prevTrack = function() { if(musicState.playlist.length===0) return; if(musicState.mode === 'random') { musicState.currentIndex = Math.floor(Math.random() * musicState.playlist.length); } else { musicState.currentIndex = (musicState.currentIndex - 1 + musicState.playlist.length) % musicState.playlist.length; } window.playCurrentTrack(); }
+window.nextTrack = function() { if(musicState.playlist.length===0) return; if(musicState.mode === 'random') { musicState.currentIndex = Math.floor(Math.random() * musicState.playlist.length); } else { musicState.currentIndex = (musicState.currentIndex + 1) % musicState.playlist.length; } window.playCurrentTrack(); }
 
 window.changePlayMode = function() { 
     const btn = document.getElementById('btn-play-mode'); 
-    if(musicState.mode === 'sequence') { 
-        musicState.mode = 'random'; 
-        if(btn) btn.innerText = '🔀'; 
-        window.showGlobalToast('随机播放', 'success'); 
-    } else if(musicState.mode === 'random') { 
-        musicState.mode = 'single'; 
-        if(btn) btn.innerText = '🔂'; 
-        window.showGlobalToast('单曲循环', 'success'); 
-    } else { 
-        musicState.mode = 'sequence'; 
-        if(btn) btn.innerText = '🔁'; 
-        window.showGlobalToast('顺序播放', 'success'); 
-    } 
+    if(musicState.mode === 'sequence') { musicState.mode = 'random'; if(btn) btn.innerText = '🔀'; window.showGlobalToast('随机播放', 'success'); } 
+    else if(musicState.mode === 'random') { musicState.mode = 'single'; if(btn) btn.innerText = '🔂'; window.showGlobalToast('单曲循环', 'success'); } 
+    else { musicState.mode = 'sequence'; if(btn) btn.innerText = '🔁'; window.showGlobalToast('顺序播放', 'success'); } 
 }
 
 window.handleAudioEnded = function() { 
-    const audioPlayer = document.getElementById('bgm-player'); 
-    if(musicState.playlist.length === 0) return; 
-    
+    const audioPlayer = document.getElementById('bgm-player'); if(musicState.playlist.length === 0) return; 
     if (musicState.tracksLimit > 0) { 
         musicState.tracksLimit--; 
-        if (musicState.tracksLimit === 0) { 
-            window.pauseTrack(); 
-            musicState.tracksLimit = -1; 
-            const timerBtn = document.getElementById('btn-timer'); 
-            if(timerBtn) timerBtn.style.color = '#fff'; 
-            window.showGlobalToast('定时结束，已暂停', 'success'); 
-            return; 
-        } 
+        if (musicState.tracksLimit === 0) { window.pauseTrack(); musicState.tracksLimit = -1; const timerBtn = document.getElementById('btn-timer'); if(timerBtn) timerBtn.style.color = '#fff'; window.showGlobalToast('定时结束，已暂停', 'success'); return; } 
     } 
-    
-    if(musicState.mode === 'single') { 
-        if(audioPlayer) { 
-            audioPlayer.currentTime = 0; 
-            audioPlayer.play().catch(e=>{}); 
-        } 
-    } else if(musicState.mode === 'random') { 
-        musicState.currentIndex = Math.floor(Math.random() * musicState.playlist.length); 
-        window.playCurrentTrack(); 
-    } else { 
-        musicState.currentIndex = (musicState.currentIndex + 1) % musicState.playlist.length; 
-        window.playCurrentTrack(); 
-    } 
+    if(musicState.mode === 'single') { if(audioPlayer) { audioPlayer.currentTime = 0; audioPlayer.play().catch(e=>{}); } } 
+    else if(musicState.mode === 'random') { musicState.currentIndex = Math.floor(Math.random() * musicState.playlist.length); window.playCurrentTrack(); } 
+    else { musicState.currentIndex = (musicState.currentIndex + 1) % musicState.playlist.length; window.playCurrentTrack(); } 
 }
 
-window.setTrackLimit = function() { 
-    document.getElementById('timer-input-val').value = ''; 
-    window.showModal('music-timer-modal'); 
-}
-
+window.setTrackLimit = function() { document.getElementById('timer-input-val').value = ''; window.showModal('music-timer-modal'); }
 window.confirmTrackLimit = function() { 
-    let val = parseInt(document.getElementById('timer-input-val').value); 
-    const timerBtn = document.getElementById('btn-timer');
-    if (isNaN(val) || val <= 0) { 
-        musicState.tracksLimit = -1; 
-        if(timerBtn) timerBtn.style.color = '#fff'; 
-        window.showGlobalToast('已取消定时', 'success'); 
-    } else { 
-        musicState.tracksLimit = val; 
-        if(timerBtn) timerBtn.style.color = 'var(--theme-primary)'; 
-        window.showGlobalToast(`定时: ${val} 首后停止`, 'success'); 
-    } 
+    let val = parseInt(document.getElementById('timer-input-val').value); const timerBtn = document.getElementById('btn-timer');
+    if (isNaN(val) || val <= 0) { musicState.tracksLimit = -1; if(timerBtn) timerBtn.style.color = '#fff'; window.showGlobalToast('已取消定时', 'success'); } 
+    else { musicState.tracksLimit = val; if(timerBtn) timerBtn.style.color = 'var(--theme-primary)'; window.showGlobalToast(`定时: ${val} 首后停止`, 'success'); } 
     window.hideModal('music-timer-modal'); 
 }
+window.closeVinylPlayer = function() { window.hideModal('vinyl-player-modal'); }
+window.showPlayerFromFloat = function() { if(state.isLoggedIn && !state.isEditMode && document.getElementById('vinyl-player-modal').style.display !== 'flex') { window.showModal('vinyl-player-modal'); } }
 
-window.closeVinylPlayer = function() { 
-    window.hideModal('vinyl-player-modal'); 
-}
 
-window.showPlayerFromFloat = function() { 
-    if(state.isLoggedIn && !state.isEditMode && document.getElementById('vinyl-player-modal').style.display !== 'flex') {
-        window.showModal('vinyl-player-modal'); 
-    }
-}
-
-// ======================= 卡片与打卡同步引擎 =======================
-
+/* ================= 10. 双向奔赴长按打卡流程引擎 ================= */
 window.startCardFlow = function(card) { 
-    state.currentCard = card; 
-    document.getElementById('prep-text').innerText = db.stages[state.stage].prepText; 
-    const prepBtn = document.getElementById('btn-prep-confirm'); 
-    if (state.stage === '单身期') { prepBtn.innerText = '我已准备好'; } else { prepBtn.innerText = '我们已预备好'; } 
+    state.currentCard = card; document.getElementById('prep-text').innerText = db.stages[state.stage].prepText; 
+    const prepBtn = document.getElementById('btn-prep-confirm'); if (state.stage === '单身期') { prepBtn.innerText = '我已准备好'; } else { prepBtn.innerText = '我们已预备好'; } 
     window.navigateTo('screen-prep'); 
 }
 
 window.confirmPrepAndNavigate = function() { 
     if (state.stage === '单身期') { 
-        const syncBox = document.getElementById('sync-animation-box'); 
-        syncBox.classList.remove('merged'); 
-        const iconB64 = db.stages[state.stage].icon; 
-        const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; 
+        const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged'); const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; 
         document.getElementById('sync-title').innerText = "抬头仰望"; 
-        
         const catName = db.stages[state.stage].categories.find(c => c.id === state.activeCategoryId)?.name || ''; 
-        let subText = "愿你在静谧中得着内心的力量与安宁。"; 
-        if (catName.includes('不想') || catName.includes('单身')) subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。"; 
-        else if (catName.includes('想') || catName.includes('进入婚姻')) subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。"; 
-        
-        document.getElementById('sync-subtitle').innerText = subText; 
-        document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望"; 
-        document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)"; 
-        syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`; 
-        window.navigateTo('screen-sync'); 
+        let subText = "愿你在静谧中得着内心的力量与安宁。"; if (catName.includes('不想') || catName.includes('单身')) subText = "在独处中享受生命的丰盈与自由，愿你拥有前行的勇气与光芒。"; else if (catName.includes('想') || catName.includes('进入婚姻')) subText = "愿你在等待的时光里被温柔以待，美好的遇见正在路上。"; 
+        document.getElementById('sync-subtitle').innerText = subText; document.getElementById('btn-sync-confirm').innerText = "抬 头 仰 望"; document.getElementById('press-text-label').innerHTML = "内心宣告<br>(长按)"; syncBox.innerHTML = `<div class="sync-half single-up" style="${bgStyle} background-size: cover; border-radius: 50%;"></div>`; window.navigateTo('screen-sync'); 
     } else { 
-        document.getElementById('sync-title').innerText = "双向奔赴"; 
-        document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并"; 
-        document.getElementById('btn-sync-confirm').innerText = "确 认 合 并"; 
-        document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)"; 
-        window.navigateTo('screen-role'); 
+        document.getElementById('sync-title').innerText = "双向奔赴"; document.getElementById('sync-subtitle').innerText = "确认手机贴合后，点击合并"; document.getElementById('btn-sync-confirm').innerText = "确 认 合 并"; document.getElementById('press-text-label').innerHTML = "同心宣告<br>(长按)"; window.navigateTo('screen-role'); 
     } 
 }
 
 window.selectRole = function(role) { 
-    state.role = role; 
-    const syncBox = document.getElementById('sync-animation-box'); 
-    syncBox.classList.remove('merged'); 
-    const iconB64 = db.stages[state.stage].icon; 
-    const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; 
-    
+    state.role = role; const syncBox = document.getElementById('sync-animation-box'); syncBox.classList.remove('merged'); 
+    const iconB64 = db.stages[state.stage].icon; const bgStyle = iconB64 ? `background-image: url(${iconB64});` : `background: var(--theme-primary);`; 
     if (role === 'boy') syncBox.innerHTML = `<div class="sync-half boy" style="${bgStyle} background-size: cover;"></div>`; 
     else syncBox.innerHTML = `<div class="sync-half girl" style="${bgStyle} background-size: cover;"></div>`; 
-    
     window.navigateTo('screen-sync'); 
 }
 
 window.triggerSync = function() { 
-    document.getElementById('sync-animation-box').classList.add('merged'); 
-    state.currentStep = 0; 
-    setTimeout(() => { 
-        window.renderContentStep(); 
-        window.navigateTo('screen-content'); 
-    }, 1800); 
+    document.getElementById('sync-animation-box').classList.add('merged'); state.currentStep = 0; 
+    setTimeout(() => { window.renderContentStep(); window.navigateTo('screen-content'); }, 1800); 
 }
 
 window.renderContentStep = function() { 
     const stepData = state.currentCard.steps[state.currentStep]; 
     document.getElementById('content-type-title').innerText = `【${db.stages[state.stage].categories.find(c => c.id === state.currentCard.categoryId)?.name || '印记'}】的连结`; 
-    document.getElementById('step-title').innerText = stepData.title; 
-    document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>'); 
-    
-    for(let i=1; i<=3; i++) { 
-        const dot = document.getElementById(`dot-${i}`); 
-        if (i - 1 === state.currentStep) dot.classList.add('active'); 
-        else dot.classList.remove('active'); 
-    } 
-    
-    const nextBtn = document.getElementById('btn-next-step'); 
-    const longPressBtn = document.getElementById('btn-long-press'); 
-    if (state.currentStep < 2) { 
-        nextBtn.style.display = 'flex'; 
-        longPressBtn.style.display = 'none'; 
-    } else { 
-        nextBtn.style.display = 'none'; 
-        longPressBtn.style.display = 'flex'; 
-    } 
+    document.getElementById('step-title').innerText = stepData.title; document.getElementById('step-text').innerHTML = stepData.text.replace(/\n/g, '<br><br>'); 
+    for(let i=1; i<=3; i++) { const dot = document.getElementById(`dot-${i}`); if (i - 1 === state.currentStep) dot.classList.add('active'); else dot.classList.remove('active'); } 
+    const nextBtn = document.getElementById('btn-next-step'); const longPressBtn = document.getElementById('btn-long-press'); 
+    if (state.currentStep < 2) { nextBtn.style.display = 'flex'; longPressBtn.style.display = 'none'; } else { nextBtn.style.display = 'none'; longPressBtn.style.display = 'flex'; } 
 }
 
 window.nextContentStep = function() { 
     if (state.currentStep < 2) { 
-        state.currentStep++; 
-        const t = document.getElementById('step-title'); 
-        const p = document.getElementById('step-text'); 
-        t.style.opacity = 0; 
-        p.style.opacity = 0; 
-        setTimeout(() => { 
-            window.renderContentStep(); 
-            t.style.transition = 'opacity 0.5s'; 
-            p.style.transition = 'opacity 0.5s'; 
-            t.style.opacity = 1; 
-            p.style.opacity = 1; 
-        }, 300); 
+        state.currentStep++; const t = document.getElementById('step-title'); const p = document.getElementById('step-text'); t.style.opacity = 0; p.style.opacity = 0; 
+        setTimeout(() => { window.renderContentStep(); t.style.transition = 'opacity 0.5s'; p.style.transition = 'opacity 0.5s'; t.style.opacity = 1; p.style.opacity = 1; }, 300); 
     } 
 }
 
 window.startPress = function(e) { 
     if(e && e.type === 'touchstart') e.preventDefault(); 
     if(isPressing) return; 
-    const pressArea = document.getElementById('btn-long-press');
-    const pressFill = document.getElementById('press-fill'); 
-    isPressing = true; 
-    pressProgress = 0; 
-    
+    const pressArea = document.getElementById('btn-long-press'); const pressFill = document.getElementById('press-fill'); 
+    isPressing = true; pressProgress = 0; 
     if (pressArea) pressArea.classList.add('pressing');
-    
-    if(pressFill) {
-        pressFill.style.transition = 'none'; 
-        pressFill.style.height = '0%';
-    }
+    if(pressFill) { pressFill.style.transition = 'none'; pressFill.style.height = '0%'; }
     if(pressFrame) cancelAnimationFrame(pressFrame); 
-    
-    let startTime = null;
-    const duration = 1500; 
-    
+    let startTime = null; const duration = 1500; 
     function up(timestamp) { 
         if(!isPressing) return; 
-        if(!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        
+        if(!startTime) startTime = timestamp; const elapsed = timestamp - startTime; 
         pressProgress = Math.min((elapsed / duration) * 100, 100); 
         if(pressFill) pressFill.style.height = `${pressProgress}%`; 
-        
-        if (pressProgress >= 100) { 
-            isPressing = false; 
-            if (pressArea) pressArea.classList.remove('pressing');
-            window.completeAction(); 
-        } else { 
-            pressFrame = requestAnimationFrame(up); 
-        } 
+        if (pressProgress >= 100) { isPressing = false; if (pressArea) pressArea.classList.remove('pressing'); window.completeAction(); } 
+        else { pressFrame = requestAnimationFrame(up); } 
     } 
     pressFrame = requestAnimationFrame(up); 
 }
@@ -1673,35 +1012,21 @@ window.startPress = function(e) {
 window.endPress = function(e) { 
     if(e && e.type === 'touchend') e.preventDefault(); 
     isPressing = false; 
-    const pressArea = document.getElementById('btn-long-press');
-    if (pressArea) pressArea.classList.remove('pressing');
+    const pressArea = document.getElementById('btn-long-press'); if (pressArea) pressArea.classList.remove('pressing');
     if(pressFrame) cancelAnimationFrame(pressFrame); 
-    
     if (pressProgress < 100) { 
-        pressProgress = 0; 
-        const pressFill = document.getElementById('press-fill'); 
-        if(pressFill) {
-            pressFill.style.transition = 'height 0.3s ease-out';
-            pressFill.style.height = `0%`; 
-            setTimeout(() => { if(!isPressing) pressFill.style.transition = ''; }, 300);
-        }
+        pressProgress = 0; const pressFill = document.getElementById('press-fill'); 
+        if(pressFill) { pressFill.style.transition = 'height 0.3s ease-out'; pressFill.style.height = `0%`; setTimeout(() => { if(!isPressing) pressFill.style.transition = ''; }, 300); }
     } 
 }
 
 window.completeAction = function() { 
-    if(pressFrame) cancelAnimationFrame(pressFrame); 
-    window.navigateTo('screen-finish'); 
+    if(pressFrame) cancelAnimationFrame(pressFrame); window.navigateTo('screen-finish'); 
 }
 
 window.resetToStage = function() { 
     const pressFill = document.getElementById('press-fill'); 
-    if(pressFill) {
-        pressFill.style.transition = ''; 
-        pressFill.style.height = `0%`; 
-    }
-    state.currentCard = null; 
-    state.role = ''; 
-    state.currentStep = 0; 
-    
+    if(pressFill) { pressFill.style.transition = ''; pressFill.style.height = `0%`; }
+    state.currentCard = null; state.role = ''; state.currentStep = 0; 
     if(typeof window.initStageScreen === 'function') window.initStageScreen(); 
 }
