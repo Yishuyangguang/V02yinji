@@ -92,6 +92,8 @@
         .btn-glass:active { transform: translateY(3px) scale(0.97); box-shadow: 0 2px 10px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1); }
         .btn-primary { background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); border: none; color: #111 !important; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5); }
         .btn-type-dark { background: #2d3748 !important; color: #e2e8f0 !important; border: 1px solid rgba(255,255,255,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        
+        .btn-favorite-cat { background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%) !important; border: 1px solid var(--theme-primary) !important; color: var(--theme-primary) !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; font-weight: bold !important; box-shadow: 0 8px 25px rgba(212,175,55,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important; letter-spacing: 2px; }
 
         input, textarea, select { width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); padding: 14px 18px; border-radius: 16px; margin-bottom: 14px; font-size: 1rem; outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
         input[type="search"] { padding: 10px 18px; border-radius: 20px; margin-bottom: 12px; font-size: 0.95rem; }
@@ -242,41 +244,72 @@
 
         /* ================= 🚀 核心修复：操作卡片与按钮精致化重构 ================= */
         .content-card-beautiful {
-            width: 100% !important; 
-            max-width: 680px !important; /* 电脑端不至于太宽 */
-            min-height: 40vh !important;
-            margin: 0 auto 30px auto !important; /* 居中并留出底部空间 */
-            padding: 40px 35px !important;
-            border-radius: 32px !important;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.08), inset 0 2px 5px rgba(255,255,255,0.5) !important;
+            width: 92% !important; 
+            max-width: 760px !important; /* 电脑端适度拓宽，让内容更有空间 */
+            min-height: 45vh !important;
+            margin: 0 auto 50px auto !important; /* 底部预留充足的呼吸空间，推开按钮 */
+            padding: 45px 35px !important;
+            border-radius: 28px !important;
+            background: rgba(255, 255, 255, 0.95) !important; /* 贴近设计的纯白磨砂 */
+            backdrop-filter: blur(25px) saturate(150%) !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.04), inset 0 2px 5px rgba(255,255,255,1) !important;
+            border: 1px solid rgba(255,255,255,0.8) !important;
             flex: none !important; /* 取消原有的 flex: 1，防止被无限拉伸 */
         }
 
         .btn-beautiful {
-            width: 90% !important;
-            max-width: 340px !important; /* 控制最大宽度 */
+            width: 85% !important;
+            max-width: 260px !important; /* 严格缩短宽度，拒绝巨型按钮 */
             border-radius: 50px !important;
-            padding: 18px !important;
-            font-size: 1.15rem !important;
+            padding: 16px !important;
+            font-size: 1.1rem !important;
+            font-weight: bold !important;
             letter-spacing: 2px !important;
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4), inset 0 2px 4px rgba(255,255,255,0.3) !important;
+            margin: 0 auto !important; /* 绝对居中 */
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
         }
 
-        /* 长按按钮精致化与动画重构 */
+        .btn-purple-gradient {
+            background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
+            color: #fff !important;
+            border: none !important;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3), inset 0 2px 4px rgba(255,255,255,0.2) !important;
+        }
+        .btn-purple-gradient:active {
+            transform: scale(0.96) !important;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2) !important;
+        }
+
+        .btn-white-outline {
+            background: rgba(255, 255, 255, 0.9) !important;
+            color: #1e293b !important;
+            border: 1px solid #cbd5e1 !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.04) !important;
+        }
+        .btn-white-outline:active {
+            transform: scale(0.96) !important;
+            background: #f1f5f9 !important;
+        }
+
+        /* 长按宣告按钮进一步往下移与精修 */
         .long-press-area {
-            width: 150px !important; height: 150px !important;
+            width: 140px !important; height: 140px !important; /* 精巧比例 */
             border-radius: 50% !important;
-            background: #f8fafc !important; /* 纯净底色 */
-            border: 2px solid #e2e8f0 !important;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1), inset 0 4px 10px rgba(255,255,255,0.8) !important;
+            background: #ffffff !important; 
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08), inset 0 4px 10px rgba(255,255,255,0.8) !important;
             display: flex; justify-content: center; align-items: center;
-            margin: 10px auto; overflow: hidden; position: relative;
+            margin: 30px auto 0 auto !important; /* 核心：大幅下移，让出上方空间 */
+            overflow: hidden; position: relative;
             cursor: pointer; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
             -webkit-user-select: none; user-select: none; touch-action: none;
         }
         .long-press-area.pressing {
             transform: scale(0.92) !important;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1), inset 0 6px 15px rgba(0,0,0,0.05) !important;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05), inset 0 6px 15px rgba(0,0,0,0.05) !important;
         }
         .press-text {
             font-weight: 900 !important; color: #1e293b !important;
@@ -287,15 +320,13 @@
         .press-fill {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
             background: linear-gradient(to top, #6366f1, #818cf8) !important;
-            z-index: 1 !important; opacity: 0.9;
-            /* 核心修复：1.5秒线性平滑填充动画 (CSS硬件加速，绝对不卡顿) */
-            transition: height 1.5s linear !important;
+            z-index: 1 !important; opacity: 0.95;
+            transition: height 1.5s linear !important; /* 核心修复：1.5秒平滑填充物理加速 */
             pointer-events: none;
         }
         .long-press-area.pressing .press-fill {
             height: 100% !important;
         }
-        /* 充满时文字反白变色，视觉更明显 */
         .long-press-area.filled .press-text, .long-press-area.pressing.filled .press-text {
             color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
         }
@@ -387,12 +418,13 @@
         <button class="btn-glass" style="margin: 30px auto;" onclick="window.navigateTo('screen-stage')">返回首页</button>
     </div>
 
+    <!-- 🚀 核心重构：将操作按钮移出白色卡片区域 -->
     <div class="screen center-content" id="screen-prep">
-        <div class="glass-panel" style="padding: 3.5rem 2rem;">
+        <div class="glass-panel content-card-beautiful">
             <h1 class="text-gradient-blue" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
-            <p id="prep-text" style="font-size: 1.2rem; margin: 2rem 0 3.5rem 0; line-height: 2;">...</p>
-            <button class="btn-glass btn-blue-gradient" id="btn-prep-confirm" onclick="window.confirmPrepAndNavigate()">我们已预备好</button>
+            <p id="prep-text" style="font-size: 1.2rem; margin: 2rem 0 1.5rem 0; line-height: 2;">...</p>
         </div>
+        <button class="btn-beautiful btn-white-outline" id="btn-prep-confirm" onclick="window.confirmPrepAndNavigate()">我已准备好</button>
     </div>
 
     <div class="screen center-content" id="screen-role">
@@ -402,29 +434,28 @@
         <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81; padding: 1.2rem 2rem;" onclick="window.selectRole('girl')">我是女生 ♀</button>
     </div>
 
+    <!-- 🚀 核心重构：将操作按钮独立化并收紧 -->
     <div class="screen center-content" id="screen-sync">
-        <h1 id="sync-title" style="font-size: 2.2rem;">双向奔赴</h1>
-        <p id="sync-subtitle" style="font-size: 1.1rem;">确认手机贴合后，点击合并</p>
-        <div class="sync-container" id="sync-animation-box"></div>
-        <button class="btn-glass btn-primary" id="btn-sync-confirm" onclick="window.triggerSync()">确 认 合 并</button>
+        <h1 id="sync-title" style="font-size: 2.2rem; margin-bottom: 10px;">双向奔赴</h1>
+        <p id="sync-subtitle" style="font-size: 1.1rem; opacity: 0.8; margin-bottom: 30px;">确认手机贴合后，点击合并</p>
+        <div class="sync-container" id="sync-animation-box" style="margin-bottom: 50px;"></div>
+        <button class="btn-beautiful btn-purple-gradient" id="btn-sync-confirm" onclick="window.triggerSync()">确 认 合 并</button>
     </div>
 
-    <!-- 🚀 核心修复：解除垂直重力场，重构上下呼吸留白 -->
+    <!-- 🚀 核心重构：解除垂直重力场，彻底分离内容卡片与操作按钮 -->
     <div class="screen" id="screen-content" style="justify-content: flex-start; padding-top: calc(env(safe-area-inset-top) + 6vh);">
         <div class="progress-bar" id="content-progress">
             <div class="progress-dot" id="dot-1"></div><div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
         </div>
         
-        <!-- 卡片精致化 -->
-        <div class="glass-panel content-card-beautiful">
+        <div class="glass-panel content-card-beautiful" style="min-height: 45vh; margin-bottom: 50px;">
             <h2 id="content-type-title" style="display: none;"></h2>
-            <h1 id="step-title" style="color: var(--theme-primary); font-size: 1.8rem; margin-bottom: 2rem;"></h1>
-            <p id="step-text" style="font-size: 1.2rem; text-align: left; text-align-last: left; line-height: 2.2; padding: 0 10px;"></p>
+            <h1 id="step-title" style="color: #6366f1; font-size: 1.8rem; margin-bottom: 2rem; text-align: center;"></h1>
+            <p id="step-text" style="font-size: 1.15rem; color: #1e293b; text-align: justify; text-align-last: left; line-height: 2.2; padding: 0 10px;"></p>
         </div>
         
-        <!-- 按钮区精致化 -->
-        <div id="action-area" style="width: 100%; display: flex; justify-content: center; min-height: 160px;">
-            <button class="btn-glass btn-primary btn-beautiful" id="btn-next-step" onclick="window.nextContentStep()">进 入 下 一 步</button>
+        <div id="action-area" style="width: 100%; display: flex; flex-direction: column; align-items: center; min-height: 160px;">
+            <button class="btn-beautiful btn-purple-gradient" id="btn-next-step" onclick="window.nextContentStep()">进 入 下 一 步</button>
             
             <!-- 🚀 核心修复：内联神级事件拦截器，防死锁，绝无丢失可能 -->
             <div class="long-press-area" id="btn-long-press" style="display: none;"
@@ -441,13 +472,14 @@
         </div>
     </div>
 
+    <!-- 🚀 核心重构：收紧底部返回按钮 -->
     <div class="screen center-content" id="screen-finish">
-        <div class="glass-panel">
+        <div class="glass-panel content-card-beautiful">
             <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem;">印记已成</h1>
             <p>常常操练，感悟成长。</p>
             <p style="font-size: 1rem; opacity: 0.6; margin-top: 3rem;">静谧的旋律将伴随您，享受此刻的沉淀。</p>
-            <button class="btn-glass" style="margin-top:30px;" onclick="window.resetToStage()">返回主页</button>
         </div>
+        <button class="btn-beautiful btn-white-outline" onclick="window.resetToStage()">返回主页</button>
     </div>
 </div>
 
@@ -576,7 +608,7 @@
             setTimeout(() => {
                 area.classList.remove('pressing', 'filled');
                 if(typeof window.completeAction === 'function') window.completeAction();
-            }, 150); // 充满后稍等 150ms 闪烁一下再跳转，让肉眼捕捉到完成状态
+            }, 150); 
         }, 1500); // 严格控制 1.5 秒
     };
 
@@ -589,7 +621,6 @@
             area.classList.remove('filled');
         }
         
-        // 鼠标松开或手指滑出，立即中止计时
         if (pressTimer) {
             clearTimeout(pressTimer);
             pressTimer = null;
