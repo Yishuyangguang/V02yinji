@@ -19,26 +19,39 @@ export async function onRequest(context) {
         if (!db.licenseKeys) db.licenseKeys = {};
         if (!db.users) db.users = {};
 
-        // 绝对真理：云端标准时间戳，彻底粉碎修改手机本地时间白嫖的漏洞
+        // 绝对真理：云端标准时间戳
         const now = Date.now();
+        const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000; // 365天的毫秒数
+        let dbChangedByCleanup = false;
+
+        // 🚀 核心逻辑 1：惰性清理引擎 (Lazy Deletion)
+        // 每次触发鉴权前，瞬间巡检全库，超过 1 年未续费的账号直接物理销毁，释放用户名
+        for (let u in db.users) {
+            if (db.users[u].expireAt && db.users[u].expireAt > 0) {
+                if (now - db.users[u].expireAt > ONE_YEAR_MS) {
+                    delete db.users[u];
+                    dbChangedByCleanup = true;
+                }
+            }
+        }
 
         // 【行动 1】：静默心跳与防封禁检测
         if (action === "check_status") {
-            // 站长无上特权，永久绿灯
+            if (dbChangedByCleanup) await env.MY_BUCKET.put("db.json", JSON.stringify(db)); // 顺手存盘
+
             if (username === "yishuyangguang") {
                 return new Response(JSON.stringify({ success: true, status: "normal", expireAt: 4102444800000, now }), { headers: corsHeaders });
             }
             
             const user = db.users[username];
-            if (!user) return new Response(JSON.stringify({ error: "用户不存在" }), { status: 400, headers: corsHeaders });
+            if (!user) return new Response(JSON.stringify({ error: "用户不存在或已被系统销毁" }), { status: 400, headers: corsHeaders });
             
             if (user.status === "banned") {
                 return new Response(JSON.stringify({ error: "您的账号已被管理员限制使用，请联系站长", status: "banned" }), { status: 403, headers: corsHeaders });
             }
             
-            // 💣 修复核心：不再使用 && 容错。只要 expireAt 是 undefined、或者是 0、或者是过去的日期，全部拦截封杀！
             if (!user.expireAt || now > user.expireAt) {
-                return new Response(JSON.stringify({ error: "印记时空已到期（或未授权），请联系站长获取新卡密", status: "expired" }), { status: 403, headers: corsHeaders });
+                return new Response(JSON.stringify({ error: "印记时空已到期。账号已进入1年保留期，请在登录界面输入新卡密直接登录以完成激活。", status: "expired" }), { status: 403, headers: corsHeaders });
             }
             
             return new Response(JSON.stringify({ success: true, status: "normal", expireAt: user.expireAt, now }), { headers: corsHeaders });
@@ -52,9 +65,13 @@ export async function onRequest(context) {
 
         let targetExpireAt = now;
 
-        // 【行动 2】：新用户核销注册
+        // 【行动 2】：新用户核销注册 (或超期销毁后的重新注册)
         if (action === "register") {
-            if (db.users[username]) return new Response(JSON.stringify({ error: "账号已存在，请直接登录" }), { status: 400, headers: corsHeaders });
+            // 🚀 核心逻辑 2：状态拦截
+            if (db.users[username]) {
+                return new Response(JSON.stringify({ error: "账号已存在。若您的账号已过期但在1年保留期内，请勿重新注册，请直接【登录】并附带新卡密即可恢复数据。" }), { status: 400, headers: corsHeaders });
+            }
+            
             targetExpireAt = now + license.days * 24 * 60 * 60 * 1000;
             
             db.users[username] = {
@@ -66,17 +83,17 @@ export async function onRequest(context) {
                 status: "normal"
             };
         } 
-        // 【行动 3】：老用户累加续费
+        // 【行动 3】：老用户累加续费 (保留期内的拯救)
         else if (action === "renew") {
             const user = db.users[username];
-            if (!user) return new Response(JSON.stringify({ error: "用户不存在" }), { status: 400, headers: corsHeaders });
+            if (!user) return new Response(JSON.stringify({ error: "用户不存在或由于超过1年未续费已被永久销毁，请重新注册。" }), { status: 400, headers: corsHeaders });
             
-            // 核心累加算法：没过期就在原有基础上加，过期了就从此刻开始算
+            // 核心累加算法：没过期就在原有基础上加，过期了（保留期内）就从此刻重新开始算
             const baseTime = (user.expireAt && user.expireAt > now) ? user.expireAt : now;
             targetExpireAt = baseTime + license.days * 24 * 60 * 60 * 1000;
             
             user.expireAt = targetExpireAt;
-            user.status = "normal"; // 充值后自动解除可能存在的过期封禁
+            user.status = "normal"; // 充值后自动解除可能存在的过期封禁状态
         } else {
             return new Response(JSON.stringify({ error: "未知操作" }), { status: 400, headers: corsHeaders });
         }
