@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 新增字体/字号选择器、游客自动全屏沉浸阅读模式、游客端字号智能缩放引擎
+ * 更新内容: 强制修复A4纸两端对齐排版、阻断外部居中污染、新增云端保存安全锁
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V6.0 (全屏排版级)");
+    console.log("🚀 成功加载知识库引擎 V7.0 (修复排版与保存级)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -25,7 +25,6 @@
                 display: flex; flex-direction: column; flex-shrink: 0; height: 100%;
                 box-shadow: 2px 0 10px rgba(0,0,0,0.02); z-index: 10; transition: transform 0.3s ease, width 0.3s ease;
             }
-            /* 游客自动全屏：隐藏侧边栏 */
             .doc-sidebar.collapsed { display: none; }
             
             .doc-sidebar-header {
@@ -68,7 +67,6 @@
             .doc-title-group { display: flex; align-items: center; gap: 10px; flex: 1; }
             .btn-toggle-menu { display: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #5f6368; padding: 5px; border-radius: 4px; }
             .btn-toggle-menu:hover { background: #f1f3f4; }
-            /* 只有游客模式或者手机端才显示展开目录按钮 */
             .reader-mode .btn-toggle-menu { display: block; }
 
             .doc-title-input {
@@ -91,7 +89,7 @@
             .btn-zoom.active { background: #e8f0fe; color: #1a73e8; border-color: #1a73e8; font-weight: bold; }
             .btn-reader-close { background: #ea4335; border: none; color: #fff; padding: 6px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 10px; }
 
-            /* 仿 Google Docs 工具栏 (只对管理员显示) */
+            /* 仿 Google Docs 工具栏 */
             .doc-toolbar {
                 display: none; flex-wrap: wrap; gap: 4px; padding: 8px 25px; 
                 background: #edf2fa; border-top: 1px solid #e0e0e0; align-items: center;
@@ -112,13 +110,14 @@
             .color-picker-icon { width: 32px; height: 32px; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: bold; }
             .color-picker-icon:hover { background: #e0e6ed; }
 
-            /* A4 纸张沉浸式阅读区 */
+            /* ================= 🔥 A4 纸张排版强力修正区 🔥 ================= */
             .doc-body-scroll {
                 flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 40px 20px 80px 20px;
                 scroll-behavior: smooth;
             }
             .doc-paper-wrapper { position: relative; width: 100%; max-width: 850px; display: none; transition: transform 0.3s ease; }
             
+            /* 彻底解决居中问题，强制左对齐/两端对齐 */
             .doc-paper {
                 background: #ffffff; color: #111111;
                 width: 100%; min-height: 1100px; 
@@ -126,7 +125,15 @@
                 box-shadow: 0 2px 6px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1);
                 outline: none; font-size: 12pt; line-height: 1.8; word-wrap: break-word;
                 font-family: Arial, "Microsoft YaHei", sans-serif;
+                text-align: justify !important;      /* 强制正文两端对齐 */
+                text-align-last: left !important;    /* 强制末行靠左 */
             }
+            
+            /* 修正内部所有元素的默认对齐，抵抗外部污染 */
+            .doc-paper p { text-align: justify; margin-bottom: 15px; }
+            .doc-paper h1, .doc-paper h2, .doc-paper h3, .doc-paper h4 { text-align: left; margin: 20px 0 15px 0; }
+            .doc-paper ul, .doc-paper ol { text-align: left; padding-left: 2.5em; margin-bottom: 15px; }
+            .doc-paper li { text-align: justify; margin-bottom: 5px; }
             
             .doc-paper img, .doc-paper video { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
             .doc-paper audio { width: 100%; margin: 15px 0; outline: none; }
@@ -149,7 +156,7 @@
             
             [contenteditable="true"]:empty:before { content: attr(placeholder); opacity: 0.4; pointer-events: none; display: block; }
             
-            .empty-state { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #5f6368; font-size: 1.2rem; flex-direction: column; gap: 15px; font-weight: bold; }
+            .empty-state { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #5f6368; font-size: 1.2rem; flex-direction: column; gap: 15px; font-weight: bold; text-align: center; }
             
             /* 移动端响应式侧边栏 */
             @media (max-width: 768px) {
@@ -157,11 +164,11 @@
                 .doc-sidebar { width: 100%; height: 35vh; border-right: none; border-bottom: 2px solid #e0e0e0; }
                 .doc-sidebar.collapsed { display: none; }
                 .doc-main { height: 65vh; }
-                .reader-mode .doc-main { height: 100vh; } /* 游客全屏时撑满 */
+                .reader-mode .doc-main { height: 100vh; } 
                 .doc-paper { min-height: 800px; padding: 30px 20px; }
                 .doc-toolbar { overflow-x: auto; flex-wrap: nowrap; padding: 8px 10px; }
                 .doc-tool-btn { flex-shrink: 0; }
-                .btn-toggle-menu { display: block; } /* 手机端管理员也允许折叠侧边栏 */
+                .btn-toggle-menu { display: block; } 
                 .doc-actions-reader { overflow-x: auto; flex-wrap: nowrap; }
             }
         `;
@@ -215,7 +222,6 @@
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
                         <div class="doc-tool-separator"></div>
                         
-                        <!-- 新增：字体库选择 -->
                         <select class="doc-tool-select" onchange="window.docExec('fontName', this.value)" title="字体集">
                             <option value="Arial">默认字体</option>
                             <option value="SimSun">宋体</option>
@@ -225,7 +231,6 @@
                         </select>
                         <div class="doc-tool-separator"></div>
 
-                        <!-- 新增：字号选择 (原生 1-7 标准映射) -->
                         <select class="doc-tool-select" onchange="window.docExec('fontSize', this.value)" title="文章字号排版">
                             <option value="3">稍小 (Small)</option>
                             <option value="4" selected>内容大小 (Normal)</option>
@@ -292,7 +297,7 @@
         currentSystemId = systemId;
         activeArticleId = null;
         
-        // 初始化数据库结构
+        // 自动初始化安全结构
         if (!db.docSystems) db.docSystems = {};
         if (!db.docSystems[systemId]) {
             db.docSystems[systemId] = {
@@ -304,18 +309,18 @@
         const modal = document.getElementById('counseling-doc-modal');
         const sidebar = document.getElementById('doc-sidebar');
         
-        // 【核心解绑权限】：站长永远是编辑模式；游客永远是沉浸阅读模式
+        // 站长全开权限，游客强制阅读降级
         if (state.isAdmin) {
             modal.classList.add('admin-mode');
             modal.classList.remove('reader-mode');
             document.getElementById('doc-editor').setAttribute('contenteditable', 'true');
-            sidebar.classList.remove('collapsed'); // 管理员默认展开目录
+            sidebar.classList.remove('collapsed'); 
         } else {
             modal.classList.remove('admin-mode');
             modal.classList.add('reader-mode');
             document.getElementById('doc-editor').setAttribute('contenteditable', 'false');
-            sidebar.classList.add('collapsed'); // 游客默认自动全屏（隐藏侧边栏）
-            window.setDocZoom(1, 'normal'); // 重置游客视角缩放
+            sidebar.classList.add('collapsed'); 
+            window.setDocZoom(1, 'normal'); 
         }
 
         window.renderKBSidebar();
@@ -331,7 +336,6 @@
         setTimeout(() => modal.style.display = 'none', 300);
     };
 
-    // 游客侧边栏切换（展开/收起目录）
     window.toggleDocSidebar = function() {
         const sidebar = document.getElementById('doc-sidebar');
         sidebar.classList.toggle('collapsed');
@@ -340,10 +344,7 @@
     // 游客沉浸式阅读字号引擎 (CSS Zoom无损缩放)
     window.setDocZoom = function(scale, btnId) {
         const wrapper = document.getElementById('doc-paper-wrapper');
-        // 使用 zoom 缩放，能完美等比放大图片、表格和字体，且自动换行不出界
         wrapper.style.zoom = scale;
-        
-        // 按钮高亮状态切换
         document.querySelectorAll('.btn-zoom').forEach(btn => btn.classList.remove('active'));
         document.getElementById('zoom-' + btnId).classList.add('active');
     };
@@ -376,7 +377,6 @@
                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">📄 ${art.title}</span>
                     <button class="kb-admin-btn del" style="flex-shrink:0;" onclick="event.stopPropagation(); window.kbDeleteArticle('${cat.id}', '${art.id}')">✖</button>
                 `;
-                // 选择文章后，如果在手机端或游客模式，自动收起侧边栏实现全屏沉浸阅读
                 artItem.onclick = () => {
                     window.kbSelectArticle(cat.id, art.id);
                     if (window.innerWidth <= 768 || !state.isAdmin) {
@@ -390,7 +390,6 @@
         });
     };
 
-    // 分类操作
     window.kbAddCategory = async function() {
         const name = prompt("请输入新分类名称 (如: 夫妻沟通):", "新分类");
         if (!name) return;
@@ -409,7 +408,6 @@
         window.renderKBSidebar();
     };
 
-    // 文章操作
     window.kbAddArticle = async function(catId) {
         const title = prompt("请输入新文章标题:", "无标题文档");
         if (!title) return;
@@ -452,7 +450,6 @@
         window.renderKBSidebar(); 
     };
 
-    // 失去焦点时实时保存标题
     window.kbSaveDocMeta = async function() {
         if (!activeArticleId) return;
         const newTitle = document.getElementById('doc-title').value.trim() || '无标题文档';
@@ -460,21 +457,40 @@
         db.docSystems[currentSystemId].categories.forEach(c => {
             c.articles.forEach(a => { if (a.id === activeArticleId) { a.title = newTitle; found = true; } });
         });
-        if(found) {
+        if(found && typeof window.saveDB === 'function') {
             await window.saveDB();
             window.renderKBSidebar();
         }
     };
 
-    // 手动保存正文内容
+    // 🔥 新增安全锁的云端保存引擎
     window.saveCounselingDoc = async function() {
-        if (!activeArticleId) return;
-        const content = document.getElementById('doc-editor').innerHTML;
+        if (!activeArticleId) return window.showGlobalToast('请先选择或创建一篇文档', 'error');
+        const editor = document.getElementById('doc-editor');
+        if (!editor) return;
+        const content = editor.innerHTML;
+        
+        // 核心安全防崩溃判定
+        if (!db) return window.showGlobalToast('数据库未就绪', 'error');
+        if (!db.docSystems) db.docSystems = {};
+        if (!db.docSystems[currentSystemId]) return window.showGlobalToast('知识库异常', 'error');
+        
+        let found = false;
         db.docSystems[currentSystemId].categories.forEach(c => {
-            c.articles.forEach(a => { if (a.id === activeArticleId) a.content = content; });
+            c.articles.forEach(a => { 
+                if (a.id === activeArticleId) {
+                    a.content = content; 
+                    found = true;
+                } 
+            });
         });
-        await window.saveDB();
-        window.showGlobalToast('文档已安全同步至云端', 'success');
+        
+        if (found && typeof window.saveDB === 'function') {
+            await window.saveDB();
+            window.showGlobalToast('文档已安全同步至云端', 'success');
+        } else {
+            window.showGlobalToast('保存失败：文档被删除或同步引擎丢失', 'error');
+        }
     };
 
     // ================== R2 富文本与多媒体引擎 ==================
@@ -499,7 +515,6 @@
         }
     });
 
-    // 按钮手动选择附件
     window.handleDocFileUpload = function(input) {
         if (input.files.length > 0) {
             processDocFiles(input.files);
