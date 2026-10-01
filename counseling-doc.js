@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 新增分类与文档的重命名(编辑)功能，严格隔离游客权限
+ * 更新内容: 新增分类与文档重命名、修复全局居中污染、新增两端对齐按钮、恢复原生粘贴格式保留
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.2 (新增重命名管理版)");
+    console.log("🚀 成功加载知识库引擎 V7.3 (排版隔离与对齐修复版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -117,7 +117,7 @@
             }
             .doc-paper-wrapper { position: relative; width: 100%; max-width: 850px; display: none; transition: transform 0.3s ease; }
             
-            /* 彻底解决居中问题，强制左对齐/两端对齐 */
+            /* 彻底解决居中问题，强制恢复原生纯净的富文本排版行为 */
             .doc-paper {
                 background: #ffffff; color: #111111;
                 width: 100%; min-height: 1100px; 
@@ -125,15 +125,17 @@
                 box-shadow: 0 2px 6px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1);
                 outline: none; font-size: 12pt; line-height: 1.8; word-wrap: break-word;
                 font-family: Arial, "Microsoft YaHei", sans-serif;
-                text-align: justify !important;      /* 强制正文两端对齐 */
-                text-align-last: left !important;    /* 强制末行靠左 */
+                text-align: left; /* 默认左对齐，去除 !important，允许富文本编辑器和粘贴的内联样式覆盖 */
             }
             
-            /* 修正内部所有元素的默认对齐，抵抗外部污染 */
-            .doc-paper p { text-align: justify; margin-bottom: 15px; }
-            .doc-paper h1, .doc-paper h2, .doc-paper h3, .doc-paper h4 { text-align: left; margin: 20px 0 15px 0; }
-            .doc-paper ul, .doc-paper ol { text-align: left; padding-left: 2.5em; margin-bottom: 15px; }
-            .doc-paper li { text-align: justify; margin-bottom: 5px; }
+            /* 💥核心拦截：彻底阻断 app.html 中 p { text-align-last: center } 的全局污染 */
+            .doc-paper * { text-align-last: auto !important; }
+            
+            /* 修正内部元素的默认对齐，去除强制 justify，完美保留粘贴的原始格式 */
+            .doc-paper p { margin-bottom: 15px; } 
+            .doc-paper h1, .doc-paper h2, .doc-paper h3, .doc-paper h4 { margin: 20px 0 15px 0; }
+            .doc-paper ul, .doc-paper ol { padding-left: 2.5em; margin-bottom: 15px; }
+            .doc-paper li { margin-bottom: 5px; }
             
             .doc-paper img, .doc-paper video { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
             .doc-paper audio { width: 100%; margin: 15px 0; outline: none; }
@@ -259,6 +261,8 @@
                         <button class="doc-tool-btn" onclick="window.docExec('justifyLeft')" title="左对齐">⇦</button>
                         <button class="doc-tool-btn" onclick="window.docExec('justifyCenter')" title="居中">⇨⇦</button>
                         <button class="doc-tool-btn" onclick="window.docExec('justifyRight')" title="右对齐">⇨</button>
+                        <!-- 🔥 新增：两端对齐按钮 -->
+                        <button class="doc-tool-btn" onclick="window.docExec('justifyFull')" title="两端对齐" style="font-size: 14px; font-weight: 900;">⇔</button>
                         <div class="doc-tool-separator"></div>
 
                         <button class="doc-tool-btn" onclick="window.docExec('insertUnorderedList')" title="无序列表">•</button>
