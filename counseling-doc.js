@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 强制修复A4纸两端对齐排版、打字静默热更保存、游客强制热更拉取
+ * 更新内容: 修复打开文档显示白板问题，自动展示第一篇文档内容
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V9.0 (排版重构与热更版)");
+    console.log("🚀 成功加载知识库引擎 V7.1 (自动展示内容修复版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -78,7 +78,7 @@
             
             /* 站长：保存按钮区 */
             .doc-actions-admin { display: none; gap: 10px; align-items: center; }
-            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: all 0.2s; }
+            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
             .btn-doc-save:active { transform: scale(0.95); }
             .admin-mode .doc-actions-admin { display: flex; }
 
@@ -203,7 +203,7 @@
                         
                         <!-- 管理员控制台 -->
                         <div class="doc-actions-admin">
-                            <button class="btn-doc-save" id="btn-cloud-save" onclick="window.saveCounselingDoc(false)">☁ 云端保存</button>
+                            <button class="btn-doc-save" onclick="window.saveCounselingDoc()">☁ 云端保存</button>
                         </div>
 
                         <!-- 游客自动全屏阅读控制台 -->
@@ -287,27 +287,9 @@
     `;
     document.body.insertAdjacentHTML('beforeend', docModalHTML);
 
-    // ================== 数据结构、状态与热更新监控 ==================
+    // ================== 数据结构与状态 ==================
     let currentSystemId = null; 
     let activeArticleId = null;
-    window.docAutoSaveTimer = null;
-
-    // 🔥 监听富文本框输入事件：打字即保存（静默热更新）
-    const docEditorEle = document.getElementById('doc-editor');
-    if (docEditorEle) {
-        docEditorEle.addEventListener('input', function() {
-            if (typeof state !== 'undefined' && state.isAdmin) {
-                const btn = document.querySelector('.btn-doc-save');
-                if (btn) { btn.innerText = '正在保存...'; btn.style.opacity = '0.7'; }
-                clearTimeout(window.docAutoSaveTimer);
-                window.docAutoSaveTimer = setTimeout(() => {
-                    if (typeof window.saveCounselingDoc === 'function') {
-                        window.saveCounselingDoc(true); // true 代表静默保存，不弹窗
-                    }
-                }, 1200); // 停顿 1.2 秒后立即写入云端
-            }
-        });
-    }
 
     // 3. 核心 API: 打开整个知识库系统
     window.openCounselingDoc = async function(systemId) {
@@ -349,7 +331,22 @@
         }
 
         window.renderKBSidebar();
-        window.kbShowEmptyState(); 
+        
+        // 🔥 自动选中第一篇文档，告别白板页面！
+        let firstArticleFound = false;
+        if (db.docSystems[currentSystemId] && db.docSystems[currentSystemId].categories) {
+            for (let cat of db.docSystems[currentSystemId].categories) {
+                if (cat.articles && cat.articles.length > 0) {
+                    window.kbSelectArticle(cat.id, cat.articles[0].id);
+                    firstArticleFound = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!firstArticleFound) {
+            window.kbShowEmptyState(); 
+        }
 
         modal.style.display = 'flex';
         setTimeout(() => modal.style.opacity = '1', 10);
@@ -488,26 +485,17 @@
         }
     };
 
-    // 🔥 新增安全锁的云端保存引擎 (支持静默保存)
-    window.saveCounselingDoc = async function(silent = false) {
-        if (!activeArticleId) {
-            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('请先选择或创建一篇文档', 'error');
-            return;
-        }
+    // 🔥 新增安全锁的云端保存引擎
+    window.saveCounselingDoc = async function() {
+        if (!activeArticleId) return window.showGlobalToast('请先选择或创建一篇文档', 'error');
         const editor = document.getElementById('doc-editor');
         if (!editor) return;
         const content = editor.innerHTML;
         
         // 核心安全防崩溃判定
-        if (typeof db === 'undefined' || !db) {
-            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('数据库未就绪', 'error');
-            return;
-        }
+        if (typeof db === 'undefined' || !db) return window.showGlobalToast('数据库未就绪', 'error');
         if (!db.docSystems) db.docSystems = {};
-        if (!db.docSystems[currentSystemId]) {
-            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('知识库异常', 'error');
-            return;
-        }
+        if (!db.docSystems[currentSystemId]) return window.showGlobalToast('知识库异常', 'error');
         
         let found = false;
         db.docSystems[currentSystemId].categories.forEach(c => {
@@ -521,11 +509,9 @@
         
         if (found && typeof window.saveDB === 'function') {
             await window.saveDB();
-            const btn = document.querySelector('.btn-doc-save');
-            if (btn) { btn.innerText = '☁ 云端保存'; btn.style.opacity = '1'; }
-            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('文档已安全同步至云端', 'success');
+            window.showGlobalToast('文档已安全同步至云端', 'success');
         } else {
-            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('保存失败：文档被删除或同步引擎丢失', 'error');
+            window.showGlobalToast('保存失败：文档被删除或同步引擎丢失', 'error');
         }
     };
 
@@ -572,7 +558,7 @@
             }
         }
         if(typeof window.showGlobalToast === 'function') window.showGlobalToast('所有附件处理完毕', 'success');
-        window.saveCounselingDoc(true); // 附件传完自动静默保存
+        window.saveCounselingDoc(); 
     }
 
     function uploadToR2(file) {
