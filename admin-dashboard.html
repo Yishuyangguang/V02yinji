@@ -21,7 +21,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background-color: #333333; /* 外围深色背景突显主体 */
+            background-color: #333333; 
             color: var(--theme-text); 
             font-family: var(--font-main); 
             display: flex; justify-content: center; padding: 20px 10px;
@@ -70,11 +70,13 @@
         .btn-outline:hover { background: #f3f4f6; }
         .btn-gold { background: linear-gradient(135deg, #fcd34d, #f59e0b); color: #111; box-shadow: 0 4px 10px rgba(245,158,11,0.3); }
         .btn-red-outline { background: transparent; border: 1px solid var(--theme-red); color: var(--theme-red); }
+        .btn-red-outline:hover { background: rgba(239, 68, 68, 0.05); }
         .btn-green-outline { background: transparent; border: 1px solid var(--theme-green); color: var(--theme-green); }
+        .btn-green-outline:hover { background: rgba(16, 185, 129, 0.05); }
 
         /* 分类选项卡 (Tab) */
-        .tab-container { display: flex; gap: 10px; margin-bottom: 15px; background: #f3f4f6; padding: 4px; border-radius: 12px; }
-        .tab-btn { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.9rem; font-weight: bold; color: var(--theme-text-light); cursor: pointer; transition: 0.3s; }
+        .tab-container { display: flex; gap: 6px; margin-bottom: 15px; background: #f3f4f6; padding: 4px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 8px 4px; text-align: center; border-radius: 8px; font-size: 0.85rem; font-weight: bold; color: var(--theme-text-light); cursor: pointer; transition: 0.3s; white-space: nowrap; }
         .tab-btn.active { background: #fff; color: var(--theme-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         /* 列表区域 */
@@ -133,9 +135,9 @@
             <button class="btn btn-gold" onclick="generateKey(365)">生成 365天卡</button>
         </div>
 
-        <div class="tab-container">
-            <div class="tab-btn active" id="tab-unused" onclick="switchKeyTab('unused')">未使用</div>
-            <div class="tab-btn" id="tab-used" onclick="switchKeyTab('used')">已使用</div>
+        <div class="tab-container" id="key-tabs">
+            <div class="tab-btn active" id="tab-key-unused" onclick="switchKeyTab('unused')">未使用</div>
+            <div class="tab-btn" id="tab-key-used" onclick="switchKeyTab('used')">已使用</div>
         </div>
 
         <div class="list-container" id="key-list">
@@ -148,6 +150,14 @@
         <div class="loading-overlay" id="loading-users">数据同步中...</div>
         <div class="section-title users">⚖️ 极速风控</div>
         
+        <!-- 用户分类菜单 -->
+        <div class="tab-container" id="user-tabs">
+            <div class="tab-btn active" id="tab-user-all" onclick="switchUserTab('all')">全部</div>
+            <div class="tab-btn" id="tab-user-normal" onclick="switchUserTab('normal')">正常</div>
+            <div class="tab-btn" id="tab-user-expired" onclick="switchUserTab('expired')">已过期</div>
+            <div class="tab-btn" id="tab-user-banned" onclick="switchUserTab('banned')">已限制</div>
+        </div>
+
         <div class="list-container" id="user-list" style="max-height: 450px;">
             <!-- 用户列表渲染区 -->
         </div>
@@ -157,7 +167,8 @@
 <script>
     let db = {};
     const ADMIN_AUTH_HEADER = 'yishuyangguang';
-    let currentKeyTab = 'unused'; // 默认显示未使用的卡密
+    let currentKeyTab = 'unused'; 
+    let currentUserTab = 'all'; // 用户风控菜单状态
     let toastTimer;
 
     function showToast(msg) {
@@ -208,9 +219,9 @@
     
     function switchKeyTab(tab) {
         currentKeyTab = tab;
-        document.getElementById('tab-unused').classList.remove('active');
-        document.getElementById('tab-used').classList.remove('active');
-        document.getElementById('tab-' + tab).classList.add('active');
+        document.getElementById('tab-key-unused').classList.remove('active');
+        document.getElementById('tab-key-used').classList.remove('active');
+        document.getElementById('tab-key-' + tab).classList.add('active');
         renderKeys();
     }
 
@@ -224,11 +235,9 @@
         db.licenseKeys[key] = { days: days, isUsed: false, createdAt: Date.now() };
         await saveDB();
         
-        // 生成新卡密后，自动切换到“未使用”标签页以便查看
         if (currentKeyTab !== 'unused') switchKeyTab('unused');
         else renderKeys();
         
-        // 自动将新生成的卡密复制到剪贴板
         copyToClipboard(key, `成功生成并复制 ${days} 天卡密`);
     }
 
@@ -237,8 +246,6 @@
         list.innerHTML = '';
         
         let allKeys = Object.keys(db.licenseKeys || {}).map(k => ({ key: k, ...db.licenseKeys[k] })).sort((a,b) => b.createdAt - a.createdAt);
-        
-        // 分类过滤
         let filteredKeys = allKeys.filter(k => currentKeyTab === 'unused' ? !k.isUsed : k.isUsed);
 
         if(filteredKeys.length === 0) {
@@ -267,7 +274,6 @@
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(text).then(() => showToast(successMsg));
         } else {
-            // 兼容老版本浏览器或非 HTTPS 环境
             let textArea = document.createElement("textarea");
             textArea.value = text;
             textArea.style.position = "fixed"; document.body.appendChild(textArea);
@@ -277,41 +283,81 @@
         }
     }
 
-    // ================= 风控逻辑 =================
+    // ================= 风控逻辑 (含多标签过滤与删除功能) =================
     
+    function switchUserTab(tab) {
+        currentUserTab = tab;
+        document.querySelectorAll('#user-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('tab-user-' + tab).classList.add('active');
+        renderUsers();
+    }
+
     function renderUsers() {
         const list = document.getElementById('user-list');
         list.innerHTML = '';
-        let hasUser = false;
         
         const now = Date.now();
 
-        for (let u in db.users) {
-            if (u === 'yishuyangguang') continue; // 站长免检
-            hasUser = true; 
-            const user = db.users[u]; 
-            
+        // 获取所有非管理员用户
+        let userEntries = Object.keys(db.users || {})
+            .map(k => ({ username: k, ...db.users[k] }))
+            .filter(u => u.username !== 'yishuyangguang');
+
+        // 应用分类菜单的过滤逻辑
+        if (currentUserTab === 'normal') {
+            userEntries = userEntries.filter(u => u.status !== 'banned' && u.expireAt && u.expireAt > now);
+        } else if (currentUserTab === 'expired') {
+            userEntries = userEntries.filter(u => u.status !== 'banned' && (!u.expireAt || u.expireAt <= now));
+        } else if (currentUserTab === 'banned') {
+            userEntries = userEntries.filter(u => u.status === 'banned');
+        }
+
+        if(userEntries.length === 0) {
+            list.innerHTML = `<div style="text-align:center; padding:20px; color:#9ca3af; font-size:0.9rem;">暂无对应状态的账户</div>`;
+            return;
+        }
+
+        userEntries.forEach(user => {
+            const u = user.username;
             let daysLeft = Math.ceil(((user.expireAt || 0) - now) / (1000 * 60 * 60 * 24)); 
+            let daysPast = Math.floor((now - (user.expireAt || 0)) / (1000 * 60 * 60 * 24));
+            if (daysPast < 0) daysPast = 0;
             
             let statusHtml = '';
             let btnHtml = '';
 
-            // 严格的权限状态机
+            let expireText = (!user.expireAt || user.expireAt === 0) ? '从未激活' : `已过期 ${daysPast} 天`;
+
+            // 严格的权限状态机与按钮呈现
             if (user.status === 'banned') {
                 statusHtml = `<span class="user-status status-banned">🚫 已限制</span>`;
-                btnHtml = `<button class="btn btn-green-outline" onclick="toggleUserStatus('${u}', 'normal')">解 除 限 制</button>`;
+                btnHtml = `
+                    <div style="display:flex; gap:10px; width:100%; margin-top:8px;">
+                        <button class="btn btn-green-outline" onclick="toggleUserStatus('${u}', 'normal')">解 除 限 制</button>
+                        <button class="btn btn-red-outline" style="flex:0.4; background:#fef2f2; border-color:#f87171;" onclick="deleteUser('${u}')">删 除</button>
+                    </div>
+                `;
             } else if (!user.expireAt || daysLeft <= 0) {
-                statusHtml = `<span class="user-status status-expired">⚠️ 已到期</span>`;
-                btnHtml = `<button class="btn btn-red-outline" onclick="toggleUserStatus('${u}', 'banned')">限 制 使 用</button>`;
+                statusHtml = `<span class="user-status status-expired">⚠️ ${expireText}</span>`;
+                btnHtml = `
+                    <div style="display:flex; gap:10px; width:100%; margin-top:8px;">
+                        <button class="btn btn-red-outline" onclick="toggleUserStatus('${u}', 'banned')">限 制 使 用</button>
+                        <button class="btn btn-red-outline" style="flex:0.4; background:#fef2f2; border-color:#f87171;" onclick="deleteUser('${u}')">删 除</button>
+                    </div>
+                `;
             } else {
-                statusHtml = `<span class="user-status status-active">✅ 未到期 (余 ${daysLeft} 天)</span>`;
-                btnHtml = `<button class="btn btn-red-outline" onclick="toggleUserStatus('${u}', 'banned')">限 制 使 用</button>`;
+                statusHtml = `<span class="user-status status-active">✅ 正常 (余 ${daysLeft} 天)</span>`;
+                btnHtml = `
+                    <div style="display:flex; gap:10px; width:100%; margin-top:8px;">
+                        <button class="btn btn-red-outline" onclick="toggleUserStatus('${u}', 'banned')">限 制 使 用</button>
+                    </div>
+                `;
             }
 
             const div = document.createElement('div');
             div.className = 'item-card';
             div.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 8px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                     <div>
                         <div class="user-name">${user.nickname || '未命名'} <span class="user-id">(${u})</span></div>
                         ${statusHtml}
@@ -320,17 +366,28 @@
                 ${btnHtml}
             `;
             list.appendChild(div);
-        }
-        if(!hasUser) list.innerHTML = `<div style="text-align:center; padding:20px; color:#9ca3af; font-size:0.9rem;">暂无普通用户</div>`;
+        });
     }
 
+    // 状态切换 (封禁/解封)
     window.toggleUserStatus = async function(u, newStatus) {
         if (!db.users[u]) return; 
         const isBanning = newStatus === 'banned';
-        if(confirm(`确定要对用户 ${u} 执行【${isBanning ? '限制使用' : '解除限制'}】操作吗？`)) {
+        if(confirm(`确定要对账户 [${u}] 执行【${isBanning ? '限制使用' : '解除限制'}】操作吗？`)) {
             db.users[u].status = newStatus; 
             await saveDB(); 
             renderUsers(); 
+        }
+    }
+
+    // 账户彻底删除
+    window.deleteUser = async function(u) {
+        if(!db.users[u]) return;
+        if(confirm(`🚨 危险操作警告：\n确定要彻底删除账户 [${u}] 吗？\n删除后该用户的所有数据（收藏、打卡进度等）将被永久清空且无法恢复！`)) {
+            delete db.users[u];
+            await saveDB();
+            renderUsers();
+            showToast(`已彻底抹除账户: ${u}`);
         }
     }
 
