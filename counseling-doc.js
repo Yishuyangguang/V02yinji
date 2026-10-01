@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 强制修复A4纸两端对齐排版、阻断外部居中污染、新增云端保存安全锁
+ * 更新内容: 强制修复A4纸两端对齐排版、打字静默热更保存、游客强制热更拉取
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.0 (修复排版与保存级)");
+    console.log("🚀 成功加载知识库引擎 V9.0 (排版重构与热更版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -78,7 +78,7 @@
             
             /* 站长：保存按钮区 */
             .doc-actions-admin { display: none; gap: 10px; align-items: center; }
-            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+            .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: all 0.2s; }
             .btn-doc-save:active { transform: scale(0.95); }
             .admin-mode .doc-actions-admin { display: flex; }
 
@@ -130,10 +130,10 @@
             }
             
             /* 修正内部所有元素的默认对齐，抵抗外部污染 */
-            .doc-paper p { text-align: justify; margin-bottom: 15px; }
-            .doc-paper h1, .doc-paper h2, .doc-paper h3, .doc-paper h4 { text-align: left; margin: 20px 0 15px 0; }
-            .doc-paper ul, .doc-paper ol { text-align: left; padding-left: 2.5em; margin-bottom: 15px; }
-            .doc-paper li { text-align: justify; margin-bottom: 5px; }
+            .doc-paper p { text-align: justify !important; text-align-last: left !important; margin-bottom: 15px; }
+            .doc-paper h1, .doc-paper h2, .doc-paper h3, .doc-paper h4 { text-align: left !important; margin: 20px 0 15px 0; }
+            .doc-paper ul, .doc-paper ol { text-align: left !important; padding-left: 2.5em; margin-bottom: 15px; }
+            .doc-paper li { text-align: justify !important; margin-bottom: 5px; }
             
             .doc-paper img, .doc-paper video { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
             .doc-paper audio { width: 100%; margin: 15px 0; outline: none; }
@@ -203,7 +203,7 @@
                         
                         <!-- 管理员控制台 -->
                         <div class="doc-actions-admin">
-                            <button class="btn-doc-save" onclick="window.saveCounselingDoc()">☁ 云端保存</button>
+                            <button class="btn-doc-save" id="btn-cloud-save" onclick="window.saveCounselingDoc(false)">☁ 云端保存</button>
                         </div>
 
                         <!-- 游客自动全屏阅读控制台 -->
@@ -287,17 +287,42 @@
     `;
     document.body.insertAdjacentHTML('beforeend', docModalHTML);
 
-    // ================== 数据结构与状态 ==================
+    // ================== 数据结构、状态与热更新监控 ==================
     let currentSystemId = null; 
     let activeArticleId = null;
+    window.docAutoSaveTimer = null;
+
+    // 🔥 监听富文本框输入事件：打字即保存（静默热更新）
+    const docEditorEle = document.getElementById('doc-editor');
+    if (docEditorEle) {
+        docEditorEle.addEventListener('input', function() {
+            if (typeof state !== 'undefined' && state.isAdmin) {
+                const btn = document.querySelector('.btn-doc-save');
+                if (btn) { btn.innerText = '正在保存...'; btn.style.opacity = '0.7'; }
+                clearTimeout(window.docAutoSaveTimer);
+                window.docAutoSaveTimer = setTimeout(() => {
+                    if (typeof window.saveCounselingDoc === 'function') {
+                        window.saveCounselingDoc(true); // true 代表静默保存，不弹窗
+                    }
+                }, 1200); // 停顿 1.2 秒后立即写入云端
+            }
+        });
+    }
 
     // 3. 核心 API: 打开整个知识库系统
-    window.openCounselingDoc = function(systemId) {
+    window.openCounselingDoc = async function(systemId) {
         if (!systemId) systemId = 'sys_default_doc';
         currentSystemId = systemId;
         activeArticleId = null;
         
-        // 自动初始化安全结构
+        // 🔥 游客点开文档瞬间，强制从 R2 拉取全网最新数据！保证绝对及时！
+        if (typeof state !== 'undefined' && !state.isAdmin) {
+            if (typeof window.forceCloudSync === 'function') {
+                if(typeof window.showGlobalToast === 'function') window.showGlobalToast('同步最新文档库...', 'loading');
+                await window.forceCloudSync();
+            }
+        }
+
         if (!db.docSystems) db.docSystems = {};
         if (!db.docSystems[systemId]) {
             db.docSystems[systemId] = {
@@ -310,7 +335,7 @@
         const sidebar = document.getElementById('doc-sidebar');
         
         // 站长全开权限，游客强制阅读降级
-        if (state.isAdmin) {
+        if (typeof state !== 'undefined' && state.isAdmin) {
             modal.classList.add('admin-mode');
             modal.classList.remove('reader-mode');
             document.getElementById('doc-editor').setAttribute('contenteditable', 'true');
@@ -379,7 +404,7 @@
                 `;
                 artItem.onclick = () => {
                     window.kbSelectArticle(cat.id, art.id);
-                    if (window.innerWidth <= 768 || !state.isAdmin) {
+                    if (window.innerWidth <= 768 || (typeof state !== 'undefined' && !state.isAdmin)) {
                         document.getElementById('doc-sidebar').classList.add('collapsed');
                     }
                 };
@@ -394,7 +419,7 @@
         const name = prompt("请输入新分类名称 (如: 夫妻沟通):", "新分类");
         if (!name) return;
         db.docSystems[currentSystemId].categories.push({ id: 'cat_' + Date.now(), name: name, articles: [] });
-        await window.saveDB();
+        if(typeof window.saveDB === 'function') await window.saveDB();
         window.renderKBSidebar();
     };
 
@@ -404,7 +429,7 @@
         if (cat.articles.length > 0 && !confirm(`分类 [${cat.name}] 下还有文章，确定连同文章一起彻底删除吗？`)) return;
         sys.categories = sys.categories.filter(c => c.id !== catId);
         if (sys.categories.length === 0) window.kbShowEmptyState();
-        await window.saveDB();
+        if(typeof window.saveDB === 'function') await window.saveDB();
         window.renderKBSidebar();
     };
 
@@ -414,7 +439,7 @@
         const newArt = { id: 'art_' + Date.now(), title: title, content: '' };
         const cat = db.docSystems[currentSystemId].categories.find(c => c.id === catId);
         cat.articles.push(newArt);
-        await window.saveDB();
+        if(typeof window.saveDB === 'function') await window.saveDB();
         window.renderKBSidebar();
         window.kbSelectArticle(catId, newArt.id);
     };
@@ -424,7 +449,7 @@
         const cat = db.docSystems[currentSystemId].categories.find(c => c.id === catId);
         cat.articles = cat.articles.filter(a => a.id !== artId);
         if (activeArticleId === artId) window.kbShowEmptyState();
-        await window.saveDB();
+        if(typeof window.saveDB === 'function') await window.saveDB();
         window.renderKBSidebar();
     };
 
@@ -463,17 +488,26 @@
         }
     };
 
-    // 🔥 新增安全锁的云端保存引擎
-    window.saveCounselingDoc = async function() {
-        if (!activeArticleId) return window.showGlobalToast('请先选择或创建一篇文档', 'error');
+    // 🔥 新增安全锁的云端保存引擎 (支持静默保存)
+    window.saveCounselingDoc = async function(silent = false) {
+        if (!activeArticleId) {
+            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('请先选择或创建一篇文档', 'error');
+            return;
+        }
         const editor = document.getElementById('doc-editor');
         if (!editor) return;
         const content = editor.innerHTML;
         
         // 核心安全防崩溃判定
-        if (!db) return window.showGlobalToast('数据库未就绪', 'error');
+        if (typeof db === 'undefined' || !db) {
+            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('数据库未就绪', 'error');
+            return;
+        }
         if (!db.docSystems) db.docSystems = {};
-        if (!db.docSystems[currentSystemId]) return window.showGlobalToast('知识库异常', 'error');
+        if (!db.docSystems[currentSystemId]) {
+            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('知识库异常', 'error');
+            return;
+        }
         
         let found = false;
         db.docSystems[currentSystemId].categories.forEach(c => {
@@ -487,9 +521,11 @@
         
         if (found && typeof window.saveDB === 'function') {
             await window.saveDB();
-            window.showGlobalToast('文档已安全同步至云端', 'success');
+            const btn = document.querySelector('.btn-doc-save');
+            if (btn) { btn.innerText = '☁ 云端保存'; btn.style.opacity = '1'; }
+            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('文档已安全同步至云端', 'success');
         } else {
-            window.showGlobalToast('保存失败：文档被删除或同步引擎丢失', 'error');
+            if (!silent && typeof window.showGlobalToast === 'function') window.showGlobalToast('保存失败：文档被删除或同步引擎丢失', 'error');
         }
     };
 
@@ -504,11 +540,11 @@
 
     // 拖拽多媒体支持
     editorWrapper.addEventListener('dragover', (e) => {
-        if(state.isAdmin) { e.preventDefault(); editorWrapper.classList.add('drag-over'); }
+        if(typeof state !== 'undefined' && state.isAdmin) { e.preventDefault(); editorWrapper.classList.add('drag-over'); }
     });
     editorWrapper.addEventListener('dragleave', (e) => { editorWrapper.classList.remove('drag-over'); });
     editorWrapper.addEventListener('drop', (e) => {
-        if(state.isAdmin) {
+        if(typeof state !== 'undefined' && state.isAdmin) {
             e.preventDefault();
             editorWrapper.classList.remove('drag-over');
             if (e.dataTransfer.files.length > 0) processDocFiles(e.dataTransfer.files);
@@ -523,7 +559,7 @@
     };
 
     async function processDocFiles(files) {
-        window.showGlobalToast(`正在将 ${files.length} 个附件极速直传至云端...`, 'loading');
+        if(typeof window.showGlobalToast === 'function') window.showGlobalToast(`正在将 ${files.length} 个附件极速直传至云端...`, 'loading');
         editor.focus(); 
         
         for (let i = 0; i < files.length; i++) {
@@ -532,11 +568,11 @@
                 const url = await uploadToR2(file);
                 insertMediaToEditor(url, file.type, file.name);
             } catch (err) {
-                window.showGlobalToast(`文件 ${file.name} 上传失败`, 'error');
+                if(typeof window.showGlobalToast === 'function') window.showGlobalToast(`文件 ${file.name} 上传失败`, 'error');
             }
         }
-        window.showGlobalToast('所有附件处理完毕', 'success');
-        window.saveCounselingDoc(); 
+        if(typeof window.showGlobalToast === 'function') window.showGlobalToast('所有附件处理完毕', 'success');
+        window.saveCounselingDoc(true); // 附件传完自动静默保存
     }
 
     function uploadToR2(file) {
