@@ -92,8 +92,6 @@
         .btn-glass:active { transform: translateY(3px) scale(0.97); box-shadow: 0 2px 10px var(--theme-glass-shadow), inset 0 2px 5px rgba(0,0,0,0.1); }
         .btn-primary { background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); border: none; color: #111 !important; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5); }
         .btn-type-dark { background: #2d3748 !important; color: #e2e8f0 !important; border: 1px solid rgba(255,255,255,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        
-        .btn-favorite-cat { background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 100%) !important; border: 1px solid var(--theme-primary) !important; color: var(--theme-primary) !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; font-weight: bold !important; box-shadow: 0 8px 25px rgba(212,175,55,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important; letter-spacing: 2px; }
 
         input, textarea, select { width: 100%; background: var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); padding: 14px 18px; border-radius: 16px; margin-bottom: 14px; font-size: 1rem; outline: none; font-family: inherit; transition: border 0.3s, background 0.5s, color 0.5s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
         input[type="search"] { padding: 10px 18px; border-radius: 20px; margin-bottom: 12px; font-size: 0.95rem; }
@@ -129,7 +127,6 @@
         .bar:nth-child(2) { animation-delay: 0.2s; } .bar:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0% { transform: scaleY(0.25); } 100% { transform: scaleY(1); } }
 
-        /* 🚀 核心更新：重定向个人中心并传递 localStorage 状态流 */
         .user-profile-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 44px; height: 44px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); transition: all 0.3s; overflow: hidden; padding: 0; flex-shrink: 0; }
         .user-profile-btn:active { transform: scale(0.9); }
         .user-avatar-preview { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
@@ -174,19 +171,6 @@
         .sync-container.merged .girl { transform: translateX(0); opacity: 1; border-left: transparent; }
         .sync-half.single-up { width: 100%; height: 100%; left: 0; top: 0; background-position: center; transform: translateY(120%); opacity: 0; border: none; transition: all 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .sync-container.merged .single-up { transform: translateY(0); opacity: 1; }
-
-        .long-press-area { 
-            position: relative; width: 160px; height: 160px; border-radius: 50%; 
-            background: linear-gradient(135deg, var(--theme-glass-bg), transparent); 
-            box-shadow: 0 15px 45px var(--theme-glass-shadow), inset 0 2px 5px var(--theme-glass-inset); 
-            display: flex; justify-content: center; align-items: center; margin: 3rem auto; 
-            cursor: pointer; overflow: hidden; border: 1px solid var(--theme-glass-border); 
-            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s; 
-            touch-action: none; -webkit-user-select: none; -webkit-touch-callout: none; user-select: none;
-        }
-        .long-press-area.pressing { transform: scale(0.92); box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 2px 10px rgba(0,0,0,0.1); }
-        .press-text { font-weight: bold; color: var(--theme-text); z-index: 2; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); text-align: center; pointer-events: none; }
-        .press-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to top, var(--theme-primary), var(--theme-secondary)); opacity: 0.95; z-index: 1; box-shadow: inset 0 3px 5px rgba(255,255,255,0.4); pointer-events: none; }
 
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; overscroll-behavior-y: none; }
         .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 25px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
@@ -256,6 +240,65 @@
             .player-progress-bar-container { margin-top: 10px; padding-top: 15px; }
         }
 
+        /* ================= 🚀 核心修复：操作卡片与按钮精致化重构 ================= */
+        .content-card-beautiful {
+            width: 100% !important; 
+            max-width: 680px !important; /* 电脑端不至于太宽 */
+            min-height: 40vh !important;
+            margin: 0 auto 30px auto !important; /* 居中并留出底部空间 */
+            padding: 40px 35px !important;
+            border-radius: 32px !important;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08), inset 0 2px 5px rgba(255,255,255,0.5) !important;
+            flex: none !important; /* 取消原有的 flex: 1，防止被无限拉伸 */
+        }
+
+        .btn-beautiful {
+            width: 90% !important;
+            max-width: 340px !important; /* 控制最大宽度 */
+            border-radius: 50px !important;
+            padding: 18px !important;
+            font-size: 1.15rem !important;
+            letter-spacing: 2px !important;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4), inset 0 2px 4px rgba(255,255,255,0.3) !important;
+        }
+
+        /* 长按按钮精致化与动画重构 */
+        .long-press-area {
+            width: 150px !important; height: 150px !important;
+            border-radius: 50% !important;
+            background: #f8fafc !important; /* 纯净底色 */
+            border: 2px solid #e2e8f0 !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1), inset 0 4px 10px rgba(255,255,255,0.8) !important;
+            display: flex; justify-content: center; align-items: center;
+            margin: 10px auto; overflow: hidden; position: relative;
+            cursor: pointer; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            -webkit-user-select: none; user-select: none; touch-action: none;
+        }
+        .long-press-area.pressing {
+            transform: scale(0.92) !important;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1), inset 0 6px 15px rgba(0,0,0,0.05) !important;
+        }
+        .press-text {
+            font-weight: 900 !important; color: #1e293b !important;
+            z-index: 5 !important; font-size: 1.15rem !important; 
+            text-align: center; pointer-events: none;
+            letter-spacing: 1px; text-shadow: none !important; transition: 0.3s;
+        }
+        .press-fill {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
+            background: linear-gradient(to top, #6366f1, #818cf8) !important;
+            z-index: 1 !important; opacity: 0.9;
+            /* 核心修复：1.5秒线性平滑填充动画 (CSS硬件加速，绝对不卡顿) */
+            transition: height 1.5s linear !important;
+            pointer-events: none;
+        }
+        .long-press-area.pressing .press-fill {
+            height: 100% !important;
+        }
+        /* 充满时文字反白变色，视觉更明显 */
+        .long-press-area.filled .press-text, .long-press-area.pressing.filled .press-text {
+            color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+        }
     </style>
 </head>
 <body class="light-theme">
@@ -275,7 +318,6 @@
         <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
     </div>
     
-    <!-- 🚀 核心更新：重定向个人中心并传递 localStorage 状态流 -->
     <div class="user-profile-btn" id="user-widget" onclick="if(typeof currentUserAccount !== 'undefined' && currentUserAccount) { localStorage.setItem('activeUser', currentUserAccount); localStorage.setItem('isAdminAuth', state.isAdmin); window.location.href='user-profile.html'; }">
         <img id="user-widget-avatar" class="user-avatar-preview" src="">
         <svg id="user-widget-svg" class="user-svg-icon" viewBox="0 0 24 24">
@@ -315,7 +357,6 @@
         </div>
     </div>
 
-    <!-- 🚀 核心修复：解除垂直居中锁定，注入向上挤压的流体力学排版 -->
     <div class="screen" id="screen-stage" style="justify-content: flex-start; padding-top: calc(env(safe-area-inset-top) + 8vh);">
         <h1 style="margin-top:0; font-size: clamp(2.2rem, 6vw, 3.2rem); letter-spacing: 4px;">恒久印记</h1>
         <p class="slogan-verse" style="margin-bottom: 50px; font-size: clamp(1rem, 4vw, 1.2rem);">选择生命当前的季节，开始今日的探索</p>
@@ -368,19 +409,32 @@
         <button class="btn-glass btn-primary" id="btn-sync-confirm" onclick="window.triggerSync()">确 认 合 并</button>
     </div>
 
-    <div class="screen center-content" id="screen-content">
+    <!-- 🚀 核心修复：解除垂直重力场，重构上下呼吸留白 -->
+    <div class="screen" id="screen-content" style="justify-content: flex-start; padding-top: calc(env(safe-area-inset-top) + 6vh);">
         <div class="progress-bar" id="content-progress">
             <div class="progress-dot" id="dot-1"></div><div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
         </div>
-        <div class="glass-panel" style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin-bottom: 25px; min-height: 55vh;">
+        
+        <!-- 卡片精致化 -->
+        <div class="glass-panel content-card-beautiful">
             <h2 id="content-type-title" style="display: none;"></h2>
             <h1 id="step-title" style="color: var(--theme-primary); font-size: 1.8rem; margin-bottom: 2rem;"></h1>
             <p id="step-text" style="font-size: 1.2rem; text-align: left; text-align-last: left; line-height: 2.2; padding: 0 10px;"></p>
         </div>
         
-        <div id="action-area" style="width: 100%; min-height: 160px;">
-            <button class="btn-glass btn-primary" id="btn-next-step" onclick="window.nextContentStep()">进 入 下 一 步</button>
-            <div class="long-press-area" id="btn-long-press" style="display: none;">
+        <!-- 按钮区精致化 -->
+        <div id="action-area" style="width: 100%; display: flex; justify-content: center; min-height: 160px;">
+            <button class="btn-glass btn-primary btn-beautiful" id="btn-next-step" onclick="window.nextContentStep()">进 入 下 一 步</button>
+            
+            <!-- 🚀 核心修复：内联神级事件拦截器，防死锁，绝无丢失可能 -->
+            <div class="long-press-area" id="btn-long-press" style="display: none;"
+                 onmousedown="window.handleStartPress(event)" 
+                 onmouseup="window.handleEndPress(event)" 
+                 onmouseleave="window.handleEndPress(event)" 
+                 ontouchstart="window.handleStartPress(event)" 
+                 ontouchend="window.handleEndPress(event)" 
+                 ontouchcancel="window.handleEndPress(event)" 
+                 oncontextmenu="event.preventDefault();">
                 <div class="press-text" id="press-text-label">内心宣告<br>(长按)</div>
                 <div class="press-fill" id="press-fill"></div>
             </div>
@@ -424,7 +478,7 @@
                     </div>
                     <div class="ctrl-group center">
                         <div class="ctrl-btn" onclick="window.prevTrack()" title="上一首">⏮</div>
-                        <div class="ctrl-btn play-pause" onclick="window.togglePlayPause()" id="btn-play-pause">▶️️</div>
+                        <div class="ctrl-btn play-pause" onclick="window.togglePlayPause()" id="btn-play-pause">▶</div>
                         <div class="ctrl-btn" onclick="window.nextTrack()" title="下一首">⏭</div>
                     </div>
                     <div class="ctrl-group right">
@@ -503,6 +557,45 @@
         </div>
     </div>
 </div>
+
+<!-- ================= 🚀 核心修复：独立长按判定引擎 (完全避开老版本的兼容性死锁) ================= -->
+<script>
+    let pressTimer = null;
+    
+    window.handleStartPress = function(e) {
+        if (e && e.type === 'touchstart') e.preventDefault(); 
+        
+        const area = document.getElementById('btn-long-press');
+        if (!area) return;
+
+        area.classList.add('pressing');
+        
+        if (pressTimer) clearTimeout(pressTimer);
+        pressTimer = setTimeout(() => {
+            area.classList.add('filled');
+            setTimeout(() => {
+                area.classList.remove('pressing', 'filled');
+                if(typeof window.completeAction === 'function') window.completeAction();
+            }, 150); // 充满后稍等 150ms 闪烁一下再跳转，让肉眼捕捉到完成状态
+        }, 1500); // 严格控制 1.5 秒
+    };
+
+    window.handleEndPress = function(e) {
+        if (e && e.type === 'touchend') e.preventDefault();
+        
+        const area = document.getElementById('btn-long-press');
+        if (area) {
+            area.classList.remove('pressing');
+            area.classList.remove('filled');
+        }
+        
+        // 鼠标松开或手指滑出，立即中止计时
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+        }
+    };
+</script>
 
 <!-- ================= 一劳永逸自动防缓存加载引擎 ================= -->
 <script>
