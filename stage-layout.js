@@ -1,7 +1,7 @@
 /**
  * 恒久印记 - 全端对称响应式布局与动态顶栏引擎
  * 文件名: stage-layout.js
- * 更新内容: 顶栏美学重构(药丸胶囊)、注入HTML5原生拖拽排序(Drag & Drop)、极速同步引擎
+ * 更新内容: 顶栏美学重构、修复苹果手机端一行一个的拥挤Bug，强制实施 2个一行 完美对称
  */
 
 (function initFluidLayout() {
@@ -104,14 +104,32 @@
                 .stage-card-flex { width: calc(33.333% - 25px); min-width: 110px; padding: 25px 10px 20px 10px; border-radius: 26px; } 
             }
             @media (max-width: 480px) { 
-                /* 手机端：极限压缩间距，严格锁定 3个一行，杜绝换行溢出 */
+                /* 手机端：主模块极限压缩间距，严格锁定 3个一行，杜绝换行溢出 */
                 .stage-array-flex { gap: 12px; padding: 5px; }
                 .stage-card-flex { width: calc(33.333% - 12px); min-width: 90px; padding: 20px 5px 15px 5px; border-radius: 22px; }
                 .stage-icon-dropzone { margin-bottom: 12px !important; border-width: 1px; }
                 .stage-card-title { font-size: 0.9rem !important; }
-                .brand-capsule-dynamic { min-width: 140px; padding: 6px 20px 6px 6px; height: 48px; }
+                
+                /* 🚀 核心修复：手机端顶栏模块强制 2个一行，完美对称 */
+                .top-modules-wrapper { gap: 12px 14px !important; margin-bottom: 35px !important; padding: 0 5px; }
+                .brand-capsule-dynamic { 
+                    width: calc(50% - 7px) !important; /* 精确计算：强制占据 50% 减去 gap 的一半 */
+                    min-width: 0 !important; 
+                    padding: 5px 8px 5px 5px !important; 
+                    height: 48px !important; 
+                    justify-content: center !important; /* 内容完美居中 */
+                }
                 .brand-capsule-dynamic img { width: 34px !important; height: 34px !important; }
-                .brand-capsule-dynamic input { font-size: 1rem !important; max-width: 100px !important; }
+                .brand-capsule-dynamic input { 
+                    font-size: 0.95rem !important; 
+                    letter-spacing: 0.5px !important; /* 缩小间距防溢出 */
+                    max-width: calc(100% - 40px) !important; /* 预留给图片的宽度 */
+                    min-width: 0 !important; 
+                    text-overflow: ellipsis !important; 
+                    white-space: nowrap !important; 
+                    overflow: hidden !important; 
+                    margin-left: 4px !important;
+                }
             }
         `;
         document.head.appendChild(style);
