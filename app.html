@@ -129,6 +129,7 @@
         .bar:nth-child(2) { animation-delay: 0.2s; } .bar:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce { 0% { transform: scaleY(0.25); } 100% { transform: scaleY(1); } }
 
+        /* 🚀 核心更新：重定向个人中心并传递 localStorage 状态流 */
         .user-profile-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 44px; height: 44px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); transition: all 0.3s; overflow: hidden; padding: 0; flex-shrink: 0; }
         .user-profile-btn:active { transform: scale(0.9); }
         .user-avatar-preview { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
@@ -324,11 +325,6 @@
             .player-progress-bar-container { margin-top: 10px; padding-top: 15px; }
         }
 
-        .profile-avatar-zone { width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 15px auto; background-color: var(--theme-input-bg); border: 2px dashed var(--theme-primary); display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; position: relative; box-shadow: 0 8px 20px var(--theme-glass-shadow); }
-        .profile-avatar-zone img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .profile-avatar-zone::after { content: '修改头像'; position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.65rem; padding: 4px 0; text-align: center; opacity: 0; transition: opacity 0.3s; }
-        .profile-avatar-zone:hover::after { opacity: 1; }
-
     </style>
 </head>
 <body class="light-theme">
@@ -348,7 +344,8 @@
         <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
     </div>
     
-    <div class="user-profile-btn" id="user-widget" onclick="window.openUserProfile()">
+    <!-- 🚀 核心更新：重定向个人中心并传递 localStorage 状态流 -->
+    <div class="user-profile-btn" id="user-widget" onclick="if(typeof currentUserAccount !== 'undefined' && currentUserAccount) { localStorage.setItem('activeUser', currentUserAccount); localStorage.setItem('isAdminAuth', state.isAdmin); window.location.href='user-profile.html'; }">
         <img id="user-widget-avatar" class="user-avatar-preview" src="">
         <svg id="user-widget-svg" class="user-svg-icon" viewBox="0 0 24 24">
             <circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path>
@@ -473,64 +470,6 @@
 </div>
 
 <!-- ================ 模态弹窗区 ================ -->
-
-<div class="modal-overlay" id="user-profile-modal">
-    <div class="modal-content" style="text-align: center; max-width: 320px; padding: 25px;">
-        <h2 class="text-gradient-blue" style="margin-bottom: 20px; font-size:1.6rem;">个人中心</h2>
-        
-        <div class="profile-avatar-zone" onclick="document.getElementById('profile-avatar-upload').click()">
-            <img id="profile-avatar-img" src="">
-            <svg id="profile-svg-placeholder" class="user-svg-icon" style="width:35px; height:35px; opacity:0.6; color:var(--theme-primary);" viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path>
-            </svg>
-        </div>
-        <input type="file" id="profile-avatar-upload" accept="image/*" style="display:none;" onchange="window.handleProfileAvatar(this)">
-
-        <input type="text" id="profile-nickname-input" placeholder="自定义个性昵称" style="text-align:center; padding: 12px 15px;">
-        
-        <div id="user-license-info" style="margin-top: 15px; padding: 20px; background: rgba(0,0,0,0.15); border-radius: 20px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
-            <div style="margin-bottom: 16px; font-size: 15px; letter-spacing: 1px;">剩余时空授权：<span id="user-days-left" style="color: #fde68a; font-weight: bold; font-size: 24px;">--</span> 天</div>
-            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-                <input type="text" id="ipt-renew-key" placeholder="在此输入16位新卡密续期" style="margin:0; width: 100%; padding: 14px 15px; font-size: 13px; text-align: center; border-radius: 14px; letter-spacing: 1px; box-sizing: border-box;">
-                <button class="btn-glass btn-blue-gradient" style="margin:0; width: 100%; padding: 12px; border-radius: 14px; font-size: 13px; font-weight: bold; letter-spacing: 1px;" onclick="window.handleRenew()">⚡ 立 即 续 费</button>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 15px; margin-top: 20px;">
-            <button class="btn-glass btn-primary" style="margin:0; flex:1; border-radius:18px; padding: 12px; color: #111 !important;" onclick="window.saveUserProfile()">保 存 资 料</button>
-            <button class="btn-glass btn-type-dark" style="margin:0; flex:1; border-radius:18px; padding: 12px;" onclick="window.hideModal('user-profile-modal')">取 消</button>
-        </div>
-
-        <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 25px;">
-            <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; background:transparent; padding: 0.8rem; border-radius:18px;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
-            <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.open('music-admin.html', '_blank');">⚙️ 全局音律库管理 (管理员专属)</button>
-            
-            <button class="btn-glass" style="width: 100%; border: 1px dashed #f59e0b; color: #f59e0b; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.openAuthAdmin();">🛡️ 全局时空权限管理 (管理员专属)</button>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="auth-admin-modal">
-    <div class="modal-content" style="padding: 25px; max-width: 420px; background: var(--theme-bg-color);">
-        <h2 class="text-gradient-blue" style="margin-bottom: 20px; font-size: 1.5rem;">🛡️ 时空权限指挥中心</h2>
-        
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--theme-primary); border-radius: 16px; padding: 15px; margin-bottom: 20px;">
-            <h4 style="color: var(--theme-primary); margin-bottom: 15px; font-size: 1.1rem;">💳 制造时空密钥</h4>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <button class="btn-glass btn-blue-gradient" style="flex: 1; padding: 10px; margin: 0; font-size: 13px; border-radius: 12px;" onclick="window.generateKey(7)">生成 7天卡</button>
-                <button class="btn-glass btn-primary" style="flex: 1; padding: 10px; margin: 0; font-size: 13px; border-radius: 12px; color: #111 !important;" onclick="window.generateKey(365)">生成 365天卡</button>
-            </div>
-            <div id="admin-key-list" style="max-height: 180px; overflow-y: auto; font-size: 12px; padding-right: 5px;"></div>
-        </div>
-
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid #ef4444; border-radius: 16px; padding: 15px;">
-            <h4 style="color: #ef4444; margin-bottom: 15px; font-size: 1.1rem;">⚖️ 极速风控</h4>
-            <div id="admin-user-list" style="max-height: 220px; overflow-y: auto; font-size: 12px; padding-right: 5px;"></div>
-        </div>
-
-        <button class="btn-glass btn-type-dark" style="width: 100%; margin-top: 25px; padding: 12px; border-radius: 18px;" onclick="window.hideModal('auth-admin-modal')">关 闭 控 制 台</button>
-    </div>
-</div>
 
 <div class="modal-overlay" id="music-type-modal">
     <div class="modal-content music-type-modal-content" style="text-align: center; max-width: 340px;">
