@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 修复打开文档显示白板问题，自动展示第一篇文档内容
+ * 更新内容: 新增分类与文档的重命名(编辑)功能，严格隔离游客权限
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.1 (自动展示内容修复版)");
+    console.log("🚀 成功加载知识库引擎 V7.2 (新增重命名管理版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -130,10 +130,10 @@
             }
             
             /* 修正内部所有元素的默认对齐，抵抗外部污染 */
-            .doc-paper p { text-align: justify !important; text-align-last: left !important; margin-bottom: 15px; }
-            .doc-paper h1, .doc-paper h2, .doc-paper h3, .doc-paper h4 { text-align: left !important; margin: 20px 0 15px 0; }
-            .doc-paper ul, .doc-paper ol { text-align: left !important; padding-left: 2.5em; margin-bottom: 15px; }
-            .doc-paper li { text-align: justify !important; margin-bottom: 5px; }
+            .doc-paper p { text-align: justify; margin-bottom: 15px; }
+            .doc-paper h1, .doc-paper h2, .doc-paper h3, .doc-paper h4 { text-align: left; margin: 20px 0 15px 0; }
+            .doc-paper ul, .doc-paper ol { text-align: left; padding-left: 2.5em; margin-bottom: 15px; }
+            .doc-paper li { text-align: justify; margin-bottom: 5px; }
             
             .doc-paper img, .doc-paper video { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
             .doc-paper audio { width: 100%; margin: 15px 0; outline: none; }
@@ -292,19 +292,12 @@
     let activeArticleId = null;
 
     // 3. 核心 API: 打开整个知识库系统
-    window.openCounselingDoc = async function(systemId) {
+    window.openCounselingDoc = function(systemId) {
         if (!systemId) systemId = 'sys_default_doc';
         currentSystemId = systemId;
         activeArticleId = null;
         
-        // 🔥 游客点开文档瞬间，强制从 R2 拉取全网最新数据！保证绝对及时！
-        if (typeof state !== 'undefined' && !state.isAdmin) {
-            if (typeof window.forceCloudSync === 'function') {
-                if(typeof window.showGlobalToast === 'function') window.showGlobalToast('同步最新文档库...', 'loading');
-                await window.forceCloudSync();
-            }
-        }
-
+        // 自动初始化安全结构
         if (!db.docSystems) db.docSystems = {};
         if (!db.docSystems[systemId]) {
             db.docSystems[systemId] = {
@@ -317,7 +310,7 @@
         const sidebar = document.getElementById('doc-sidebar');
         
         // 站长全开权限，游客强制阅读降级
-        if (typeof state !== 'undefined' && state.isAdmin) {
+        if (state.isAdmin) {
             modal.classList.add('admin-mode');
             modal.classList.remove('reader-mode');
             document.getElementById('doc-editor').setAttribute('contenteditable', 'true');
@@ -332,19 +325,20 @@
 
         window.renderKBSidebar();
         
-        // 🔥 自动选中第一篇文档，告别白板页面！
-        let firstArticleFound = false;
-        if (db.docSystems[currentSystemId] && db.docSystems[currentSystemId].categories) {
-            for (let cat of db.docSystems[currentSystemId].categories) {
-                if (cat.articles && cat.articles.length > 0) {
-                    window.kbSelectArticle(cat.id, cat.articles[0].id);
-                    firstArticleFound = true;
+        // 🔥 自动展示第一篇文章逻辑
+        let hasArticle = false;
+        const sys = db.docSystems[currentSystemId];
+        if (sys && sys.categories) {
+            for (let i = 0; i < sys.categories.length; i++) {
+                if (sys.categories[i].articles && sys.categories[i].articles.length > 0) {
+                    window.kbSelectArticle(sys.categories[i].id, sys.categories[i].articles[0].id);
+                    hasArticle = true;
                     break;
                 }
             }
         }
         
-        if (!firstArticleFound) {
+        if (!hasArticle) {
             window.kbShowEmptyState(); 
         }
 
@@ -383,10 +377,12 @@
             
             const catTitle = document.createElement('div');
             catTitle.className = 'kb-category-title';
+            // 🔥 新增：分类名称的重命名(✎)按钮
             catTitle.innerHTML = `
-                <span>${cat.name}</span>
-                <div>
+                <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cat.name}</span>
+                <div style="display:flex; flex-shrink:0;">
                     <button class="kb-admin-btn" onclick="window.kbAddArticle('${cat.id}')" title="添加文章">➕</button>
+                    <button class="kb-admin-btn" style="color:#f59e0b;" onclick="window.kbEditCategory('${cat.id}')" title="重命名分类">✎</button>
                     <button class="kb-admin-btn del" onclick="window.kbDeleteCategory('${cat.id}')" title="删除分类">✖</button>
                 </div>
             `;
@@ -395,13 +391,17 @@
             cat.articles.forEach(art => {
                 const artItem = document.createElement('div');
                 artItem.className = `kb-article-item ${art.id === activeArticleId ? 'active' : ''}`;
+                // 🔥 新增：文章标题的重命名(✎)按钮
                 artItem.innerHTML = `
                     <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">📄 ${art.title}</span>
-                    <button class="kb-admin-btn del" style="flex-shrink:0;" onclick="event.stopPropagation(); window.kbDeleteArticle('${cat.id}', '${art.id}')">✖</button>
+                    <div style="display:flex; flex-shrink:0;">
+                        <button class="kb-admin-btn" style="color:#f59e0b;" onclick="event.stopPropagation(); window.kbEditArticle('${cat.id}', '${art.id}')" title="重命名文章">✎</button>
+                        <button class="kb-admin-btn del" onclick="event.stopPropagation(); window.kbDeleteArticle('${cat.id}', '${art.id}')" title="删除文章">✖</button>
+                    </div>
                 `;
                 artItem.onclick = () => {
                     window.kbSelectArticle(cat.id, art.id);
-                    if (window.innerWidth <= 768 || (typeof state !== 'undefined' && !state.isAdmin)) {
+                    if (window.innerWidth <= 768 || !state.isAdmin) {
                         document.getElementById('doc-sidebar').classList.add('collapsed');
                     }
                 };
@@ -416,8 +416,21 @@
         const name = prompt("请输入新分类名称 (如: 夫妻沟通):", "新分类");
         if (!name) return;
         db.docSystems[currentSystemId].categories.push({ id: 'cat_' + Date.now(), name: name, articles: [] });
-        if(typeof window.saveDB === 'function') await window.saveDB();
+        await window.saveDB();
         window.renderKBSidebar();
+    };
+
+    // 🔥 新增：重命名分类功能
+    window.kbEditCategory = async function(catId) {
+        const sys = db.docSystems[currentSystemId];
+        const cat = sys.categories.find(c => c.id === catId);
+        if (!cat) return;
+        const newName = prompt("请输入新的分类名称:", cat.name);
+        if (newName && newName.trim() !== '') {
+            cat.name = newName.trim();
+            if(typeof window.saveDB === 'function') await window.saveDB();
+            window.renderKBSidebar();
+        }
     };
 
     window.kbDeleteCategory = async function(catId) {
@@ -426,7 +439,7 @@
         if (cat.articles.length > 0 && !confirm(`分类 [${cat.name}] 下还有文章，确定连同文章一起彻底删除吗？`)) return;
         sys.categories = sys.categories.filter(c => c.id !== catId);
         if (sys.categories.length === 0) window.kbShowEmptyState();
-        if(typeof window.saveDB === 'function') await window.saveDB();
+        await window.saveDB();
         window.renderKBSidebar();
     };
 
@@ -436,9 +449,32 @@
         const newArt = { id: 'art_' + Date.now(), title: title, content: '' };
         const cat = db.docSystems[currentSystemId].categories.find(c => c.id === catId);
         cat.articles.push(newArt);
-        if(typeof window.saveDB === 'function') await window.saveDB();
+        await window.saveDB();
         window.renderKBSidebar();
         window.kbSelectArticle(catId, newArt.id);
+    };
+
+    // 🔥 新增：重命名文章功能
+    window.kbEditArticle = async function(catId, artId) {
+        const sys = db.docSystems[currentSystemId];
+        const cat = sys.categories.find(c => c.id === catId);
+        if (!cat) return;
+        const art = cat.articles.find(a => a.id === artId);
+        if (!art) return;
+        
+        const newTitle = prompt("请输入新的文章标题:", art.title);
+        if (newTitle && newTitle.trim() !== '') {
+            art.title = newTitle.trim();
+            
+            // 如果修改的是当前正在阅读的文章，同步更新右侧顶部的标题栏
+            if (activeArticleId === artId) {
+                const titleInput = document.getElementById('doc-title');
+                if (titleInput) titleInput.value = art.title;
+            }
+            
+            if(typeof window.saveDB === 'function') await window.saveDB();
+            window.renderKBSidebar();
+        }
     };
 
     window.kbDeleteArticle = async function(catId, artId) {
@@ -446,7 +482,7 @@
         const cat = db.docSystems[currentSystemId].categories.find(c => c.id === catId);
         cat.articles = cat.articles.filter(a => a.id !== artId);
         if (activeArticleId === artId) window.kbShowEmptyState();
-        if(typeof window.saveDB === 'function') await window.saveDB();
+        await window.saveDB();
         window.renderKBSidebar();
     };
 
@@ -493,7 +529,7 @@
         const content = editor.innerHTML;
         
         // 核心安全防崩溃判定
-        if (typeof db === 'undefined' || !db) return window.showGlobalToast('数据库未就绪', 'error');
+        if (!db) return window.showGlobalToast('数据库未就绪', 'error');
         if (!db.docSystems) db.docSystems = {};
         if (!db.docSystems[currentSystemId]) return window.showGlobalToast('知识库异常', 'error');
         
@@ -526,11 +562,11 @@
 
     // 拖拽多媒体支持
     editorWrapper.addEventListener('dragover', (e) => {
-        if(typeof state !== 'undefined' && state.isAdmin) { e.preventDefault(); editorWrapper.classList.add('drag-over'); }
+        if(state.isAdmin) { e.preventDefault(); editorWrapper.classList.add('drag-over'); }
     });
     editorWrapper.addEventListener('dragleave', (e) => { editorWrapper.classList.remove('drag-over'); });
     editorWrapper.addEventListener('drop', (e) => {
-        if(typeof state !== 'undefined' && state.isAdmin) {
+        if(state.isAdmin) {
             e.preventDefault();
             editorWrapper.classList.remove('drag-over');
             if (e.dataTransfer.files.length > 0) processDocFiles(e.dataTransfer.files);
@@ -545,7 +581,7 @@
     };
 
     async function processDocFiles(files) {
-        if(typeof window.showGlobalToast === 'function') window.showGlobalToast(`正在将 ${files.length} 个附件极速直传至云端...`, 'loading');
+        window.showGlobalToast(`正在将 ${files.length} 个附件极速直传至云端...`, 'loading');
         editor.focus(); 
         
         for (let i = 0; i < files.length; i++) {
@@ -554,10 +590,10 @@
                 const url = await uploadToR2(file);
                 insertMediaToEditor(url, file.type, file.name);
             } catch (err) {
-                if(typeof window.showGlobalToast === 'function') window.showGlobalToast(`文件 ${file.name} 上传失败`, 'error');
+                window.showGlobalToast(`文件 ${file.name} 上传失败`, 'error');
             }
         }
-        if(typeof window.showGlobalToast === 'function') window.showGlobalToast('所有附件处理完毕', 'success');
+        window.showGlobalToast('所有附件处理完毕', 'success');
         window.saveCounselingDoc(); 
     }
 
