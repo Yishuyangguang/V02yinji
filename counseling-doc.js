@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 新增分类与文档重命名、修复全局居中污染、新增两端对齐按钮、恢复原生粘贴格式保留
+ * 更新内容: 新增分类重命名、修复全局居中污染、新增两端对齐、修复下拉菜单失焦导致字体修改无效的史诗级Bug
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.3 (排版隔离与对齐修复版)");
+    console.log("🚀 成功加载知识库引擎 V7.4 (终极选区防丢与字体修复版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -177,6 +177,18 @@
         document.head.appendChild(style);
     }
 
+    // ================== 核心修复：富文本选区追踪引擎 ==================
+    // 解决因点击下拉菜单、颜色选择器导致编辑器失焦，从而格式修改无效的史诗级 Bug
+    window.docSavedRange = null;
+    document.addEventListener('selectionchange', () => {
+        const sel = window.getSelection();
+        const editor = document.getElementById('doc-editor');
+        // 严格边界防御：确保只有当选区在富文本编辑器内部时，才去记录快照
+        if (sel.rangeCount > 0 && editor && editor.contains(sel.anchorNode)) {
+            window.docSavedRange = sel.getRangeAt(0);
+        }
+    });
+
     // 2. 注入文档系统的 HTML 骨架
     const docModalHTML = `
         <div class="doc-modal-overlay" id="counseling-doc-modal">
@@ -224,18 +236,22 @@
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
                         <div class="doc-tool-separator"></div>
                         
-                        <select class="doc-tool-select" onchange="window.docExec('fontName', this.value)" title="字体集">
+                        <!-- 🔥修复点：加入隐藏的占位符，并在执行后重置selectedIndex，解决同一字体无法二次点击的Bug -->
+                        <select class="doc-tool-select" onchange="window.docExec('fontName', this.value); this.selectedIndex=0;" title="字体集">
+                            <option value="" disabled selected hidden>修改字体</option>
                             <option value="Arial">默认字体</option>
-                            <option value="SimSun">宋体</option>
-                            <option value="KaiTi">楷体</option>
-                            <option value="Microsoft YaHei">微软雅黑</option>
-                            <option value="SimHei">黑体</option>
+                            <option value="楷体, KaiTi">楷体</option>
+                            <option value="宋体, SimSun">宋体</option>
+                            <option value="微软雅黑, Microsoft YaHei">微软雅黑</option>
+                            <option value="黑体, SimHei">黑体</option>
                         </select>
                         <div class="doc-tool-separator"></div>
 
-                        <select class="doc-tool-select" onchange="window.docExec('fontSize', this.value)" title="文章字号排版">
+                        <!-- 🔥修复点：加入隐藏的占位符，并在执行后重置selectedIndex -->
+                        <select class="doc-tool-select" onchange="window.docExec('fontSize', this.value); this.selectedIndex=0;" title="文章字号排版">
+                            <option value="" disabled selected hidden>修改字号</option>
                             <option value="3">稍小 (Small)</option>
-                            <option value="4" selected>内容大小 (Normal)</option>
+                            <option value="4">标准 (Normal)</option>
                             <option value="5">偏大 (Large)</option>
                             <option value="6">小标题 (Sub-title)</option>
                             <option value="7">主标题 (Main Title)</option>
@@ -261,7 +277,6 @@
                         <button class="doc-tool-btn" onclick="window.docExec('justifyLeft')" title="左对齐">⇦</button>
                         <button class="doc-tool-btn" onclick="window.docExec('justifyCenter')" title="居中">⇨⇦</button>
                         <button class="doc-tool-btn" onclick="window.docExec('justifyRight')" title="右对齐">⇨</button>
-                        <!-- 🔥 新增：两端对齐按钮 -->
                         <button class="doc-tool-btn" onclick="window.docExec('justifyFull')" title="两端对齐" style="font-size: 14px; font-weight: 900;">⇔</button>
                         <div class="doc-tool-separator"></div>
 
@@ -557,7 +572,16 @@
 
     // ================== R2 富文本与多媒体引擎 ==================
     window.docExec = function(command, value = null) {
-        document.getElementById('doc-editor').focus();
+        const editor = document.getElementById('doc-editor');
+        editor.focus();
+        
+        // 💥 终极修复：从失焦的控件（如下拉菜单、颜色选择器）回来时，精准还原高亮选区
+        if (window.docSavedRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(window.docSavedRange);
+        }
+        
         document.execCommand(command, false, value);
     };
 
