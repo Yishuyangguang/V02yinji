@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>个人中心 - 恒久印记</title>
+    <style>
+        :root {
+            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --theme-primary: #d4af37;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: #1c1d22; /* 沉浸式暗色背景 */
+            font-family: var(--font-main); 
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 20px;
+        }
+
+        /* 核心卡片：完美对称、防挤压溢出 */
+        .profile-card {
+            width: 100%; max-width: 420px; 
+            background: #f8f6f0; /* 温柔护眼的暖白底色 */
+            border-radius: 32px; 
+            padding: 40px 30px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .page-title {
+            color: #6366f1; font-size: 1.8rem; font-weight: bold; letter-spacing: 2px; margin-bottom: 30px; text-shadow: 0 1px 2px rgba(99,102,241,0.2);
+        }
+
+        /* 头像区域 */
+        .avatar-zone { 
+            width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 25px auto; 
+            background-color: #ffffff; border: 2px dashed #d4af37; 
+            display: flex; justify-content: center; align-items: center; 
+            overflow: hidden; cursor: pointer; position: relative; box-shadow: 0 8px 25px rgba(212,175,55,0.25); 
+        }
+        .avatar-zone img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .avatar-zone svg { width: 45px; height: 45px; color: #d4af37; opacity: 0.7; }
+        .avatar-zone::after { content: '修改头像'; position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; padding: 5px 0; text-align: center; opacity: 0; transition: opacity 0.3s; }
+        .avatar-zone:hover::after { opacity: 1; }
+
+        /* 昵称输入框 */
+        .nickname-input {
+            width: 100%; background: #ffffff; border: 1px solid #e2e8f0; color: #1e293b;
+            padding: 18px; border-radius: 16px; margin-bottom: 25px; 
+            font-size: 1.1rem; font-weight: bold; text-align: center; outline: none; transition: 0.3s;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.03); letter-spacing: 1px;
+        }
+        .nickname-input:focus { border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+        .nickname-input::placeholder { color: #94a3b8; font-weight: normal; }
+
+        /* 时空授权信息卡片 */
+        .license-box {
+            width: 100%; background: #cbd5e1; border-radius: 20px; padding: 25px 20px;
+            display: flex; flex-direction: column; align-items: center; margin-bottom: 30px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .license-text {
+            font-size: 1.05rem; color: #334155; margin-bottom: 18px; letter-spacing: 1px;
+        }
+        .days-highlight {
+            font-size: 1.6rem; font-weight: 900; color: #f59e0b; text-shadow: 0 1px 2px rgba(245,158,11,0.2); margin: 0 5px;
+        }
+        .renew-input {
+            width: 100%; background: #f8fafc; border: 1px solid #94a3b8; color: #1e293b;
+            padding: 16px; border-radius: 14px; text-align: center; font-size: 0.95rem; 
+            margin-bottom: 12px; outline: none; letter-spacing: 1px;
+        }
+        .renew-input:focus { border-color: #6366f1; }
+        .btn-renew {
+            width: 100%; background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); color: #1e293b;
+            font-weight: bold; padding: 15px; border-radius: 14px; border: 1px solid #94a3b8; 
+            cursor: pointer; transition: 0.2s; font-size: 1rem; letter-spacing: 2px;
+        }
+        .btn-renew:active { transform: scale(0.97); }
+
+        /* 主操作按钮（保存/取消） */
+        .action-group {
+            display: flex; width: 100%; gap: 15px; margin-bottom: 30px;
+        }
+        .btn-main {
+            flex: 1; padding: 16px; border-radius: 16px; font-weight: bold; font-size: 1.1rem;
+            border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; letter-spacing: 2px;
+        }
+        .btn-save {
+            background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%); color: #111;
+            box-shadow: 0 8px 20px rgba(245,158,11,0.3);
+        }
+        .btn-cancel {
+            background: #334155; color: #fff;
+            box-shadow: 0 8px 20px rgba(51,65,85,0.3);
+        }
+        .btn-main:active { transform: scale(0.96); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        /* 管理员专属功能区 */
+        .admin-zone {
+            width: 100%; display: none; flex-direction: column; gap: 15px;
+            padding-top: 10px;
+        }
+        .btn-admin {
+            width: 100%; padding: 18px; border-radius: 20px; font-weight: bold; font-size: 1.05rem;
+            background: transparent; cursor: pointer; transition: 0.2s; letter-spacing: 1px;
+        }
+        .btn-admin:active { transform: scale(0.97); background: rgba(0,0,0,0.02); }
+        .btn-red { border: 1px dashed #ef4444; color: #ef4444; }
+        .btn-blue { border: 1px dashed #6366f1; color: #6366f1; }
+        .btn-orange { border: 1px dashed #f59e0b; color: #f59e0b; }
+
+        /* 吐司提示 */
+        .toast {
+            position: fixed; top: -60px; left: 50%; transform: translateX(-50%);
+            background: #1f2937; color: #fff; padding: 12px 25px; border-radius: 30px;
+            font-size: 1rem; z-index: 9999; box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: bold; letter-spacing: 1px;
+        }
+        .toast.show { top: 40px; }
+        
+        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(28,29,34,0.9); display:flex; justify-content:center; align-items:center; z-index: 500; font-weight:bold; color:#d4af37; font-size: 1.2rem; transition: 0.3s; }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ 操作成功</div>
+<div class="loading-overlay" id="loading-overlay">⏳ 同步时空数据...</div>
+
+<div class="profile-card">
+    <div class="page-title">个人中心</div>
+    
+    <div class="avatar-zone" onclick="document.getElementById('avatar-upload').click()">
+        <img id="avatar-img" src="">
+        <svg id="avatar-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+        </svg>
+    </div>
+    <input type="file" id="avatar-upload" accept="image/*" style="display:none;" onchange="handleAvatar(this)">
+
+    <input type="text" id="nickname-input" class="nickname-input" placeholder="自定义个性昵称" autocomplete="off">
+    
+    <div class="license-box">
+        <div class="license-text">剩余时空授权：<span class="days-highlight" id="days-left">--</span> 天</div>
+        <input type="text" id="ipt-renew-key" class="renew-input" placeholder="在此输入16位新卡密续期" autocomplete="off">
+        <button class="btn-renew" onclick="handleRenew()">⚡ 立 即 续 费</button>
+    </div>
+
+    <div class="action-group">
+        <button class="btn-main btn-save" onclick="saveProfile()">保 存 资 料</button>
+        <button class="btn-main btn-cancel" onclick="goBack()">取 消</button>
+    </div>
+
+    <div class="admin-zone" id="admin-zone">
+        <button class="btn-admin btn-red" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
+        <button class="btn-admin btn-blue" onclick="window.open('music-admin.html', '_blank')">⚙️ 全局音律库管理 (管理员专属)</button>
+        <button class="btn-admin btn-orange" onclick="window.open('admin-dashboard.html', '_blank')">🛡️ 全局时空权限管理 (管理员专属)</button>
+    </div>
+</div>
+
+<script>
+    let db = null;
+    let toastTimer;
+    
+    // 跨域读取在 app.html 点击头像时存储的用户状态
+    const activeUser = localStorage.getItem('activeUser');
+    const isAdmin = localStorage.getItem('isAdminAuth') === 'true';
+    const authHeader = isAdmin ? 'yishuyangguang' : '';
+
+    if (!activeUser) {
+        alert("鉴权丢失：未登录或状态已过期");
+        window.location.href = 'app.html';
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function goBack() {
+        window.location.href = 'app.html';
+    }
+
+    async function loadData() {
+        try {
+            const res = await fetch('/api/db?t=' + Date.now(), { 
+                headers: isAdmin ? { 'x-admin-auth': authHeader } : {} 
+            });
+            if (!res.ok) throw new Error("网络错误");
+            db = await res.json();
+            
+            if (!db.users || !db.users[activeUser]) {
+                alert("云端查无此账号记录");
+                return goBack();
+            }
+
+            const user = db.users[activeUser];
+            
+            // 渲染头像
+            if (user.avatar) {
+                document.getElementById('avatar-img').src = user.avatar;
+                document.getElementById('avatar-img').style.display = 'block';
+                document.getElementById('avatar-svg').style.display = 'none';
+            }
+            
+            // 渲染昵称
+            document.getElementById('nickname-input').value = user.nickname || '';
+            
+            // 渲染剩余天数
+            if (activeUser === 'yishuyangguang') {
+                document.getElementById('days-left').innerHTML = '永久 <span style="font-size:1rem; opacity:0.8;">(特权)</span>';
+            } else {
+                const now = Date.now();
+                let days = Math.ceil(((user.expireAt || 0) - now) / (1000 * 60 * 60 * 24));
+                if (days < 0) days = 0;
+                document.getElementById('days-left').innerText = user.status === 'banned' ? '已封禁' : days;
+            }
+            
+            // 管理员功能揭示
+            if (isAdmin) document.getElementById('admin-zone').style.display = 'flex';
+
+            document.getElementById('loading-overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 300);
+
+        } catch (e) {
+            alert('⚠️ 无法连接云端数据库');
+            goBack();
+        }
+    }
+
+    function handleAvatar(input) {
+        if(input.files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 240;
+                    let w = img.width, h = img.height;
+                    if(w > h) { if(w > MAX) { h *= MAX/w; w = MAX; } }
+                    else { if(h > MAX) { w *= MAX/h; h = MAX; } }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const base64 = canvas.toDataURL('image/webp', 0.8);
+                    
+                    document.getElementById('avatar-img').src = base64;
+                    document.getElementById('avatar-img').style.display = 'block';
+                    document.getElementById('avatar-svg').style.display = 'none';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function saveProfile() {
+        const nick = document.getElementById('nickname-input').value.trim();
+        const imgEl = document.getElementById('avatar-img');
+        
+        // 排他性昵称校验
+        for(let key in db.users) {
+            if(key !== activeUser && db.users[key].nickname && db.users[key].nickname === nick) {
+                return showToast('⚠️ 该个性昵称已被其他人使用');
+            }
+        }
+        
+        db.users[activeUser].nickname = nick;
+        if(imgEl.style.display === 'block') {
+            db.users[activeUser].avatar = imgEl.src;
+        }
+        
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            if(isAdmin) headers['x-admin-auth'] = authHeader;
+            
+            const res = await fetch('/api/db', {
+                method: 'POST', headers: headers, body: JSON.stringify(db)
+            });
+            if(res.ok) {
+                showToast('✅ 资料已保存至云端');
+                setTimeout(() => goBack(), 1000);
+            } else {
+                showToast('⚠️ 保存失败');
+            }
+        } catch(e) {
+            showToast('⚠️ 网络异常');
+        }
+    }
+
+    async function handleRenew() {
+        const k = document.getElementById('ipt-renew-key').value.trim().toUpperCase();
+        if(!k) return showToast('请输入续费卡密');
+        
+        showToast('⏳ 正在向时空网络验证...');
+        try {
+            const res = await fetch('/api/verifyKey', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'renew', username: activeUser, key: k })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                return showToast(data.error || '续费失败');
+            }
+            
+            db.users[activeUser].expireAt = data.expireAt;
+            db.users[activeUser].status = 'normal';
+            
+            const headers = { 'Content-Type': 'application/json' };
+            if(isAdmin) headers['x-admin-auth'] = authHeader;
+            await fetch('/api/db', { method: 'POST', headers, body: JSON.stringify(db) });
+            
+            document.getElementById('ipt-renew-key').value = '';
+            showToast(`✅ 续费成功！时空叠加 ${data.days} 天`);
+            loadData(); // 静默刷新 UI 天数
+        } catch(e) {
+            showToast('⚠️ 网络异常');
+        }
+    }
+
+    // 唤醒引擎
+    window.onload = loadData;
+
+</script>
+</body>
+</html>
