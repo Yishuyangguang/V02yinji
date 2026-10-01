@@ -1,7 +1,7 @@
 /**
  * 恒久印记 - 全端对称响应式布局与动态顶栏引擎
  * 文件名: stage-layout.js
- * 更新内容: 完美对称排版、修复全局样式污染、集成云端富文本(Google Docs)调度
+ * 更新内容: 完美对称排版、修复全局样式污染、集成云端富文本调度、引入 4+3/3+3+1 绝对对称阵列
  */
 
 (function initFluidLayout() {
@@ -10,10 +10,10 @@
         const style = document.createElement('style');
         style.id = 'fluid-layout-style';
         style.innerHTML = `
-            /* 顶部动态功能区样式 */
+            /* 顶部动态功能区样式 (增加底部留白，拉开呼吸感) */
             .top-modules-wrapper {
-                display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; 
-                width: 100%; margin-bottom: 30px; position: relative; z-index: 10;
+                display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; 
+                width: 100%; margin-bottom: 45px; position: relative; z-index: 10;
             }
             .brand-capsule-dynamic {
                 display: inline-flex; align-items: center; justify-content: center; gap: 10px;
@@ -38,21 +38,21 @@
             .edit-mode .brand-capsule-dynamic input { pointer-events: auto; border-bottom: 1px dashed var(--theme-primary) !important; padding: 2px 5px !important; }
             .edit-mode .brand-capsule-dynamic img { cursor: pointer; }
 
-            /* 主模块绝对对称流体布局 */
+            /* ================= 🚀 核心修复：主模块绝对对称流体布局 ================= */
             .stage-array-flex {
                 display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;
-                gap: clamp(15px, 3vw, 25px); width: 100%; padding: 10px 20px; max-width: 1000px; margin: 0 auto;
+                gap: clamp(15px, 3vw, 35px); width: 100%; padding: 10px 0; max-width: 900px; margin: 0 auto;
             }
             .stage-card-flex {
-                flex: 0 1 calc(25% - 20px); /* PC端默认并排4个，余数自动居中 */
-                min-width: 110px; max-width: 160px;
-                background: var(--theme-glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-                border: 1px solid var(--theme-glass-border); border-radius: 24px; padding: 25px 10px 20px 10px;
+                /* PC端强制 4个一行，精确数学控制基础宽度，彻底解决 5+2 不对称问题 */
+                width: calc(25% - 30px); min-width: 130px; max-width: 180px;
+                background: var(--theme-glass-bg); backdrop-filter: blur(25px) saturate(150%); -webkit-backdrop-filter: blur(25px) saturate(150%);
+                border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 30px 10px 25px 10px;
                 display: flex; flex-direction: column; align-items: center; justify-content: center;
-                box-shadow: 0 15px 35px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
+                box-shadow: 0 15px 40px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
                 cursor: pointer; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); position: relative;
             }
-            .stage-card-flex:active { transform: translateY(3px) scale(0.95); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+            .stage-card-flex:active { transform: translateY(4px) scale(0.96); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
             
             /* 强制锁定主模块标题，拒绝背景色污染撑爆 */
             .stage-card-title { 
@@ -66,13 +66,13 @@
                 border-bottom: 1px dashed var(--theme-primary) !important; padding: 5px !important; border-radius: 8px !important;
             }
 
-            /* 强制锁定圆形图片裁剪区域 */
+            /* 圆形图片容器 - 大小随屏幕动态优雅缩放 */
             .stage-icon-dropzone { 
-                width: clamp(65px, 18vw, 85px) !important; height: clamp(65px, 18vw, 85px) !important; 
-                border-radius: 50% !important; overflow: hidden !important; margin-bottom: 15px !important; position: relative !important;
-                display: flex; justify-content: center; align-items: center;
+                width: clamp(65px, 16vw, 90px) !important; height: clamp(65px, 16vw, 90px) !important; 
+                border-radius: 50% !important; overflow: hidden !important; margin-bottom: 18px !important; position: relative !important;
+                display: flex; justify-content: center; align-items: center; flex-shrink: 0;
                 background: rgba(255,255,255,0.05); border: 2px solid var(--theme-primary); 
-                box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.2); transition: all 0.3s; 
+                box-shadow: 0 8px 25px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.4); transition: all 0.3s; 
             }
             .stage-icon-dropzone img { 
                 width: 100% !important; height: 100% !important; object-fit: cover !important; 
@@ -90,9 +90,18 @@
             }
             .del-badge:active { transform: scale(0.85); }
 
-            /* 响应式断点自动坍缩 */
-            @media (max-width: 850px) { .stage-card-flex { flex: 0 1 calc(33.333% - 20px); min-width: 100px; } }
-            @media (max-width: 480px) { .stage-card-flex { flex: 0 1 calc(33.333% - 15px); min-width: 90px; padding: 20px 5px 15px 5px; } }
+            /* ================= 🚀 响应式断点自动坍缩 ================= */
+            @media (max-width: 850px) { 
+                /* Pad端：强制 3个一行 */
+                .stage-card-flex { width: calc(33.333% - 25px); min-width: 110px; padding: 25px 10px 20px 10px; border-radius: 26px; } 
+            }
+            @media (max-width: 480px) { 
+                /* 手机端：极限压缩间距，严格锁定 3个一行，杜绝换行溢出 */
+                .stage-array-flex { gap: 12px; padding: 5px; }
+                .stage-card-flex { width: calc(33.333% - 12px); min-width: 90px; padding: 20px 5px 15px 5px; border-radius: 22px; }
+                .stage-icon-dropzone { margin-bottom: 12px !important; border-width: 1px; }
+                .stage-card-title { font-size: 0.9rem !important; }
+            }
         `;
         document.head.appendChild(style);
     }
