@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>常用软件 - 恒久印记</title>
+    
+    <!-- ================= 🛡️ 腾讯系全家桶(微信/企微/QQ)极致侦测与熔断拦截 ================= -->
+    <script>
+      (function() {
+          var ua = navigator.userAgent.toLowerCase();
+          var isTencentApp = ua.indexOf('micromessenger') !== -1 || ua.indexOf('wxwork') !== -1 || ua.indexOf('qq/') !== -1;
+          if (isTencentApp) {
+              document.write('\
+              <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.98);z-index:2147483647;display:flex;flex-direction:column;align-items:center;padding-top:15vh;color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,sans-serif;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);touch-action:none;pointer-events:all;overscroll-behavior:none;">\
+                  <svg style="position:absolute;top:15px;right:25px;width:70px;height:70px;animation:wechatBounce 1s infinite alternate;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">\
+                      <path d="M85 15 C 60 15, 30 40, 20 80" stroke="#d4af37" stroke-width="4" stroke-linecap="round" fill="none" stroke-dasharray="8 8"/>\
+                      <path d="M90 10 L 65 20 L 80 35 Z" fill="#d4af37"/>\
+                  </svg>\
+                  <h2 style="font-size:1.6rem;color:#d4af37;margin-bottom:20px;letter-spacing:2px;font-weight:bold;">请在浏览器中打开</h2>\
+                  <p style="font-size:1.15rem;line-height:2;text-align:center;padding:0 30px;opacity:0.9;">为了确保软件能够正常下载<br>请务必脱离当前环境</p>\
+                  <div style="background:#ef4444;color:#fff;padding:8px 20px;border-radius:20px;font-weight:bold;margin-top:25px;letter-spacing:1px;box-shadow:0 8px 20px rgba(239,68,68,0.4);">点击右上角【···】选择在浏览器打开</div>\
+                  <style>@keyframes wechatBounce { 0% { transform:translate(0,0); } 100% { transform:translate(-10px,10px); } }</style>\
+              </div>\
+              ');
+              document.close();
+              if(window.stop) window.stop();
+          }
+      })();
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #f8f6f0;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --text-main: #1f2937;
+            --text-sub: #64748b;
+            --border: rgba(255, 255, 255, 0.4);
+            --primary: #d4af37;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            --font-title: "Songti SC", "SimSun", serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            font-family: var(--font-main); 
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top right, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                              radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+            color: var(--text-main); 
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+            padding: calc(env(safe-area-inset-top) + 40px) 20px 40px 20px;
+        }
+
+        .container { 
+            width: 100%; max-width: 720px; 
+            background: var(--card-bg); 
+            backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+            padding: 45px 35px; 
+            border-radius: 32px; 
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.04), inset 0 2px 5px rgba(255, 255, 255, 0.8); 
+            border: 1px solid var(--border);
+            display: flex; flex-direction: column;
+        }
+
+        .header-icon { font-size: 42px; text-align: center; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        
+        h2 { 
+            margin: 0 0 10px 0; color: var(--text-main); text-align: center; 
+            font-size: 32px; font-weight: 800; font-family: var(--font-title); letter-spacing: 2px;
+        }
+        
+        .desc { text-align: center; color: var(--text-sub); font-size: 15px; margin-bottom: 30px; letter-spacing: 1px; }
+
+        /* 优雅的警告提示框 */
+        .notice-box {
+            background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2);
+            border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 16px;
+            margin-bottom: 35px; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.05);
+        }
+        .notice-icon { font-size: 20px; flex-shrink: 0; }
+        .notice-content { font-size: 14px; color: #b45309; line-height: 1.6; font-weight: 500; }
+        .notice-content strong { font-weight: bold; color: #92400e; }
+
+        /* 软件卡片：融入毛玻璃与悬浮反馈 */
+        .software-list { display: flex; flex-direction: column; gap: 18px; }
+
+        .software-card { 
+            background: rgba(255, 255, 255, 0.6); 
+            border: 1px solid rgba(255, 255, 255, 0.9); 
+            border-radius: 20px; padding: 20px 24px; 
+            display: flex; justify-content: space-between; align-items: center; gap: 20px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            position: relative; overflow: hidden;
+        }
+        
+        /* 左侧彩色指示条 (通过伪元素实现，更优雅) */
+        .software-card::before {
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 6px;
+            background: var(--card-color, #d4af37); opacity: 0.8;
+        }
+
+        .software-card:hover { 
+            background: #ffffff; 
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06); 
+            transform: translateY(-3px);
+        }
+
+        .software-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; }
+
+        .software-icon {
+            width: 44px; height: 44px; object-fit: contain; border-radius: 12px; flex-shrink: 0;
+            background: #ffffff; padding: 4px; border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .text-group { display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+        
+        .title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .software-name { font-weight: bold; font-size: 1.1rem; color: var(--text-main); letter-spacing: 0.5px; }
+        
+        .tag {
+            font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px;
+            background: var(--tag-bg, #fef3c7); color: var(--tag-text, #d97706);
+        }
+
+        /* 专属动作按钮样式 */
+        .btn-action { 
+            padding: 12px 24px; border: none; border-radius: 14px; 
+            font-size: 0.95rem; font-weight: bold; letter-spacing: 1px;
+            cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); text-align: center;
+            flex-shrink: 0; white-space: nowrap;
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%); color: #111;
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25), inset 0 2px 4px rgba(255,255,255,0.4);
+        }
+        .btn-download:hover { box-shadow: 0 10px 25px rgba(245, 158, 11, 0.35); transform: translateY(-1px); }
+        .btn-download:active { transform: scale(0.96); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+
+        .btn-watch {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%); color: #fff;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25), inset 0 2px 4px rgba(255,255,255,0.3);
+        }
+        .btn-watch:hover { box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35); transform: translateY(-1px); }
+        .btn-watch:active { transform: scale(0.96); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+
+        /* 底部返回按钮 */
+        .btn-back {
+            margin-top: 40px; align-self: center; padding: 14px 40px; border-radius: 50px;
+            background: transparent; border: 1px solid #cbd5e1; color: #475569;
+            font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-back:hover { background: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); color: #1e293b; }
+
+        @media (max-width: 600px) {
+            .container { padding: 35px 20px; border-radius: 28px; }
+            .software-card { flex-direction: column; align-items: stretch; gap: 20px; padding: 20px; }
+            .text-group { align-items: flex-start; }
+            .btn-action { width: 100%; padding: 14px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">    
+    <div class="header-icon">💻</div>    
+    <h2>常用软件与平台</h2>    
+    <p class="desc">恒久印记精选 · 点击即可直达官方进行下载与阅览</p>
+
+    <!-- 优雅的注意事项提示板块 -->    
+    <div class="notice-box">        
+        <div class="notice-icon">✨</div>        
+        <div class="notice-content">            
+            <strong>温馨提示：</strong>为保障下载渠道畅通，请务必脱离聊天软件环境，<strong>在手机系统自带浏览器</strong>中打开本页面进行下载。
+        </div>    
+    </div>
+
+    <!-- 动态生成的软件列表容器 -->    
+    <div class="software-list" id="softwareListContainer"></div>
+    
+    <!-- 返回主系统 -->
+    <button class="btn-back" onclick="window.location.href='app.html'">返回印记主页</button>
+</div>
+
+<script>
+// ==========================================
+// 💡 【软件专区配置区】
+// ==========================================
+const softwareList = [
+    { 
+        name: "诗歌本", 
+        tag: "官方下载", 
+        url: "https://appsky.icu/#/hymn", 
+        icon: "https://www.google.com/s2/favicons?domain=appsky.icu&sz=64",
+        btnText: "点击下载",
+        btnType: "download",
+        themeColor: "#f59e0b", // 香槟金
+        tagBg: "#fef3c7", tagText: "#d97706"
+    },
+    { 
+        name: "精读圣经", 
+        tag: "官方下载", 
+        url: "https://appsky.icu/#/bible", 
+        icon: "https://www.google.com/s2/favicons?domain=appsky.icu&sz=64",
+        btnText: "点击下载",
+        btnType: "download",
+        themeColor: "#6366f1", // 灵动靛青
+        tagBg: "#e0e7ff", tagText: "#4f46e5"
+    },
+    { 
+        name: "微读圣经", 
+        tag: "官方下载", 
+        url: "https://wd.bible/app", 
+        icon: "https://www.google.com/s2/favicons?domain=wd.bible&sz=64",
+        btnText: "点击下载",
+        btnType: "download",
+        themeColor: "#3b82f6", // 天空蓝
+        tagBg: "#eff6ff", tagText: "#2563eb"
+    },
+    { 
+        name: "Zoom 会议", 
+        tag: "官方客户端", 
+        url: "https://zoom.us/download", 
+        icon: "https://www.google.com/s2/favicons?domain=zoom.us&sz=64",
+        btnText: "点击下载",
+        btnType: "download",
+        themeColor: "#0ea5e9", // 冰川蓝
+        tagBg: "#e0f2fe", tagText: "#0284c7"
+    },
+    { 
+        name: "小鸽子", 
+        tag: "客户端下载", 
+        url: "https://www.idigest.app/#/appDownload", 
+        icon: "https://www.google.com/s2/favicons?domain=idigest.app&sz=64",
+        btnText: "点击下载",
+        btnType: "download",
+        themeColor: "#8b5cf6", // 紫罗兰
+        tagBg: "#ede9fe", tagText: "#7c3aed"
+    },
+    { 
+        name: "福音TV", 
+        tag: "视频平台", 
+        url: "https://www.fuyin.tv/", 
+        icon: "https://www.google.com/s2/favicons?domain=fuyin.tv&sz=64",
+        btnText: "点击观看",
+        btnType: "watch",
+        themeColor: "#10b981", // 翡翠绿
+        tagBg: "#d1fae5", tagText: "#059669"
+    }
+];
+
+// 自动渲染极简美化列表到网页中
+function renderSoftware() {
+    const container = document.getElementById('softwareListContainer');
+    let html = '';
+    
+    softwareList.forEach((item) => {
+        let btnClass = item.btnType === "watch" ? "btn-action btn-watch" : "btn-action btn-download";
+        
+        html += `
+            <div class="software-card" style="--card-color: ${item.themeColor};">
+                <div class="software-info">
+                    <img src="${item.icon}" alt="Icon" class="software-icon" onerror="this.src='favicon-32x32.png'">
+                    <div class="text-group">
+                        <div class="title-row">
+                            <span class="software-name">${item.name}</span>
+                            <span class="tag" style="--tag-bg: ${item.tagBg}; --tag-text: ${item.tagText};">${item.tag}</span>
+                        </div>
+                        <span style="font-size:0.8rem; color:#94a3b8; font-family:monospace;">${new URL(item.url).hostname}</span>
+                    </div>
+                </div>
+                <button class="${btnClass}" onclick="window.open('${item.url}', '_blank')">${item.btnText}</button>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// 页面加载完成后自动渲染
+window.onload = renderSoftware;
+</script>
+
+</body>
+</html>
