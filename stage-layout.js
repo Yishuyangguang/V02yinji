@@ -1,7 +1,7 @@
 /**
  * 恒久印记 - 全端对称响应式布局与动态顶栏引擎
  * 文件名: stage-layout.js
- * 更新内容: 完美对称排版、修复全局样式污染、集成云端富文本调度、引入 4+3/3+3+1 绝对对称阵列
+ * 更新内容: 顶栏美学重构(药丸胶囊)、注入HTML5原生拖拽排序(Drag & Drop)、极速同步引擎
  */
 
 (function initFluidLayout() {
@@ -10,35 +10,43 @@
         const style = document.createElement('style');
         style.id = 'fluid-layout-style';
         style.innerHTML = `
-            /* 顶部动态功能区样式 (增加底部留白，拉开呼吸感) */
+            /* ================= 🚀 顶栏动态功能区美学重构 ================= */
             .top-modules-wrapper {
-                display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; 
-                width: 100%; margin-bottom: 45px; position: relative; z-index: 10;
+                display: flex; flex-wrap: wrap; justify-content: center; gap: 20px 25px; 
+                width: 100%; margin-bottom: 50px; position: relative; z-index: 10;
             }
             .brand-capsule-dynamic {
-                display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-                background: var(--theme-glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-                border: 1px solid var(--theme-glass-border); border-radius: 50px; padding: 6px 20px 6px 6px;
+                display: inline-flex; align-items: center; justify-content: flex-start; gap: 12px;
+                background: var(--theme-glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+                border: 1px solid var(--theme-glass-border); border-radius: 50px; /* 完美药丸形状 */
+                padding: 6px 28px 6px 8px; height: 54px; min-width: 170px;
                 box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset);
                 cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); color: var(--theme-text);
                 position: relative;
             }
             .brand-capsule-dynamic:active { transform: scale(0.95); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+            
             .brand-capsule-dynamic img { 
-                width: 36px !important; height: 36px !important; border-radius: 50% !important; 
-                object-fit: cover !important; flex-shrink: 0 !important; border: 1px solid rgba(255,255,255,0.1) !important; 
-                margin: 0 !important; padding: 0 !important; box-shadow: none !important;
+                width: 40px !important; height: 40px !important; border-radius: 50% !important; 
+                object-fit: cover !important; flex-shrink: 0 !important; 
+                border: 1px solid rgba(255,255,255,0.2) !important; 
+                margin: 0 !important; padding: 0 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
             }
             .brand-capsule-dynamic input { 
                 background: transparent !important; border: none !important; color: inherit !important; font-weight: bold !important; 
-                font-size: 1.1rem !important; letter-spacing: 2px !important; font-family: var(--font-title) !important; 
-                outline: none !important; max-width: 120px !important; text-align: center !important; pointer-events: none; 
+                font-size: 1.15rem !important; letter-spacing: 2px !important; font-family: var(--font-title) !important; 
+                outline: none !important; max-width: 130px !important; text-align: center !important; pointer-events: none; 
                 box-shadow: none !important; margin: 0 !important; padding: 0 !important;
             }
-            .edit-mode .brand-capsule-dynamic input { pointer-events: auto; border-bottom: 1px dashed var(--theme-primary) !important; padding: 2px 5px !important; }
+            .edit-mode .brand-capsule-dynamic input { pointer-events: auto; border-bottom: 1px dashed var(--theme-primary) !important; padding: 2px 5px !important; cursor: text; }
             .edit-mode .brand-capsule-dynamic img { cursor: pointer; }
 
-            /* ================= 🚀 核心修复：主模块绝对对称流体布局 ================= */
+            /* ================= 🚀 拖拽状态机视觉增强 ================= */
+            .dragging { opacity: 0.4 !important; transform: scale(0.9) !important; }
+            .drag-over-active { border: 2px dashed var(--theme-primary) !important; transform: scale(1.05) !important; z-index: 20; box-shadow: 0 0 20px rgba(99,102,241,0.4) !important; }
+            .brand-capsule-dynamic.drag-over-active { background: rgba(99, 102, 241, 0.1) !important; }
+
+            /* ================= 主模块绝对对称流体布局 ================= */
             .stage-array-flex {
                 display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;
                 gap: clamp(15px, 3vw, 35px); width: 100%; padding: 10px 0; max-width: 900px; margin: 0 auto;
@@ -63,7 +71,7 @@
             }
             .edit-mode .stage-card-title { 
                 pointer-events: auto; background: rgba(0,0,0,0.3) !important; 
-                border-bottom: 1px dashed var(--theme-primary) !important; padding: 5px !important; border-radius: 8px !important;
+                border-bottom: 1px dashed var(--theme-primary) !important; padding: 5px !important; border-radius: 8px !important; cursor: text;
             }
 
             /* 圆形图片容器 - 大小随屏幕动态优雅缩放 */
@@ -81,12 +89,12 @@
             }
             .edit-mode .stage-icon-dropzone { cursor: pointer; pointer-events: auto; background-color: rgba(0,0,0,0.3); }
 
-            /* 删除按钮徽章 */
+            /* 删除按钮徽章 - 黄金比例定位 */
             .del-badge {
-                position: absolute; top: -10px; right: -10px; width: 28px; height: 28px; border-radius: 50%;
+                position: absolute; top: -8px; right: -8px; width: 26px; height: 26px; border-radius: 50%;
                 background: #ef4444; color: white; display: flex; justify-content: center; align-items: center;
-                font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(239,68,68,0.5);
-                z-index: 10; transition: transform 0.2s;
+                font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(239,68,68,0.5);
+                z-index: 30; transition: transform 0.2s;
             }
             .del-badge:active { transform: scale(0.85); }
 
@@ -101,10 +109,16 @@
                 .stage-card-flex { width: calc(33.333% - 12px); min-width: 90px; padding: 20px 5px 15px 5px; border-radius: 22px; }
                 .stage-icon-dropzone { margin-bottom: 12px !important; border-width: 1px; }
                 .stage-card-title { font-size: 0.9rem !important; }
+                .brand-capsule-dynamic { min-width: 140px; padding: 6px 20px 6px 6px; height: 48px; }
+                .brand-capsule-dynamic img { width: 34px !important; height: 34px !important; }
+                .brand-capsule-dynamic input { font-size: 1rem !important; max-width: 100px !important; }
             }
         `;
         document.head.appendChild(style);
     }
+
+    // 全局拖拽状态字典
+    let dragSource = null; 
 
     // 2. 接管主程序的渲染函数，挂载动态顶栏与主模块
     window.initStageScreen = function() {
@@ -121,7 +135,7 @@
         document.documentElement.style.setProperty('--theme-secondary', currentParams.s); 
         window.updateThemeCache(currentParams.p);
 
-        // ================= 渲染顶部动态模块 (印记音律、婚前辅导等) =================
+        // ================= 渲染顶部动态模块 =================
         const topContainer = document.getElementById('top-modules-dynamic-container');
         if (topContainer) {
             topContainer.innerHTML = '';
@@ -130,35 +144,52 @@
                 capsule.className = 'brand-capsule-dynamic';
                 
                 capsule.onclick = (e) => {
-                    if (state.isEditMode) return; // 编辑模式下点击不跳转
-                    
-                    // 智能调度不同类型的模块
-                    if (tm.actionType === 'music') {
-                        if(typeof window.openMusicTypeModal === 'function') window.openMusicTypeModal();
-                    } else if (tm.actionType === 'link' && tm.url) {
-                        window.open(tm.url, '_blank');
-                    } else if (tm.actionType === 'doc') {
-                        // 🚀 触发全新的 Google Docs 级富文本辅导文档引擎
-                        if(typeof window.openCounselingDoc === 'function') {
-                            window.openCounselingDoc(tm.url); 
-                        } else {
-                            window.showGlobalToast('文档引擎加载中...', 'loading');
-                        }
-                    } else {
-                        window.showGlobalToast('该模块暂未配置功能', 'loading');
-                    }
+                    if (state.isEditMode) return; 
+                    if (tm.actionType === 'music') { if(typeof window.openMusicTypeModal === 'function') window.openMusicTypeModal(); } 
+                    else if (tm.actionType === 'link' && tm.url) { window.open(tm.url, '_blank'); } 
+                    else if (tm.actionType === 'doc') {
+                        if(typeof window.openCounselingDoc === 'function') window.openCounselingDoc(tm.url); 
+                        else window.showGlobalToast('文档引擎加载中...', 'loading');
+                    } else { window.showGlobalToast('该模块暂未配置功能', 'loading'); }
                 };
 
-                // 图片渲染 (防止外部污染)
                 const imgEl = document.createElement('img');
                 imgEl.src = tm.icon || 'favicon-32x32.png';
                 imgEl.onerror = function() { this.src = 'favicon-32x32.png'; };
                 
-                // 名称输入框 (只读，编辑模式可写)
                 const inputEl = document.createElement('input');
                 inputEl.value = tm.name;
                 
+                // 🚀 开启深度编辑时的拖拽与修改引擎
                 if (state.isEditMode) {
+                    capsule.draggable = true;
+                    
+                    // 防护盾：防止在输入文字时触发拖拽
+                    inputEl.onmousedown = (e) => e.stopPropagation();
+                    inputEl.ontouchstart = (e) => e.stopPropagation();
+                    
+                    capsule.ondragstart = (e) => {
+                        dragSource = { type: 'top', id: idx };
+                        e.dataTransfer.effectAllowed = 'move';
+                        setTimeout(() => capsule.classList.add('dragging'), 0);
+                    };
+                    capsule.ondragover = (e) => {
+                        if (dragSource && dragSource.type === 'top') { e.preventDefault(); capsule.classList.add('drag-over-active'); }
+                    };
+                    capsule.ondragleave = () => capsule.classList.remove('drag-over-active');
+                    capsule.ondrop = async (e) => {
+                        e.stopPropagation();
+                        capsule.classList.remove('drag-over-active');
+                        if (dragSource && dragSource.type === 'top' && dragSource.id !== idx) {
+                            const arr = db.topModules;
+                            const item = arr.splice(dragSource.id, 1)[0];
+                            arr.splice(idx, 0, item);
+                            await window.saveDB(); // 极速落盘
+                            window.initStageScreen(); // 无感刷新 UI
+                        }
+                    };
+                    capsule.ondragend = () => capsule.classList.remove('dragging');
+
                     imgEl.onclick = (e) => {
                         e.stopPropagation();
                         const fileIpt = document.createElement('input'); fileIpt.type = 'file'; fileIpt.accept = 'image/*';
@@ -180,7 +211,7 @@
             });
         }
 
-        // ================= 渲染主模块 (弹性对称引擎) =================
+        // ================= 渲染主模块 (含极速拖拽引擎) =================
         const mainContainer = document.getElementById('stage-buttons-container'); 
         if (mainContainer) {
             mainContainer.innerHTML = ''; 
@@ -198,7 +229,6 @@
                 const iconDiv = document.createElement('div'); 
                 iconDiv.className = 'stage-icon-dropzone'; 
                 
-                // 🔥 注入 100% 强制贴合圆形的样式，彻底解决图片破窗越界的问题
                 if (iconB64) { 
                     iconDiv.innerHTML = `<img src="${iconB64}" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; margin:0; padding:0; border:none; box-shadow:none;">`; 
                 } else { 
@@ -209,7 +239,45 @@
                 titleInput.className = 'stage-card-title'; 
                 titleInput.value = displayName; 
                 
+                // 🚀 开启深度编辑时的拖拽与修改引擎
                 if (state.isEditMode) { 
+                    card.draggable = true;
+
+                    // 防护盾
+                    titleInput.onmousedown = (e) => e.stopPropagation();
+                    titleInput.ontouchstart = (e) => e.stopPropagation();
+
+                    card.ondragstart = (e) => {
+                        dragSource = { type: 'stage', id: sKey };
+                        e.dataTransfer.effectAllowed = 'move';
+                        setTimeout(() => card.classList.add('dragging'), 0);
+                    };
+                    card.ondragover = (e) => {
+                        if (dragSource && dragSource.type === 'stage') { e.preventDefault(); card.classList.add('drag-over-active'); }
+                    };
+                    card.ondragleave = () => card.classList.remove('drag-over-active');
+                    card.ondrop = async (e) => {
+                        e.stopPropagation();
+                        card.classList.remove('drag-over-active');
+                        if (dragSource && dragSource.type === 'stage' && dragSource.id !== sKey) {
+                            const keys = Object.keys(db.stages);
+                            const fromIdx = keys.indexOf(dragSource.id);
+                            const toIdx = keys.indexOf(sKey);
+                            
+                            // 内存键值对重排
+                            keys.splice(fromIdx, 1);
+                            keys.splice(toIdx, 0, dragSource.id);
+
+                            const newStagesObj = {};
+                            keys.forEach(k => newStagesObj[k] = db.stages[k]);
+                            db.stages = newStagesObj; // 完美覆盖
+
+                            await window.saveDB(); // 极速落盘
+                            window.initStageScreen(); // 无感刷新 UI
+                        }
+                    };
+                    card.ondragend = () => card.classList.remove('dragging');
+
                     iconDiv.addEventListener('click', (e) => { 
                         e.stopPropagation(); 
                         const input = document.createElement('input'); 
