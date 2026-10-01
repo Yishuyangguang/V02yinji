@@ -24,6 +24,24 @@ export async function onRequest(context) {
         }
 
         const isAdmin = request.headers.get("x-admin-auth") === "yishuyangguang";
+        const now = Date.now();
+        const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+
+        // 惰性清理函数：读取或写入前净化数据库
+        const purifyDB = (database) => {
+            let changed = false;
+            if (database.users) {
+                for (let u in database.users) {
+                    if (database.users[u].expireAt && database.users[u].expireAt > 0) {
+                        if (now - database.users[u].expireAt > ONE_YEAR_MS) {
+                            delete database.users[u];
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            return changed;
+        };
 
         if (request.method === "GET") {
             const object = await env.MY_BUCKET.get("db.json");
@@ -35,6 +53,12 @@ export async function onRequest(context) {
             }
             
             let dbData = await object.json();
+            const needsSave = purifyDB(dbData);
+            
+            // 如果 GET 操作触发了清理，静默存盘一次
+            if (needsSave) {
+                await env.MY_BUCKET.put("db.json", JSON.stringify(dbData));
+            }
             
             if (!isAdmin && dbData.licenseKeys) {
                 delete dbData.licenseKeys;
@@ -48,6 +72,7 @@ export async function onRequest(context) {
 
         if (request.method === "POST") {
             const incomingData = await request.json();
+            purifyDB(incomingData); // 写入前先净化一下
             
             const object = await env.MY_BUCKET.get("db.json");
             if (object) {
