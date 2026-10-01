@@ -411,7 +411,7 @@
         <div class="stage-admin-bar edit-mode-only">
             <button class="btn-glass btn-small btn-blue-gradient" onclick="window.openEditModal(null)">+ 新增卡片</button>
             <button class="btn-glass btn-small" onclick="window.manageCategories()">管理大选项</button>
-            <button class="btn-glass btn-small" onclick="window.manageMusicLibrary()">音律库管理</button>
+            <button class="btn-glass btn-small" onclick="window.open('music-admin.html', '_blank')">音律库管理</button>
             <button class="btn-glass btn-small" onclick="window.editPrepText()">预备提示语</button>
         </div>
 
@@ -503,7 +503,7 @@
 
         <div id="admin-recovery-btn-wrap" style="display: none; margin-top: 25px;">
             <button class="btn-glass" style="width: 100%; border: 1px dashed #ef4444; color: #ef4444; background:transparent; padding: 0.8rem; border-radius:18px;" onclick="window.open('recovery.html', '_blank')">云端密码检索 (管理员专属)</button>
-            <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.manageMusicLibrary();">⚙️ 全局音律库管理 (管理员专属)</button>
+            <button class="btn-glass" style="width: 100%; border: 1px dashed #6366f1; color: #6366f1; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.open('music-admin.html', '_blank');">⚙️ 全局音律库管理 (管理员专属)</button>
             
             <button class="btn-glass" style="width: 100%; border: 1px dashed #f59e0b; color: #f59e0b; background:transparent; padding: 0.8rem; border-radius:18px; margin-top: 12px;" onclick="window.hideModal('user-profile-modal'); window.openAuthAdmin();">🛡️ 全局时空权限管理 (管理员专属)</button>
         </div>
@@ -591,44 +591,6 @@
             <button class="btn-glass btn-primary" style="margin:0; flex:1; color:#111 !important;" onclick="window.confirmTrackLimit()">确 定</button>
             <button class="btn-glass btn-type-dark" style="margin:0; flex:1;" onclick="window.hideModal('music-timer-modal')">取 消</button>
         </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="music-admin-modal">
-    <div class="modal-content" style="background: var(--theme-bg-color); padding: 25px;">
-        <h2 class="text-gradient-blue" style="margin-bottom: 15px; text-align:left; font-size: 1.4rem;">全局音律库管理</h2>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <p style="font-size: 0.85rem; opacity: 0.8; text-align:left; margin:0;">选择分类库进行管理</p>
-            <button class="btn-glass btn-small" style="margin:0; border: 1px dashed #f59e0b; color:#f59e0b; padding:4px 8px; font-size: 0.8rem;" onclick="window.manageMusicCategories()">⚙️ 管理分类</button>
-        </div>
-        <select id="admin-music-cat" onchange="window.renderAdminMusicList()" style="margin-bottom: 15px; padding:10px 15px; background:var(--theme-glass-bg);"></select>
-        <input type="search" id="admin-music-search" placeholder="🔍 模糊搜索音乐库..." oninput="window.filterAdminMusicList()" style="margin-bottom:12px; padding:10px 15px;">
-        <div id="admin-music-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; max-height: 25vh; overflow-y:auto; padding-right:5px;"></div>
-        <div style="background: rgba(255,255,255,0.02); padding:15px; border-radius:14px; border: 1px dashed #6366f1;">
-            <h4 id="admin-music-action-title" style="margin-bottom: 12px; color:#6366f1; text-align:left; font-size: 1rem;">+ 新增曲目</h4>
-            <input type="hidden" id="edit-music-idx" value="">
-            <input type="text" id="new-music-name" placeholder="曲目名称" style="margin-bottom:10px; padding:12px 15px; background:var(--theme-glass-bg);">
-            <div id="music-upload-zone" style="width:100%; padding:15px; border: 2px dashed #818cf8; border-radius: 12px; text-align: center; cursor: pointer; margin-bottom: 10px; transition: all 0.3s;">
-                <span id="music-upload-text" style="color: #6366f1; font-size:0.9rem; font-weight:500;">点击或拖拽音频 (支持批量直传云端)</span>
-                <input type="file" id="new-music-file" accept="audio/*" multiple style="display: none;">
-            </div>
-            <div style="text-align: center; margin-bottom: 10px; opacity: 0.5; font-size: 0.8rem;">或输入云端直链 URL (单文件)</div>
-            <input type="text" id="new-music-url" placeholder="云端直链 URL" style="margin-bottom:15px; padding:12px 15px; background:var(--theme-glass-bg);">
-            <div style="display:flex; gap:10px;">
-                <button class="btn-glass btn-blue-gradient" id="btn-admin-music-save" style="flex:1; border-radius:12px; margin:0; padding:10px;" onclick="window.saveMusicToLibrary()">添 加 到 库</button>
-                <button class="btn-glass" id="btn-admin-music-cancel" style="flex:1; border-radius:12px; margin:0; padding:10px; display:none;" onclick="window.resetMusicEdit()">取 消 修 改</button>
-            </div>
-        </div>
-        <button class="btn-glass" style="margin-top: 20px; width: 100%; padding: 0.9rem;" onclick="window.hideModal('music-admin-modal')">关闭</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="music-cat-modal">
-    <div class="modal-content">
-        <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理音律分类</h2>
-        <div id="music-cat-list-edit" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;"></div>
-        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%; margin-bottom: 10px;" onclick="window.addMusicCategory()">+ 添加新音律分类</button>
-        <button class="btn-glass btn-primary" style="margin-top: 20px; width:100%;" onclick="window.saveMusicCategories()">完成并极速保存</button>
     </div>
 </div>
 
