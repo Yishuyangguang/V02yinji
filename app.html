@@ -136,59 +136,21 @@
         .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
 
-        /* ================= 🚀 模块选项卡(大胶囊)极致对称美学 ================= */
-        .cat-tabs-container { 
-            display: flex; gap: 16px 20px; overflow-x: auto; width: 100%; max-width: 900px; margin: 0 auto; 
-            padding: 10px 10px 30px 10px; scrollbar-width: none; flex-shrink: 0; justify-content: center; flex-wrap: wrap; 
-        }
+        .cat-tabs-container { display: flex; gap: 16px 20px; overflow-x: auto; width: 100%; max-width: 900px; margin: 0 auto; padding: 10px 10px 30px 10px; scrollbar-width: none; flex-shrink: 0; justify-content: center; flex-wrap: wrap; }
         .cat-tabs-container::-webkit-scrollbar { display: none; }
-        
-        .cat-tab { 
-            padding: 12px 30px; border-radius: 40px; font-size: 1.1rem; font-weight: bold; white-space: nowrap; 
-            flex-shrink: 0; background: #ffffff; border: 1px solid rgba(0,0,0,0.05); 
-            color: #475569; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); 
-            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.04); 
-            letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; position: relative;
-        }
+        .cat-tab { padding: 12px 30px; border-radius: 40px; font-size: 1.1rem; font-weight: bold; white-space: nowrap; flex-shrink: 0; background: #ffffff; border: 1px solid rgba(0,0,0,0.05); color: #475569; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.04); letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; position: relative; }
         .cat-tab:active { transform: scale(0.95); }
         .cat-tab:hover { color: #1e293b; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
-        .cat-tab.active { 
-            background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%); 
-            color: #ffffff; border-color: transparent; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35); 
-        }
-
-        /* 编辑模式下的分类胶囊 */
-        .edit-mode .cat-tab { padding-right: 45px; } /* 为删除按钮留出空间 */
-        .edit-mode .cat-tab input {
-            background: transparent !important; border: none !important; color: inherit !important;
-            font-weight: bold !important; font-size: 1.1rem !important; letter-spacing: 1px !important;
-            outline: none !important; text-align: center !important; width: auto !important; max-width: 120px;
-            padding: 0 !important; margin: 0 !important; box-shadow: none !important;
-            border-bottom: 1px dashed rgba(255,255,255,0.6) !important; pointer-events: auto;
-        }
-        .cat-tab-del {
-            position: absolute; top: 50%; right: 12px; transform: translateY(-50%);
-            width: 24px; height: 24px; border-radius: 50%; background: #ef4444; color: #fff;
-            display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: bold;
-            cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(239,68,68,0.4); z-index: 10;
-        }
+        .cat-tab.active { background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%); color: #ffffff; border-color: transparent; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35); }
+        
+        .edit-mode .cat-tab { padding-right: 45px; } 
+        .edit-mode .cat-tab input { background: transparent !important; border: none !important; color: inherit !important; font-weight: bold !important; font-size: 1.1rem !important; letter-spacing: 1px !important; outline: none !important; text-align: center !important; width: auto !important; max-width: 120px; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border-bottom: 1px dashed rgba(255,255,255,0.6) !important; pointer-events: auto; }
+        .cat-tab-del { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: #ef4444; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(239,68,68,0.4); z-index: 10; }
         .cat-tab-del:active { transform: translateY(-50%) scale(0.85); }
-
-        .btn-add-cat-inline {
-            padding: 12px 28px; border-radius: 40px; font-size: 1.05rem; font-weight: bold; white-space: nowrap;
-            background: rgba(255,255,255,0.9); border: 2px dashed #6366f1; color: #6366f1;
-            cursor: pointer; transition: all 0.3s; display: none; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); letter-spacing: 1px;
-        }
+        .btn-add-cat-inline { padding: 12px 28px; border-radius: 40px; font-size: 1.05rem; font-weight: bold; white-space: nowrap; background: rgba(255,255,255,0.9); border: 2px dashed #6366f1; color: #6366f1; cursor: pointer; transition: all 0.3s; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); letter-spacing: 1px; }
         .edit-mode .btn-add-cat-inline { display: flex; }
         .btn-add-cat-inline:active { transform: scale(0.95); background: rgba(99,102,241,0.1); }
-
-        @media (max-width: 480px) {
-            .cat-tabs-container { gap: 10px; padding: 5px 5px 20px 5px; }
-            .cat-tab { padding: 10px 20px; font-size: 0.95rem; border-radius: 25px; }
-            .btn-add-cat-inline { padding: 10px 18px; font-size: 0.9rem; }
-            .edit-mode .cat-tab input { max-width: 70px; font-size: 0.95rem !important; }
-        }
+        @media (max-width: 480px) { .cat-tabs-container { gap: 10px; padding: 5px 5px 20px 5px; } .cat-tab { padding: 10px 20px; font-size: 0.95rem; border-radius: 25px; } .btn-add-cat-inline { padding: 10px 18px; font-size: 0.9rem; } .edit-mode .cat-tab input { max-width: 70px; font-size: 0.95rem !important; } }
 
         #card-list-container { width: 100%; display: flex; flex-direction: column; flex: 1; }
         .module-section { width: 100%; text-align: left; margin-bottom: 35px; }
@@ -289,31 +251,32 @@
             .player-progress-bar-container { margin-top: 10px; padding-top: 15px; }
         }
 
-        /* 操作卡片与按钮精致化重构 */
+        /* ================= 🚀 核心修复：操作卡片与按钮精致化重构 ================= */
         .content-card-beautiful {
             width: 92% !important; 
             max-width: 760px !important; 
-            min-height: 45vh !important;
-            margin: 0 auto 20px auto !important; 
-            padding: 45px 35px !important;
+            flex: 1 !important; /* 核心修复：自动占据上方剩余空间 */
+            min-height: 0 !important; /* 允许滚动 */
+            overflow-y: auto !important; /* 文字过多时内部优雅滚动，绝不挤压按钮 */
+            margin: 0 auto 2vh auto !important; /* 底部与按钮留出极其微小的呼吸空隙，让按钮吸底 */
+            padding: 40px 30px !important;
             border-radius: 28px !important;
             background: rgba(255, 255, 255, 0.95) !important; 
             backdrop-filter: blur(25px) saturate(150%) !important;
             box-shadow: 0 20px 40px rgba(0,0,0,0.04), inset 0 2px 5px rgba(255,255,255,1) !important;
             border: 1px solid rgba(255,255,255,0.8) !important;
-            flex: none !important; 
         }
 
         .btn-beautiful {
             width: 85% !important;
-            max-width: 240px !important; 
+            max-width: 220px !important; /* 极限收紧，成就精致的药丸短按钮 */
             border-radius: 50px !important;
-            padding: 16px !important;
-            font-size: 1.1rem !important;
+            padding: 14px !important;
+            font-size: 1.05rem !important;
             font-weight: bold !important;
             letter-spacing: 2px !important;
-            margin: 40px auto 0 auto !important; 
-            display: flex; 
+            margin: 0 auto !important; /* 取消Margin推移，交给父级Flex掌控 */
+            display: flex; /* 允许 JS 隐藏 */
             justify-content: center;
             align-items: center;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
@@ -341,15 +304,15 @@
             background: #f1f5f9 !important;
         }
 
-        /* 长按宣告按钮进一步往下移与精修 */
+        /* 核心修复：长按圆圈等比例缩放与完美居中 */
         .long-press-area {
-            width: 140px !important; height: 140px !important; 
+            width: 130px !important; height: 130px !important; /* 黄金小比例 */
             border-radius: 50% !important;
             background: #ffffff !important; 
             border: 1px solid #e2e8f0 !important;
             box-shadow: 0 15px 35px rgba(0,0,0,0.08), inset 0 4px 10px rgba(255,255,255,0.8) !important;
             display: flex; justify-content: center; align-items: center;
-            margin: 40px auto 0 auto !important; 
+            margin: 0 auto !important; 
             overflow: hidden; position: relative;
             cursor: pointer; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
             -webkit-user-select: none; user-select: none; touch-action: none;
@@ -368,7 +331,7 @@
             position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
             background: linear-gradient(to top, #6366f1, #818cf8) !important;
             z-index: 1 !important; opacity: 0.95;
-            transition: height 1.5s linear !important; 
+            transition: height 1.5s linear !important; /* 1.5秒线性填充 */
             pointer-events: none;
         }
         .long-press-area.pressing .press-fill {
@@ -378,7 +341,6 @@
             color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
         }
 
-        /* 🆕 NEW徽章样式 - 防止闪烁预置 */
         .card-new-badge {
             position: absolute; top: -6px; right: -6px;
             background: linear-gradient(135deg, #ff4757, #ff6b81);
@@ -480,12 +442,15 @@
         <button class="btn-glass" style="margin: 30px auto;" onclick="window.navigateTo('screen-stage')">返回首页</button>
     </div>
 
-    <div class="screen center-content" id="screen-prep">
-        <div class="glass-panel content-card-beautiful">
-            <h1 class="text-gradient-blue" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
-            <p id="prep-text" style="font-size: 1.2rem; margin: 2rem 0 1.5rem 0; line-height: 2;">...</p>
+    <!-- 🚀 核心重构：彻底解除屏幕堆叠，完美适配呼吸留白 -->
+    <div class="screen center-content" id="screen-prep" style="padding-top: calc(env(safe-area-inset-top) + 8vh); padding-bottom: calc(env(safe-area-inset-bottom) + 5vh); justify-content: space-between;">
+        <div class="glass-panel content-card-beautiful" style="flex:1; margin-bottom:0 !important; display:flex; flex-direction:column; justify-content:center;">
+            <h1 class="text-gradient-blue" style="font-size: 2.2rem; margin-bottom: 1.5rem; text-align:center;">操练预备</h1>
+            <p id="prep-text" style="font-size: 1.2rem; margin: 0; line-height: 2; text-align:center;">...</p>
         </div>
-        <button class="btn-beautiful btn-white-outline" id="btn-prep-confirm" onclick="window.confirmPrepAndNavigate()">我已准备好</button>
+        <div style="margin-top: 30px; width:100%; display:flex; justify-content:center; flex-shrink:0;">
+            <button class="btn-beautiful btn-white-outline" id="btn-prep-confirm" onclick="window.confirmPrepAndNavigate()">我已准备好</button>
+        </div>
     </div>
 
     <div class="screen center-content" id="screen-role">
@@ -495,25 +460,34 @@
         <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81; padding: 1.2rem 2rem;" onclick="window.selectRole('girl')">我是女生 ♀</button>
     </div>
 
-    <div class="screen center-content" id="screen-sync">
-        <h1 id="sync-title" style="font-size: 2.2rem; margin-bottom: 10px;">双向奔赴</h1>
-        <p id="sync-subtitle" style="font-size: 1.1rem; opacity: 0.8; margin-bottom: 30px;">确认手机贴合后，点击合并</p>
-        <div class="sync-container" id="sync-animation-box" style="margin-bottom: 50px;"></div>
-        <button class="btn-beautiful btn-purple-gradient" id="btn-sync-confirm" onclick="window.triggerSync()">确 认 合 并</button>
+    <!-- 🚀 核心重构：双向奔赴解耦排版 -->
+    <div class="screen center-content" id="screen-sync" style="padding-top: calc(env(safe-area-inset-top) + 8vh); padding-bottom: calc(env(safe-area-inset-bottom) + 5vh); justify-content: space-between;">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; width:100%;">
+            <h1 id="sync-title" style="font-size: 2.2rem; margin-bottom: 10px;">双向奔赴</h1>
+            <p id="sync-subtitle" style="font-size: 1.1rem; opacity: 0.8; margin-bottom: 30px; text-align:center;"></p>
+            <div class="sync-container" id="sync-animation-box" style="margin-bottom: 0;"></div>
+        </div>
+        <div style="margin-top: 30px; width:100%; display:flex; justify-content:center; flex-shrink:0;">
+            <button class="btn-beautiful btn-purple-gradient" id="btn-sync-confirm" onclick="window.triggerSync()">确 认 合 并</button>
+        </div>
     </div>
 
-    <div class="screen" id="screen-content" style="justify-content: flex-start; padding-top: calc(env(safe-area-inset-top) + 6vh);">
-        <div class="progress-bar" id="content-progress">
-            <div class="progress-dot" id="dot-1"></div><div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
+    <!-- 🚀 核心修复：4 步骤引擎全动态吸底布局 -->
+    <div class="screen" id="screen-content" style="padding-top: calc(env(safe-area-inset-top) + 6vh); padding-bottom: calc(env(safe-area-inset-bottom) + 4vh); justify-content: flex-start; display: flex; flex-direction: column;">
+        <div class="progress-bar" id="content-progress" style="flex-shrink:0;">
+            <div class="progress-dot" id="dot-1"></div>
+            <div class="progress-dot" id="dot-2"></div>
+            <div class="progress-dot" id="dot-3"></div>
+            <div class="progress-dot" id="dot-4"></div> <!-- 🚀 新增了第 4 个点 -->
         </div>
         
         <div class="glass-panel content-card-beautiful">
             <h2 id="content-type-title" style="display: none;"></h2>
             <h1 id="step-title" style="color: #6366f1; font-size: 1.8rem; margin-bottom: 2rem; text-align: center;"></h1>
-            <p id="step-text" style="font-size: 1.15rem; color: #1e293b; text-align: justify; text-align-last: left; line-height: 2.2; padding: 0 10px;"></p>
+            <p id="step-text" style="font-size: 1.15rem; color: #1e293b; text-align: justify; text-align-last: left; line-height: 2.2; padding: 0 5px;"></p>
         </div>
         
-        <div id="action-area" style="width: 100%; display: flex; flex-direction: column; align-items: center; min-height: 160px;">
+        <div id="action-area" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; margin-top: auto; flex-shrink:0; min-height: 60px;">
             <button class="btn-beautiful btn-purple-gradient" id="btn-next-step" onclick="window.nextContentStep()">进 入 下 一 步</button>
             
             <div class="long-press-area" id="btn-long-press" style="display: none;"
@@ -530,90 +504,20 @@
         </div>
     </div>
 
-    <div class="screen center-content" id="screen-finish">
-        <div class="glass-panel content-card-beautiful">
-            <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem;">印记已成</h1>
-            <p>常常操练，感悟成长。</p>
-            <p style="font-size: 1rem; opacity: 0.6; margin-top: 3rem;">静谧的旋律将伴随您，享受此刻的沉淀。</p>
+    <!-- 🚀 核心重构：收紧底部返回按钮 -->
+    <div class="screen center-content" id="screen-finish" style="padding-top: calc(env(safe-area-inset-top) + 8vh); padding-bottom: calc(env(safe-area-inset-bottom) + 5vh); justify-content: space-between;">
+        <div class="glass-panel content-card-beautiful" style="flex:1; margin-bottom:0 !important; display:flex; flex-direction:column; justify-content:center;">
+            <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem; text-align:center;">印记已成</h1>
+            <p style="text-align:center;">常常操练，感悟成长。</p>
+            <p style="font-size: 1rem; opacity: 0.6; margin-top: 3rem; text-align:center;">静谧的旋律将伴随您，享受此刻的沉淀。</p>
         </div>
-        <button class="btn-beautiful btn-white-outline" onclick="window.resetToStage()">返回主页</button>
+        <div style="margin-top: 30px; width:100%; display:flex; justify-content:center; flex-shrink:0;">
+            <button class="btn-beautiful btn-white-outline" onclick="window.resetToStage()">返回主页</button>
+        </div>
     </div>
 </div>
 
 <!-- ================ 模态弹窗区 ================ -->
-
-<div class="modal-overlay" id="music-type-modal">
-    <div class="modal-content music-type-modal-content" style="text-align: center; max-width: 340px;">
-        <h2 class="text-gradient-blue" style="margin-bottom: 25px; font-size: 1.5rem; letter-spacing:1px;">选择背景音律</h2>
-        <div id="music-type-btn-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
-        <button class="btn-glass btn-type-dark" style="margin-top: 15px; width: 100%; padding:0.9rem;" onclick="window.hideModal('music-type-modal')">取 消</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="vinyl-player-modal">
-    <div class="modal-content vinyl-player-container new-layout">
-        <div class="close-3d-btn" onclick="window.closeVinylPlayer()">✖</div>
-        <div class="player-main-content">
-            <div class="player-left-panel">
-                <h2 id="player-track-name">曲目加载中...</h2>
-                <div class="tech-wave-container" id="vinyl-disc-ui">
-                    <div class="wave-ring"></div><div class="wave-ring"></div><div class="wave-ring"></div>
-                    <div class="wave-center"></div>
-                </div>
-                <div class="player-controls-wrapper">
-                    <div class="ctrl-group left">
-                        <div class="ctrl-btn-small" id="btn-play-mode" onclick="window.changePlayMode()" title="切换播放模式">🔁</div>
-                        <div class="ctrl-btn-small" id="btn-timer" onclick="window.setTrackLimit()" title="定时定量">⏳</div>
-                    </div>
-                    <div class="ctrl-group center">
-                        <div class="ctrl-btn" onclick="window.prevTrack()" title="上一首">⏮</div>
-                        <div class="ctrl-btn play-pause" onclick="window.togglePlayPause()" id="btn-play-pause">▶</div>
-                        <div class="ctrl-btn" onclick="window.nextTrack()" title="下一首">⏭</div>
-                    </div>
-                    <div class="ctrl-group right">
-                        <div class="ctrl-btn-small heart-icon" id="btn-favorite" onclick="window.toggleFavorite()" title="收藏">🤍</div>
-                        <div class="ctrl-btn-small" style="visibility: hidden; pointer-events: none;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="player-right-panel">
-                <input type="search" id="vinyl-search" placeholder="🔍 搜索歌曲名称..." oninput="window.filterVinylPlaylist()" style="border-radius:14px; background:var(--theme-input-bg); border: 1px solid var(--theme-glass-border); color:var(--theme-text); padding:10px 15px; margin-bottom:10px; flex-shrink:0; width:100%;">
-                <div class="playlist-box" id="playlist-ui"></div>
-            </div>
-        </div>
-        <div class="player-progress-bar-container">
-            <span id="player-time-current">00:00</span>
-            <div class="progress-track" id="progress-track">
-                <div class="progress-fill" id="progress-fill"></div>
-                <div class="progress-thumb" id="progress-thumb">❤️</div>
-            </div>
-            <span id="player-time-total">00:00</span>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="music-timer-modal">
-    <div class="modal-content gold-3d" style="text-align: center; max-width: 320px;">
-        <h2 style="color: var(--theme-primary); margin-bottom: 15px; font-size: 1.4rem;">⏳ 定时/定量停止</h2>
-        <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 20px;">请输入播放几首歌曲后自动暂停<br>(留空或0表示无限播放)</p>
-        <input type="number" id="timer-input-val" placeholder="例如: 3" style="text-align: center; border-color: var(--theme-primary); color: var(--theme-primary); font-size: 1.2rem; font-weight: bold; padding: 12px;">
-        <div style="display: flex; gap: 15px; margin-top: 10px;">
-            <button class="btn-glass btn-primary" style="margin:0; flex:1; color:#111 !important;" onclick="window.confirmTrackLimit()">确 定</button>
-            <button class="btn-glass btn-type-dark" style="margin:0; flex:1;" onclick="window.hideModal('music-timer-modal')">取 消</button>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="qr-modal">
-    <div class="modal-content" style="text-align: center; max-width: 320px;">
-        <h2 style="color: var(--theme-primary); margin-bottom: 20px;">联系站长邮箱</h2>
-        <a href="mailto:yg@3927521.xyz" style="display: block; background: var(--theme-glass-bg); border: 1px dashed var(--theme-primary); padding: 15px; border-radius: 16px; color: var(--theme-text); font-size: 1.15rem; font-weight: bold; text-decoration: none; margin-bottom: 15px; transition: all 0.3s;">
-            yg@3927521.xyz
-        </a>
-        <p style="font-size: 0.85rem; opacity: 0.6; margin-bottom: 20px;">点击上方邮箱地址即可直接发送邮件</p>
-        <button class="btn-glass" style="margin-top: 10px;" onclick="window.hideModal('qr-modal')">关 闭</button>
-    </div>
-</div>
 
 <div class="modal-overlay" id="edit-modal">
     <div class="modal-content">
@@ -622,15 +526,24 @@
         <label style="font-size: 0.9rem; opacity: 0.8; margin-left: 8px;">所属模块 (分类)</label>
         <select id="edit-card-category" style="margin-bottom: 20px;"></select>
         <input type="text" id="edit-card-title" placeholder="卡片标题">
-        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 1: 认知 / 行为意义</h4>
-        <input type="text" id="edit-s1-title" placeholder="步骤标题">
-        <textarea id="edit-s1-text" placeholder="为什么我们要如此做..."></textarea>
-        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 2: 具体操练</h4>
-        <input type="text" id="edit-s2-title" placeholder="步骤标题">
-        <textarea id="edit-s2-text" placeholder="日常生活中具体的互动指引..."></textarea>
-        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 3: 宣告</h4>
-        <input type="text" id="edit-s3-title" placeholder="步骤标题">
-        <textarea id="edit-s3-text" placeholder="内心或同声宣告的内容..."></textarea>
+        
+        <!-- 🚀 核心修复：4 大金刚物理输入框 -->
+        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 1: 参考经文</h4>
+        <input type="text" id="edit-s1-title" placeholder="如: 参考经文">
+        <textarea id="edit-s1-text" placeholder="输入核心经文..."></textarea>
+        
+        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 2: 认知 / 行为意义</h4>
+        <input type="text" id="edit-s2-title" placeholder="如: 认知">
+        <textarea id="edit-s2-text" placeholder="为什么我们要如此做..."></textarea>
+        
+        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 3: 具体操练</h4>
+        <input type="text" id="edit-s3-title" placeholder="如: 操练">
+        <textarea id="edit-s3-text" placeholder="日常生活中具体的互动指引..."></textarea>
+        
+        <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 4: 宣告</h4>
+        <input type="text" id="edit-s4-title" placeholder="如: 宣告">
+        <textarea id="edit-s4-text" placeholder="内心或同声宣告的内容..."></textarea>
+        
         <div style="display: flex; gap: 15px; margin-top: 35px;">
             <button class="btn-glass btn-primary" style="margin:0; width: 50%;" onclick="window.saveCard()">保存并同步</button>
             <button class="btn-glass" style="margin:0; width: 50%;" onclick="window.hideModal('edit-modal')">取 消</button>
@@ -675,151 +588,170 @@
     };
 </script>
 
-<!-- ================= 🚀 核心修复：内联接管胶囊菜单与渲染引擎 ================= -->
+<!-- ================= 🚀 核心修复：4步骤流转生命周期引擎注入 ================= -->
 <script>
-    let originalPatched = false;
-    const checkPatch = setInterval(() => {
-        if (window.renderCardList && window.renderCardList.isTrackerPatched && !originalPatched) {
+    let stepEnginePatched = false;
+    const checkStepPatch = setInterval(() => {
+        if (typeof window.renderContentStep === 'function' && !stepEnginePatched) {
             
-            window.renderCardList = function() {
-                if(!db || !db.stages[state.stage]) return;
-                
-                const cats = db.stages[state.stage].categories || [];
-                const tabContainer = document.getElementById('cat-tabs-container');
-                if(tabContainer) tabContainer.innerHTML = '';
-                
-                // 1. 渲染分类药丸
-                if (cats.length > 0 || state.isEditMode) {
-                    cats.forEach((cat, idx) => {
-                        const tab = document.createElement('div');
-                        tab.className = `cat-tab ${cat.id === state.activeCategoryId ? 'active' : ''}`;
-                        
-                        if (state.isEditMode) {
-                            const ipt = document.createElement('input');
-                            ipt.value = cat.name;
-                            ipt.onclick = (e) => e.stopPropagation();
-                            ipt.onblur = async (e) => {
-                                const newName = e.target.value.trim();
-                                if (newName && newName !== cat.name) {
-                                    cat.name = newName;
-                                    window.showGlobalToast('正在保存模块名称...', 'loading');
-                                    await window.saveDB();
-                                    window.showGlobalToast('✅ 同步成功', 'success');
-                                }
-                            };
-                            
-                            const delBtn = document.createElement('div');
-                            delBtn.className = 'cat-tab-del';
-                            delBtn.innerText = '✖';
-                            delBtn.onclick = async (e) => {
-                                e.stopPropagation();
-                                const linkedCards = db.stages[state.stage].cards.filter(c => c.categoryId === cat.id);
-                                if (linkedCards.length > 0 && !confirm(`🚨 危险：该模块下有 ${linkedCards.length} 张卡片！\n确定要连同里面的卡片一起彻底删除吗？`)) return;
-                                
-                                db.stages[state.stage].categories.splice(idx, 1);
-                                
-                                if (state.activeCategoryId === cat.id) {
-                                    state.activeCategoryId = db.stages[state.stage].categories.length > 0 ? db.stages[state.stage].categories[0].id : '';
-                                }
-                                
-                                window.showGlobalToast('正在删除...', 'loading');
-                                await window.saveDB();
-                                window.renderCardList();
-                                window.showGlobalToast('✅ 删除成功', 'success');
-                            };
-                            
-                            tab.appendChild(ipt);
-                            tab.appendChild(delBtn);
-                        } else {
-                            tab.innerText = cat.name;
-                        }
-                        
-                        tab.onclick = () => {
-                            if (!state.isEditMode) {
-                                state.activeCategoryId = cat.id;
-                                window.renderCardList();
-                            }
-                        };
-                        
-                        if(tabContainer) tabContainer.appendChild(tab);
-                    });
+            // 静默热更新旧版的 3步骤 卡片，如果用户点击了老卡片，内存自动插入空经文
+            const originalStartCardFlow = window.startCardFlow;
+            window.startCardFlow = function(card) {
+                if (card && card.steps && card.steps.length === 3) {
+                    card.steps.unshift({title: '参考经文', text: ''});
                 }
-                
-                // 2. 渲染添加按钮 (仅编辑模式)
-                if (state.isEditMode) {
-                    const addBtn = document.createElement('div');
-                    addBtn.className = 'btn-add-cat-inline';
-                    addBtn.innerHTML = '<span style="font-size:18px; margin-right:4px;">+</span> 新增模块';
-                    addBtn.onclick = async () => {
-                        if (!db.stages[state.stage].categories) db.stages[state.stage].categories = [];
-                        const newId = 'cat_' + Date.now();
-                        db.stages[state.stage].categories.push({ id: newId, name: '新模块', articles: [] });
-                        state.activeCategoryId = newId; 
-                        
-                        window.showGlobalToast('正在创建...', 'loading');
-                        await window.saveDB();
-                        window.renderCardList();
-                        window.showGlobalToast('✅ 创建成功，请直接点击名称修改', 'success');
-                    };
-                    if(tabContainer) tabContainer.appendChild(addBtn);
-                }
-
-                // 3. 渲染下方的卡片
-                const container = document.getElementById('card-list-container');
-                if(container) container.innerHTML = '';
-                const activeCards = db.stages[state.stage].cards.filter(c => c.categoryId === state.activeCategoryId);
-
-                if (activeCards.length > 0 || state.isEditMode) {
-                    const grid = document.createElement('div');
-                    grid.className = 'content-grid';
-
-                    let userCompleted = [];
-                    if (typeof currentUserAccount !== 'undefined' && currentUserAccount && db.users[currentUserAccount]) {
-                        if (!db.users[currentUserAccount].completedCards) db.users[currentUserAccount].completedCards = [];
-                        userCompleted = db.users[currentUserAccount].completedCards;
-                    }
-
-                    activeCards.forEach((card) => {
-                        const cardDiv = document.createElement('div');
-                        cardDiv.className = 'data-card';
-                        
-                        let badgeHtml = '';
-                        if (!userCompleted.includes(card.id) && !state.isEditMode) {
-                            badgeHtml = `<div class="card-new-badge">NEW</div>`;
-                        }
-
-                        cardDiv.innerHTML = `${badgeHtml}<h3 class="card-inner-title">${card.title}</h3>`;
-                        
-                        if (state.isEditMode) {
-                            const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id);
-                            const actDiv = document.createElement('div');
-                            actDiv.className = 'card-edit-badge';
-                            actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); window.openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); window.deleteCard(${globalIndex})">✖</div>`;
-                            cardDiv.appendChild(actDiv);
-                        }
-                        cardDiv.onclick = () => { if(!state.isEditMode && typeof window.startCardFlow === 'function') window.startCardFlow(card); };
-                        grid.appendChild(cardDiv);
-                    });
-                    
-                    if (activeCards.length === 0 && state.isEditMode) { 
-                        grid.innerHTML = `<p style="opacity:0.4; font-size:0.85rem; text-align:center; width:100%; grid-column: 1 / -1; padding: 20px;">该模块暂无内容，请点击上方 [+ 新增卡片]</p>`; 
-                    }
-                    
-                    const section = document.createElement('div');
-                    section.className = 'module-section';
-                    section.appendChild(grid);
-                    if(container) container.appendChild(section);
+                if (typeof originalStartCardFlow === 'function') {
+                    originalStartCardFlow.call(this, card);
                 } else {
-                    if(container) container.innerHTML = '<p style="opacity:0.4; margin-top:50px; text-align:center; font-size: 1.1rem; font-weight: bold;">当前模块暂无内容</p>';
+                    state.currentCard = card; 
+                    const prepTextEl = document.getElementById('prep-text');
+                    if(prepTextEl) prepTextEl.innerText = db.stages[state.stage].prepText; 
+                    
+                    const prepBtn = document.getElementById('btn-prep-confirm'); 
+                    if(prepBtn) {
+                        if (state.stage === '单身期') prepBtn.innerText = '我已准备好'; 
+                        else prepBtn.innerText = '我们已预备好'; 
+                    }
+                    window.navigateTo('screen-prep'); 
                 }
             };
-            
-            originalPatched = true;
-            clearInterval(checkPatch);
-            
-            if(document.getElementById('screen-card-list').classList.contains('active')) {
-                window.renderCardList();
-            }
+
+            // 完全重写渲染引擎，适配 4 个点
+            window.renderContentStep = function() {
+                const stepData = state.currentCard.steps[state.currentStep];
+                if(!stepData) return;
+
+                const titleEl = document.getElementById('content-type-title');
+                if(titleEl) {
+                    titleEl.innerText = `【${db.stages[state.stage].categories.find(c => c.id === state.currentCard.categoryId)?.name || '印记'}】的连结`;
+                }
+
+                const stepTitle = document.getElementById('step-title');
+                if(stepTitle) {
+                    stepTitle.innerText = stepData.title || '';
+                    stepTitle.style.animation = 'none';
+                    void stepTitle.offsetWidth; // 触发重绘，保证纯净版的沉浸动画每次都生效
+                    stepTitle.style.animation = '';
+                }
+
+                const stepText = document.getElementById('step-text');
+                if(stepText) {
+                    stepText.innerHTML = (stepData.text || '').replace(/\n/g, '<br><br>');
+                    stepText.style.animation = 'none';
+                    void stepText.offsetWidth;
+                    stepText.style.animation = '';
+                }
+
+                // 精准点亮 4 个小点
+                for(let i=1; i<=4; i++) {
+                    const dot = document.getElementById(`dot-${i}`);
+                    if(dot) {
+                        if (i - 1 === state.currentStep) dot.classList.add('active');
+                        else dot.classList.remove('active');
+                    }
+                }
+
+                const nextBtn = document.getElementById('btn-next-step');
+                const longPressBtn = document.getElementById('btn-long-press');
+
+                if (state.currentStep < 3) { // 步骤 0, 1, 2 (经文, 认知, 操练)
+                    if(nextBtn) nextBtn.style.display = 'flex';
+                    if(longPressBtn) longPressBtn.style.display = 'none';
+                } else { // 步骤 3 (宣告)
+                    if(nextBtn) nextBtn.style.display = 'none';
+                    if(longPressBtn) longPressBtn.style.display = 'flex';
+                }
+            };
+
+            window.nextContentStep = function() {
+                if (state.currentStep < 3) {
+                    state.currentStep++;
+                    const t = document.getElementById('step-title');
+                    const p = document.getElementById('step-text');
+
+                    if(t) t.style.opacity = 0;
+                    if(p) p.style.opacity = 0;
+
+                    setTimeout(() => {
+                        window.renderContentStep();
+                        if(t) { t.style.transition = 'opacity 0.5s'; t.style.opacity = 1; }
+                        if(p) { p.style.transition = 'opacity 0.5s'; p.style.opacity = 1; }
+                    }, 300);
+                }
+            };
+
+            window.openEditModal = function(index) {
+                const isNew = (index === null);
+                const titleEl = document.getElementById('modal-title');
+                if(titleEl) titleEl.innerText = isNew ? '新增卡片' : '编辑卡片';
+
+                const catSelect = document.getElementById('edit-card-category');
+                if(catSelect) catSelect.innerHTML = '';
+                const cats = db.stages[state.stage].categories || [];
+                cats.forEach(c => {
+                    if(catSelect) catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                });
+
+                let c = isNew ? {
+                    id: 'c_'+Date.now(),
+                    categoryId: state.activeCategoryId,
+                    title:'',
+                    steps:[
+                        {title:'参考经文', text:''},
+                        {title:'认知', text:''},
+                        {title:'操练', text:''},
+                        {title:'宣告', text:''}
+                    ]
+                } : db.stages[state.stage].cards[index];
+
+                // 老卡片防丢保护：如果打开的是老的3步卡，立刻强行给它升维
+                if (c.steps && c.steps.length === 3) {
+                    c.steps.unshift({title: '参考经文', text: ''});
+                }
+
+                document.getElementById('edit-card-id').value = index === null ? 'new' : index;
+                document.getElementById('edit-card-category').value = c.categoryId || (cats[0]?cats[0].id:'');
+                document.getElementById('edit-card-title').value = c.title;
+
+                for(let i=1; i<=4; i++) {
+                    const sTitle = document.getElementById(`edit-s${i}-title`);
+                    const sText = document.getElementById(`edit-s${i}-text`);
+                    if(sTitle) sTitle.value = c.steps[i-1] ? c.steps[i-1].title : '';
+                    if(sText) sText.value = c.steps[i-1] ? c.steps[i-1].text : '';
+                }
+
+                if(typeof window.showModal === 'function') window.showModal('edit-modal');
+            };
+
+            window.saveCard = async function() {
+                const idxStr = document.getElementById('edit-card-id').value;
+                const c = {
+                    id: idxStr === 'new' ? 'c_' + Date.now() : db.stages[state.stage].cards[parseInt(idxStr)].id,
+                    categoryId: document.getElementById('edit-card-category').value,
+                    title: document.getElementById('edit-card-title').value || '未命名',
+                    steps: []
+                };
+
+                for(let i=1; i<=4; i++) {
+                    c.steps.push({
+                        title: document.getElementById(`edit-s${i}-title`).value,
+                        text: document.getElementById(`edit-s${i}-text`).value
+                    });
+                }
+
+                if(idxStr === 'new') {
+                    db.stages[state.stage].cards.push(c);
+                } else {
+                    db.stages[state.stage].cards[parseInt(idxStr)] = c;
+                }
+
+                if(typeof window.saveDB === 'function') await window.saveDB();
+                if(typeof window.hideModal === 'function') window.hideModal('edit-modal');
+                if(typeof window.renderCardList === 'function') window.renderCardList();
+            };
+
+            stepEnginePatched = true;
+            clearInterval(checkStepPatch);
         }
     }, 50);
 </script>
