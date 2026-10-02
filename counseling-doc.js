@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 移除阅读字号文本、电脑端目录常驻不隐藏、苹果手机端自适应排版修复
+ * 更新内容: 全局多文档状态快照，【终极修复】苹果iOS设备WebKit引擎引号解析Bug导致字体无法切换的问题
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.8 (目录常驻与全端适配版)");
+    console.log("🚀 成功加载知识库引擎 V7.9 (苹果iOS端字体完美映射版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -159,7 +159,6 @@
             
             .empty-state { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #5f6368; font-size: 1.2rem; flex-direction: column; gap: 15px; font-weight: bold; text-align: center; }
             
-            /* 🚀 核心修复：苹果手机端自适应排版 */
             @media (max-width: 768px) {
                 .doc-modal-overlay { flex-direction: column; }
                 .doc-sidebar { width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; }
@@ -215,7 +214,6 @@
                             <button class="btn-doc-save" id="btn-doc-save" onclick="window.saveCounselingDoc()">☁ 云端保存</button>
                         </div>
 
-                        <!-- 🚀 核心修复：移除了阅读字号文字，精简按钮组对称排列 -->
                         <div class="doc-actions-reader">
                             <button class="btn-zoom" id="zoom-small" onclick="window.setDocZoom(0.85, 'small')">偏小</button>
                             <button class="btn-zoom active" id="zoom-normal" onclick="window.setDocZoom(1, 'normal')">标准</button>
@@ -230,12 +228,13 @@
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
                         <div class="doc-tool-separator"></div>
                         
+                        <!-- 🚀核心修复：剥离所有内部单引号，完美兼容 iOS Safari 的 execCommand 解析 -->
                         <select class="doc-tool-select" onchange="window.docExec('fontName', this.value); this.selectedIndex=0;" title="字体集" style="width: 110px;">
                             <option value="" disabled selected hidden>修改字体</option>
-                            <option value="system-ui, -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif">系统默认</option>
-                            <option value="'STKaiti', 'Kaiti SC', 'KaiTi', '楷体', serif">楷体 (优雅)</option>
-                            <option value="'STSong', 'Songti SC', 'SimSun', '宋体', serif">宋体 (传统)</option>
-                            <option value="'PingFang SC', 'Microsoft YaHei', '黑体', sans-serif">雅黑 / 黑体</option>
+                            <option value="system-ui, -apple-system, BlinkMacSystemFont, PingFang SC, Microsoft YaHei, sans-serif">系统默认</option>
+                            <option value="Kaiti SC, STKaiti, KaiTi, 楷体, serif">楷体 (优雅)</option>
+                            <option value="Songti SC, STSong, SimSun, 宋体, serif">宋体 (传统)</option>
+                            <option value="PingFang SC, Microsoft YaHei, 黑体, sans-serif">雅黑 / 黑体</option>
                         </select>
                         <div class="doc-tool-separator"></div>
 
@@ -433,6 +432,9 @@
                 `;
                 artItem.onclick = () => {
                     window.kbSelectArticle(cat.id, art.id);
+                    if (window.innerWidth <= 768 || !state.isAdmin) {
+                        document.getElementById('doc-sidebar').classList.add('collapsed');
+                    }
                 };
                 catGroup.appendChild(artItem);
             });
