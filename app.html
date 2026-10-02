@@ -136,10 +136,59 @@
         .stage-admin-bar { width: 100%; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 25px; display: none; position: relative; z-index: 10; }
         .edit-mode .stage-admin-bar { display: flex; }
 
-        .cat-tabs-container { display: flex; gap: 12px; overflow-x: auto; width: 100%; padding: 5px 5px 20px 5px; scrollbar-width: none; flex-shrink: 0; justify-content: center; flex-wrap: wrap; }
+        /* ================= 🚀 模块选项卡(大胶囊)极致对称美学 ================= */
+        .cat-tabs-container { 
+            display: flex; gap: 16px 20px; overflow-x: auto; width: 100%; max-width: 900px; margin: 0 auto; 
+            padding: 10px 10px 30px 10px; scrollbar-width: none; flex-shrink: 0; justify-content: center; flex-wrap: wrap; 
+        }
         .cat-tabs-container::-webkit-scrollbar { display: none; }
-        .cat-tab { padding: 10px 24px; border-radius: 25px; font-size: 1.05rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); opacity: 0.8; transition: all 0.3s; cursor: pointer; box-shadow: 0 4px 12px var(--theme-glass-shadow); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
-        .cat-tab.active { opacity: 1; background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%); color: #111; border-color: transparent; box-shadow: 0 6px 18px var(--theme-glass-shadow); }
+        
+        .cat-tab { 
+            padding: 12px 30px; border-radius: 40px; font-size: 1.1rem; font-weight: bold; white-space: nowrap; 
+            flex-shrink: 0; background: #ffffff; border: 1px solid rgba(0,0,0,0.05); 
+            color: #475569; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.04); 
+            letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; position: relative;
+        }
+        .cat-tab:active { transform: scale(0.95); }
+        .cat-tab:hover { color: #1e293b; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .cat-tab.active { 
+            background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%); 
+            color: #ffffff; border-color: transparent; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35); 
+        }
+
+        /* 编辑模式下的分类胶囊 */
+        .edit-mode .cat-tab { padding-right: 45px; } /* 为删除按钮留出空间 */
+        .edit-mode .cat-tab input {
+            background: transparent !important; border: none !important; color: inherit !important;
+            font-weight: bold !important; font-size: 1.1rem !important; letter-spacing: 1px !important;
+            outline: none !important; text-align: center !important; width: auto !important; max-width: 120px;
+            padding: 0 !important; margin: 0 !important; box-shadow: none !important;
+            border-bottom: 1px dashed rgba(255,255,255,0.6) !important; pointer-events: auto;
+        }
+        .cat-tab-del {
+            position: absolute; top: 50%; right: 12px; transform: translateY(-50%);
+            width: 24px; height: 24px; border-radius: 50%; background: #ef4444; color: #fff;
+            display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: bold;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(239,68,68,0.4); z-index: 10;
+        }
+        .cat-tab-del:active { transform: translateY(-50%) scale(0.85); }
+
+        .btn-add-cat-inline {
+            padding: 12px 28px; border-radius: 40px; font-size: 1.05rem; font-weight: bold; white-space: nowrap;
+            background: rgba(255,255,255,0.9); border: 2px dashed #6366f1; color: #6366f1;
+            cursor: pointer; transition: all 0.3s; display: none; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); letter-spacing: 1px;
+        }
+        .edit-mode .btn-add-cat-inline { display: flex; }
+        .btn-add-cat-inline:active { transform: scale(0.95); background: rgba(99,102,241,0.1); }
+
+        @media (max-width: 480px) {
+            .cat-tabs-container { gap: 10px; padding: 5px 5px 20px 5px; }
+            .cat-tab { padding: 10px 20px; font-size: 0.95rem; border-radius: 25px; }
+            .btn-add-cat-inline { padding: 10px 18px; font-size: 0.9rem; }
+            .edit-mode .cat-tab input { max-width: 70px; font-size: 0.95rem !important; }
+        }
 
         #card-list-container { width: 100%; display: flex; flex-direction: column; flex: 1; }
         .module-section { width: 100%; text-align: left; margin-bottom: 35px; }
@@ -240,31 +289,31 @@
             .player-progress-bar-container { margin-top: 10px; padding-top: 15px; }
         }
 
-        /* ================= 🚀 核心修复：操作卡片与按钮精致化重构 ================= */
+        /* 操作卡片与按钮精致化重构 */
         .content-card-beautiful {
             width: 92% !important; 
-            max-width: 760px !important; /* 电脑端适度拓宽，让内容更有空间 */
+            max-width: 760px !important; 
             min-height: 45vh !important;
-            margin: 0 auto 20px auto !important; /* 底部预留充足的呼吸空间，推开按钮 */
+            margin: 0 auto 20px auto !important; 
             padding: 45px 35px !important;
             border-radius: 28px !important;
-            background: rgba(255, 255, 255, 0.95) !important; /* 贴近设计的纯白磨砂 */
+            background: rgba(255, 255, 255, 0.95) !important; 
             backdrop-filter: blur(25px) saturate(150%) !important;
             box-shadow: 0 20px 40px rgba(0,0,0,0.04), inset 0 2px 5px rgba(255,255,255,1) !important;
             border: 1px solid rgba(255,255,255,0.8) !important;
-            flex: none !important; /* 取消原有的 flex: 1，防止被无限拉伸 */
+            flex: none !important; 
         }
 
         .btn-beautiful {
             width: 85% !important;
-            max-width: 240px !important; /* 严格缩短宽度，拒绝巨型按钮 */
+            max-width: 240px !important; 
             border-radius: 50px !important;
             padding: 16px !important;
             font-size: 1.1rem !important;
             font-weight: bold !important;
             letter-spacing: 2px !important;
-            margin: 40px auto 0 auto !important; /* 绝对居中，强制下移 */
-            display: flex; /* ⚠️ 核心修复：移除 !important，允许 JS 控制隐藏 */
+            margin: 40px auto 0 auto !important; 
+            display: flex; 
             justify-content: center;
             align-items: center;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
@@ -294,13 +343,13 @@
 
         /* 长按宣告按钮进一步往下移与精修 */
         .long-press-area {
-            width: 140px !important; height: 140px !important; /* 精巧比例 */
+            width: 140px !important; height: 140px !important; 
             border-radius: 50% !important;
             background: #ffffff !important; 
             border: 1px solid #e2e8f0 !important;
             box-shadow: 0 15px 35px rgba(0,0,0,0.08), inset 0 4px 10px rgba(255,255,255,0.8) !important;
             display: flex; justify-content: center; align-items: center;
-            margin: 40px auto 0 auto !important; /* 核心：大幅下移，让出上方空间 */
+            margin: 40px auto 0 auto !important; 
             overflow: hidden; position: relative;
             cursor: pointer; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
             -webkit-user-select: none; user-select: none; touch-action: none;
@@ -319,7 +368,7 @@
             position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
             background: linear-gradient(to top, #6366f1, #818cf8) !important;
             z-index: 1 !important; opacity: 0.95;
-            transition: height 1.5s linear !important; /* 核心修复：1.5秒平滑填充物理加速 */
+            transition: height 1.5s linear !important; 
             pointer-events: none;
         }
         .long-press-area.pressing .press-fill {
@@ -328,6 +377,23 @@
         .long-press-area.filled .press-text, .long-press-area.pressing.filled .press-text {
             color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
         }
+
+        /* 🆕 NEW徽章样式 - 防止闪烁预置 */
+        .card-new-badge {
+            position: absolute; top: -6px; right: -6px;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white; font-size: 0.75rem; font-weight: 900;
+            padding: 4px 10px; border-radius: 12px 12px 12px 0;
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4), inset 0 1px 2px rgba(255,255,255,0.4);
+            z-index: 10; pointer-events: none; letter-spacing: 1px;
+            animation: pulse-badge 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes pulse-badge {
+            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 6px 15px rgba(255, 71, 87, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4); }
+        }
+
     </style>
 </head>
 <body class="light-theme">
@@ -388,7 +454,7 @@
 
     <div class="screen" id="screen-stage" style="justify-content: flex-start; padding-top: calc(env(safe-area-inset-top) + 8vh);">
         <h1 style="margin-top:0; font-size: clamp(2.2rem, 6vw, 3.2rem); letter-spacing: 4px;">恒久印记</h1>
-        <p class="slogan-verse" style="margin-bottom: 50px; font-size: clamp(1rem, 4vw, 1.2rem);">选择生命当前的季节，开始今日的探索</p>
+        <p class="slogan-verse" style="margin-bottom: 50px; font-size: clamp(1rem, 4vw, 1.2rem);">常常操练，感悟成长</p>
         
         <div class="stage-admin-bar edit-mode-only" style="margin-bottom: 20px;">
             <button class="btn-glass btn-small" onclick="window.addNewTopModule()">+ 动态新增顶栏模块</button>
@@ -405,8 +471,6 @@
         
         <div class="stage-admin-bar edit-mode-only">
             <button class="btn-glass btn-small btn-blue-gradient" onclick="window.openEditModal(null)">+ 新增卡片</button>
-            <button class="btn-glass btn-small" onclick="window.manageCategories()">管理大选项</button>
-            <button class="btn-glass btn-small" onclick="window.open('music-admin.html', '_blank')">音律库管理</button>
             <button class="btn-glass btn-small" onclick="window.editPrepText()">预备提示语</button>
         </div>
 
@@ -416,7 +480,6 @@
         <button class="btn-glass" style="margin: 30px auto;" onclick="window.navigateTo('screen-stage')">返回首页</button>
     </div>
 
-    <!-- 🚀 核心重构：将操作按钮移出白色卡片区域 -->
     <div class="screen center-content" id="screen-prep">
         <div class="glass-panel content-card-beautiful">
             <h1 class="text-gradient-blue" style="font-size: 2.2rem; margin-bottom: 1.5rem;">操练预备</h1>
@@ -432,7 +495,6 @@
         <button class="btn-glass" style="border-color: #ff6b81; color: #ff6b81; padding: 1.2rem 2rem;" onclick="window.selectRole('girl')">我是女生 ♀</button>
     </div>
 
-    <!-- 🚀 核心重构：将操作按钮独立化并收紧 -->
     <div class="screen center-content" id="screen-sync">
         <h1 id="sync-title" style="font-size: 2.2rem; margin-bottom: 10px;">双向奔赴</h1>
         <p id="sync-subtitle" style="font-size: 1.1rem; opacity: 0.8; margin-bottom: 30px;">确认手机贴合后，点击合并</p>
@@ -440,7 +502,6 @@
         <button class="btn-beautiful btn-purple-gradient" id="btn-sync-confirm" onclick="window.triggerSync()">确 认 合 并</button>
     </div>
 
-    <!-- 🚀 核心重构：解除垂直重力场，彻底分离内容卡片与操作按钮 -->
     <div class="screen" id="screen-content" style="justify-content: flex-start; padding-top: calc(env(safe-area-inset-top) + 6vh);">
         <div class="progress-bar" id="content-progress">
             <div class="progress-dot" id="dot-1"></div><div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
@@ -455,7 +516,6 @@
         <div id="action-area" style="width: 100%; display: flex; flex-direction: column; align-items: center; min-height: 160px;">
             <button class="btn-beautiful btn-purple-gradient" id="btn-next-step" onclick="window.nextContentStep()">进 入 下 一 步</button>
             
-            <!-- 🚀 核心修复：内联神级事件拦截器，防死锁，绝无丢失可能 -->
             <div class="long-press-area" id="btn-long-press" style="display: none;"
                  onmousedown="window.handleStartPress(event)" 
                  onmouseup="window.handleEndPress(event)" 
@@ -470,7 +530,6 @@
         </div>
     </div>
 
-    <!-- 🚀 核心重构：收紧底部返回按钮 -->
     <div class="screen center-content" id="screen-finish">
         <div class="glass-panel content-card-beautiful">
             <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem;">印记已成</h1>
@@ -556,20 +615,11 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="cat-modal">
-    <div class="modal-content">
-        <h2 style="margin-bottom: 20px; color: var(--theme-primary);">管理大选项 (阶段分类)</h2>
-        <div id="cat-list-edit" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;"></div>
-        <button class="btn-glass btn-small" style="border: 1px dashed var(--theme-primary); width: 100%; margin-bottom: 10px;" onclick="window.addNewCategory()">+ 添加新分类</button>
-        <button class="btn-glass btn-primary" style="margin-top: 20px; width:100%;" onclick="window.saveCategories()">完成并极速保存</button>
-    </div>
-</div>
-
 <div class="modal-overlay" id="edit-modal">
     <div class="modal-content">
         <h2 style="margin-bottom: 25px; color: var(--theme-primary);" id="modal-title">编辑卡片内容</h2>
         <input type="hidden" id="edit-card-id">
-        <label style="font-size: 0.9rem; opacity: 0.8; margin-left: 8px;">所属大选项 (分类)</label>
+        <label style="font-size: 0.9rem; opacity: 0.8; margin-left: 8px;">所属模块 (分类)</label>
         <select id="edit-card-category" style="margin-bottom: 20px;"></select>
         <input type="text" id="edit-card-title" placeholder="卡片标题">
         <h4 style="margin: 20px 0 10px 8px; color:var(--theme-primary); font-size:1.1rem;">步骤 1: 认知 / 行为意义</h4>
@@ -588,7 +638,6 @@
     </div>
 </div>
 
-<!-- ================= 🚀 核心修复：独立长按判定引擎 (完全避开老版本的兼容性死锁) ================= -->
 <script>
     let pressTimer = null;
     
@@ -607,7 +656,7 @@
                 area.classList.remove('pressing', 'filled');
                 if(typeof window.completeAction === 'function') window.completeAction();
             }, 150); 
-        }, 1500); // 严格控制 1.5 秒
+        }, 1500); 
     };
 
     window.handleEndPress = function(e) {
@@ -624,6 +673,155 @@
             pressTimer = null;
         }
     };
+</script>
+
+<!-- ================= 🚀 核心修复：内联接管胶囊菜单与渲染引擎 ================= -->
+<script>
+    let originalPatched = false;
+    const checkPatch = setInterval(() => {
+        if (window.renderCardList && window.renderCardList.isTrackerPatched && !originalPatched) {
+            
+            window.renderCardList = function() {
+                if(!db || !db.stages[state.stage]) return;
+                
+                const cats = db.stages[state.stage].categories || [];
+                const tabContainer = document.getElementById('cat-tabs-container');
+                if(tabContainer) tabContainer.innerHTML = '';
+                
+                // 1. 渲染分类药丸
+                if (cats.length > 0 || state.isEditMode) {
+                    cats.forEach((cat, idx) => {
+                        const tab = document.createElement('div');
+                        tab.className = `cat-tab ${cat.id === state.activeCategoryId ? 'active' : ''}`;
+                        
+                        if (state.isEditMode) {
+                            const ipt = document.createElement('input');
+                            ipt.value = cat.name;
+                            ipt.onclick = (e) => e.stopPropagation();
+                            ipt.onblur = async (e) => {
+                                const newName = e.target.value.trim();
+                                if (newName && newName !== cat.name) {
+                                    cat.name = newName;
+                                    window.showGlobalToast('正在保存模块名称...', 'loading');
+                                    await window.saveDB();
+                                    window.showGlobalToast('✅ 同步成功', 'success');
+                                }
+                            };
+                            
+                            const delBtn = document.createElement('div');
+                            delBtn.className = 'cat-tab-del';
+                            delBtn.innerText = '✖';
+                            delBtn.onclick = async (e) => {
+                                e.stopPropagation();
+                                const linkedCards = db.stages[state.stage].cards.filter(c => c.categoryId === cat.id);
+                                if (linkedCards.length > 0 && !confirm(`🚨 危险：该模块下有 ${linkedCards.length} 张卡片！\n确定要连同里面的卡片一起彻底删除吗？`)) return;
+                                
+                                db.stages[state.stage].categories.splice(idx, 1);
+                                
+                                if (state.activeCategoryId === cat.id) {
+                                    state.activeCategoryId = db.stages[state.stage].categories.length > 0 ? db.stages[state.stage].categories[0].id : '';
+                                }
+                                
+                                window.showGlobalToast('正在删除...', 'loading');
+                                await window.saveDB();
+                                window.renderCardList();
+                                window.showGlobalToast('✅ 删除成功', 'success');
+                            };
+                            
+                            tab.appendChild(ipt);
+                            tab.appendChild(delBtn);
+                        } else {
+                            tab.innerText = cat.name;
+                        }
+                        
+                        tab.onclick = () => {
+                            if (!state.isEditMode) {
+                                state.activeCategoryId = cat.id;
+                                window.renderCardList();
+                            }
+                        };
+                        
+                        if(tabContainer) tabContainer.appendChild(tab);
+                    });
+                }
+                
+                // 2. 渲染添加按钮 (仅编辑模式)
+                if (state.isEditMode) {
+                    const addBtn = document.createElement('div');
+                    addBtn.className = 'btn-add-cat-inline';
+                    addBtn.innerHTML = '<span style="font-size:18px; margin-right:4px;">+</span> 新增模块';
+                    addBtn.onclick = async () => {
+                        if (!db.stages[state.stage].categories) db.stages[state.stage].categories = [];
+                        const newId = 'cat_' + Date.now();
+                        db.stages[state.stage].categories.push({ id: newId, name: '新模块', articles: [] });
+                        state.activeCategoryId = newId; 
+                        
+                        window.showGlobalToast('正在创建...', 'loading');
+                        await window.saveDB();
+                        window.renderCardList();
+                        window.showGlobalToast('✅ 创建成功，请直接点击名称修改', 'success');
+                    };
+                    if(tabContainer) tabContainer.appendChild(addBtn);
+                }
+
+                // 3. 渲染下方的卡片
+                const container = document.getElementById('card-list-container');
+                if(container) container.innerHTML = '';
+                const activeCards = db.stages[state.stage].cards.filter(c => c.categoryId === state.activeCategoryId);
+
+                if (activeCards.length > 0 || state.isEditMode) {
+                    const grid = document.createElement('div');
+                    grid.className = 'content-grid';
+
+                    let userCompleted = [];
+                    if (typeof currentUserAccount !== 'undefined' && currentUserAccount && db.users[currentUserAccount]) {
+                        if (!db.users[currentUserAccount].completedCards) db.users[currentUserAccount].completedCards = [];
+                        userCompleted = db.users[currentUserAccount].completedCards;
+                    }
+
+                    activeCards.forEach((card) => {
+                        const cardDiv = document.createElement('div');
+                        cardDiv.className = 'data-card';
+                        
+                        let badgeHtml = '';
+                        if (!userCompleted.includes(card.id) && !state.isEditMode) {
+                            badgeHtml = `<div class="card-new-badge">NEW</div>`;
+                        }
+
+                        cardDiv.innerHTML = `${badgeHtml}<h3 class="card-inner-title">${card.title}</h3>`;
+                        
+                        if (state.isEditMode) {
+                            const globalIndex = db.stages[state.stage].cards.findIndex(c => c.id === card.id);
+                            const actDiv = document.createElement('div');
+                            actDiv.className = 'card-edit-badge';
+                            actDiv.innerHTML = `<div class="action-icon" onclick="event.stopPropagation(); window.openEditModal(${globalIndex})">✎</div><div class="action-icon del" onclick="event.stopPropagation(); window.deleteCard(${globalIndex})">✖</div>`;
+                            cardDiv.appendChild(actDiv);
+                        }
+                        cardDiv.onclick = () => { if(!state.isEditMode && typeof window.startCardFlow === 'function') window.startCardFlow(card); };
+                        grid.appendChild(cardDiv);
+                    });
+                    
+                    if (activeCards.length === 0 && state.isEditMode) { 
+                        grid.innerHTML = `<p style="opacity:0.4; font-size:0.85rem; text-align:center; width:100%; grid-column: 1 / -1; padding: 20px;">该模块暂无内容，请点击上方 [+ 新增卡片]</p>`; 
+                    }
+                    
+                    const section = document.createElement('div');
+                    section.className = 'module-section';
+                    section.appendChild(grid);
+                    if(container) container.appendChild(section);
+                } else {
+                    if(container) container.innerHTML = '<p style="opacity:0.4; margin-top:50px; text-align:center; font-size: 1.1rem; font-weight: bold;">当前模块暂无内容</p>';
+                }
+            };
+            
+            originalPatched = true;
+            clearInterval(checkPatch);
+            
+            if(document.getElementById('screen-card-list').classList.contains('active')) {
+                window.renderCardList();
+            }
+        }
+    }, 50);
 </script>
 
 <!-- ================= 一劳永逸自动防缓存加载引擎 ================= -->
