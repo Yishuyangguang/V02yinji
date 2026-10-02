@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 新增防抖引擎、修复排版对齐、修复选区防丢，【终极修复】跨端字体缺失与 CSS 层叠覆盖失效的 Bug
+ * 更新内容: 新增分类重命名、防丢选区、跨端字体，【终极修复】注入状态快照引擎，实现绝对的全局多篇幅一键全量同步
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.6 (跨端字体库完美映射升级版)");
+    console.log("🚀 成功加载知识库引擎 V7.7 (全局多文档状态快照与全量同步版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -76,7 +76,7 @@
             .admin-mode .doc-title-input { pointer-events: auto; }
             .admin-mode .doc-title-input:focus { background: #f1f3f4; border-bottom: 2px solid #1a73e8; }
             
-            /* 站长：保存按钮区 (注入了 transition 动画引擎) */
+            /* 站长：保存按钮区 */
             .doc-actions-admin { display: none; gap: 10px; align-items: center; }
             .btn-doc-save { background: #1a73e8; border: none; color: #fff; padding: 8px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
             .btn-doc-save:active { transform: scale(0.95); }
@@ -117,7 +117,6 @@
             }
             .doc-paper-wrapper { position: relative; width: 100%; max-width: 850px; display: none; transition: transform 0.3s ease; }
             
-            /* 彻底解决居中问题，强制恢复原生纯净的富文本排版行为 */
             .doc-paper {
                 background: #ffffff; color: #111111;
                 width: 100%; min-height: 1100px; 
@@ -128,10 +127,9 @@
                 text-align: left;
             }
             
-            /* 💥核心拦截：彻底阻断 app.html 中 p { text-align-last: center } 的全局污染 */
+            /* 阻断全局样式污染 */
             .doc-paper * { text-align-last: auto !important; }
             
-            /* 修正内部元素的默认对齐，去除强制 justify，完美保留粘贴的原始格式 */
             .doc-paper p { margin-bottom: 15px; } 
             .doc-paper h1, .doc-paper h2, .doc-paper h3, .doc-paper h4 { margin: 20px 0 15px 0; }
             .doc-paper ul, .doc-paper ol { padding-left: 2.5em; margin-bottom: 15px; }
@@ -160,7 +158,6 @@
             
             .empty-state { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #5f6368; font-size: 1.2rem; flex-direction: column; gap: 15px; font-weight: bold; text-align: center; }
             
-            /* 移动端响应式侧边栏 */
             @media (max-width: 768px) {
                 .doc-modal-overlay { flex-direction: column; }
                 .doc-sidebar { width: 100%; height: 35vh; border-right: none; border-bottom: 2px solid #e0e0e0; }
@@ -187,24 +184,20 @@
         }
     });
 
-    // 2. 注入文档系统的 HTML 骨架 (跨端字体栈部署)
+    // 2. 注入文档系统的 HTML 骨架
     const docModalHTML = `
         <div class="doc-modal-overlay" id="counseling-doc-modal">
-            <!-- 左侧：知识库导航 -->
             <div class="doc-sidebar" id="doc-sidebar">
                 <div class="doc-sidebar-header">
                     <h2 id="kb-main-title">知识库目录</h2>
                     <button class="btn-close-kb" onclick="window.closeCounselingDoc()">退出</button>
                 </div>
-                <div class="doc-sidebar-content" id="kb-sidebar-content">
-                    <!-- 动态分类与文章列表渲染区 -->
-                </div>
+                <div class="doc-sidebar-content" id="kb-sidebar-content"></div>
                 <div style="padding: 15px;">
                     <button class="btn-add-cat" onclick="window.kbAddCategory()">+ 新增分类</button>
                 </div>
             </div>
 
-            <!-- 右侧：文档编辑区 -->
             <div class="doc-main">
                 <div class="doc-header-wrapper">
                     <div class="doc-header-top">
@@ -226,13 +219,11 @@
                         </div>
                     </div>
 
-                    <!-- Google Docs 风格高级工具栏 -->
                     <div class="doc-toolbar" id="doc-toolbar">
                         <button class="doc-tool-btn" onclick="window.docExec('undo')" title="撤销">↩</button>
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
                         <div class="doc-tool-separator"></div>
                         
-                        <!-- 🚀核心修复：配置多系统跨平台安全字族映射 (Mac + Windows) -->
                         <select class="doc-tool-select" onchange="window.docExec('fontName', this.value); this.selectedIndex=0;" title="字体集" style="width: 110px;">
                             <option value="" disabled selected hidden>修改字体</option>
                             <option value="system-ui, -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif">系统默认</option>
@@ -304,13 +295,34 @@
     let currentSystemId = null; 
     let activeArticleId = null;
 
+    // 🚀 核心修复：全局状态快照引擎 (Memory Flush Engine)
+    // 强制将当前富文本的内容写入全局 db 对象，防止切换页面或同步时发生数据丢失！
+    window.flushDocToDB = function() {
+        if (!activeArticleId || !currentSystemId || !db || !db.docSystems || !db.docSystems[currentSystemId]) return;
+        
+        const editor = document.getElementById('doc-editor');
+        const titleInput = document.getElementById('doc-title');
+        if (!editor) return;
+
+        const currentContent = editor.innerHTML;
+        const currentTitle = titleInput ? (titleInput.value.trim() || '无标题文档') : '无标题文档';
+        
+        db.docSystems[currentSystemId].categories.forEach(c => {
+            c.articles.forEach(a => { 
+                if (a.id === activeArticleId) {
+                    a.content = currentContent; 
+                    a.title = currentTitle;
+                } 
+            });
+        });
+    };
+
     // 3. 核心 API: 打开整个知识库系统
     window.openCounselingDoc = function(systemId) {
         if (!systemId) systemId = 'sys_default_doc';
         currentSystemId = systemId;
         activeArticleId = null;
         
-        // 自动初始化安全结构
         if (!db.docSystems) db.docSystems = {};
         if (!db.docSystems[systemId]) {
             db.docSystems[systemId] = {
@@ -322,7 +334,6 @@
         const modal = document.getElementById('counseling-doc-modal');
         const sidebar = document.getElementById('doc-sidebar');
         
-        // 站长全开权限，游客强制阅读降级
         if (state.isAdmin) {
             modal.classList.add('admin-mode');
             modal.classList.remove('reader-mode');
@@ -338,7 +349,6 @@
 
         window.renderKBSidebar();
         
-        // 自动展示第一篇文章逻辑
         let hasArticle = false;
         const sys = db.docSystems[currentSystemId];
         if (sys && sys.categories) {
@@ -360,6 +370,9 @@
     };
 
     window.closeCounselingDoc = function() {
+        // 🚀 核心修复：关闭面板前，强行将编辑器内容快照写入 db
+        window.flushDocToDB();
+
         const modal = document.getElementById('counseling-doc-modal');
         modal.style.opacity = '0';
         setTimeout(() => modal.style.display = 'none', 300);
@@ -370,7 +383,6 @@
         sidebar.classList.toggle('collapsed');
     };
 
-    // 游客沉浸式阅读字号引擎
     window.setDocZoom = function(scale, btnId) {
         const wrapper = document.getElementById('doc-paper-wrapper');
         wrapper.style.zoom = scale;
@@ -501,6 +513,9 @@
     };
 
     window.kbSelectArticle = function(catId, artId) {
+        // 🚀 核心修复：切换到新文章前，强行将当前正在编辑的文章写入内存
+        window.flushDocToDB();
+
         activeArticleId = artId;
         const cat = db.docSystems[currentSystemId].categories.find(c => c.id === catId);
         const art = cat.articles.find(a => a.id === artId);
@@ -516,28 +531,20 @@
 
     window.kbSaveDocMeta = async function() {
         if (!activeArticleId) return;
-        const newTitle = document.getElementById('doc-title').value.trim() || '无标题文档';
-        let found = false;
-        db.docSystems[currentSystemId].categories.forEach(c => {
-            c.articles.forEach(a => { if (a.id === activeArticleId) { a.title = newTitle; found = true; } });
-        });
-        if(found && typeof window.saveDB === 'function') {
+        window.flushDocToDB();
+        if(typeof window.saveDB === 'function') {
             await window.saveDB();
             window.renderKBSidebar();
         }
     };
 
-    // 🚀 安全锁云端保存引擎
+    // 🚀 全局同步引擎增强版
     window.saveCounselingDoc = async function() {
         if (!activeArticleId) return window.showGlobalToast('请先选择或创建一篇文档', 'error');
-        const editor = document.getElementById('doc-editor');
-        const saveBtn = document.getElementById('btn-doc-save'); 
-        if (!editor) return;
-
-        const content = editor.innerHTML;
         
+        const saveBtn = document.getElementById('btn-doc-save'); 
         if (saveBtn) {
-            saveBtn.innerHTML = '⏳ 保存中...';
+            saveBtn.innerHTML = '⏳ 全局保存中...';
             saveBtn.style.pointerEvents = 'none';
             saveBtn.style.opacity = '0.8';
         }
@@ -552,26 +559,16 @@
             }
         };
 
-        if (!db) { resetBtn(); return window.showGlobalToast('数据库未就绪', 'error'); }
-        if (!db.docSystems) db.docSystems = {};
-        if (!db.docSystems[currentSystemId]) { resetBtn(); return window.showGlobalToast('知识库异常', 'error'); }
+        // 🚀 核心修复：保存前，强制将当前编辑器的 DOM 最新状态刷入全局 db 对象
+        window.flushDocToDB();
         
-        let found = false;
-        db.docSystems[currentSystemId].categories.forEach(c => {
-            c.articles.forEach(a => { 
-                if (a.id === activeArticleId) {
-                    a.content = content; 
-                    found = true;
-                } 
-            });
-        });
-        
-        if (found && typeof window.saveDB === 'function') {
+        // window.saveDB() 本身就是提交整个全局 db 变量，只要内存最新，就是真正的全系统同步！
+        if (typeof window.saveDB === 'function') {
             await window.saveDB();
-            window.showGlobalToast('文档已安全同步至云端', 'success');
+            window.showGlobalToast('✅ 全局所有数据已安全同步', 'success');
             
             if (saveBtn) {
-                saveBtn.innerHTML = '✅ 已同步';
+                saveBtn.innerHTML = '✅ 全局已同步';
                 saveBtn.style.backgroundColor = '#10b981';
                 saveBtn.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.4)';
                 saveBtn.style.opacity = '1';
@@ -580,7 +577,7 @@
             }
         } else {
             resetBtn();
-            window.showGlobalToast('保存失败：文档被删除或同步引擎丢失', 'error');
+            window.showGlobalToast('保存失败：全局同步引擎丢失', 'error');
         }
     };
 
@@ -595,16 +592,13 @@
             sel.addRange(window.docSavedRange);
         }
         
-        // 🚀 核心修复：开启 CSS 模式，使用 <span style="font-family:..."> 代替废弃的 <font> 标签，彻底解决样式覆盖失效
         try { document.execCommand('styleWithCSS', false, true); } catch(e) {}
-
         document.execCommand(command, false, value);
     };
 
     const editorWrapper = document.getElementById('doc-paper-wrapper');
     const editor = document.getElementById('doc-editor');
 
-    // 拖拽多媒体支持
     editorWrapper.addEventListener('dragover', (e) => {
         if(state.isAdmin) { e.preventDefault(); editorWrapper.classList.add('drag-over'); }
     });
