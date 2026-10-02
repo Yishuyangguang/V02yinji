@@ -118,6 +118,7 @@
         .theme-toggle-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); font-size: 1.2rem; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); transition: all 0.3s; }
         .theme-toggle-btn:active { transform: scale(0.9); }
 
+        /* 右上角音乐快捷入口，跳转至专属独立播放器 */
         .apple-music-player { background: var(--theme-glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); border: 1px solid var(--theme-glass-border); opacity: 0; pointer-events: none; transition: opacity 0.5s; cursor: pointer; height: 44px; }
         .apple-music-player.playing { opacity: 1; pointer-events: auto; }
         .music-icon { width: 22px; height: 22px; border-radius: 6px; background-size: cover; background-position: center; background-image: url('music-artwork.png'); }
@@ -187,69 +188,6 @@
         .modal-content { background: var(--theme-bg-color); border: 1px solid var(--theme-glass-border); border-radius: 30px; padding: 25px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 2px var(--theme-glass-inset); box-sizing: border-box; position: relative; }
         .modal-content::-webkit-scrollbar { display: none; }
         .qr-image { width: 200px; height: auto; border-radius: 16px; margin: 20px auto; display: block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
-
-        .music-type-modal-content { background: var(--theme-bg-color) !important; border-radius: 28px !important; border: 1px solid var(--theme-glass-border) !important; padding: 20px !important; box-shadow: 0 20px 50px var(--theme-glass-shadow) !important; }
-        
-        .vinyl-player-container.new-layout { width: 90vw; max-width: 950px; height: 85vh; max-height: 650px; display: flex; flex-direction: column; padding: 30px; background: var(--theme-bg-color) !important; border-radius: 28px !important; border: 1px solid var(--theme-glass-border) !important; box-shadow: 0 40px 80px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset) !important; position: relative; }
-        .close-3d-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; border-radius: 50%; background: var(--theme-glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--theme-glass-border); box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 2px var(--theme-glass-inset); color: var(--theme-text); display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.1rem; z-index: 999; transition: transform 0.2s, box-shadow 0.2s; }
-        .close-3d-btn:active { transform: scale(0.9); box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
-
-        .player-main-content { display: flex; flex-direction: row; gap: 40px; flex: 1; min-height: 0; align-items: stretch; justify-content: center; width: 100%; }
-        .player-left-panel { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; min-width: 300px; }
-        .player-right-panel { flex: 1.2; display: flex; flex-direction: column; min-height: 0; min-width: 320px; height: 100%; }
-
-        #player-track-name { width: 100%; max-width: 320px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-bottom: 25px; font-size: 1.25rem; font-weight: bold; color: var(--theme-primary); text-shadow: 0 2px 5px var(--theme-glass-shadow); padding: 0 10px; box-sizing: border-box; }
-        .player-controls-wrapper { display: flex; width: 100%; max-width: 380px; justify-content: space-between; align-items: center; margin: 15px auto 0; gap: 8px; }
-        .ctrl-group { display: flex; align-items: center; }
-        .ctrl-group.left { flex: 1; justify-content: flex-start; gap: 15px; }
-        .ctrl-group.center { flex: 0; justify-content: center; gap: 18px; }
-        .ctrl-group.right { flex: 1; justify-content: flex-end; gap: 15px; }
-
-        .ctrl-btn-small { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.15rem; transition: all 0.2s; box-shadow: 0 4px 10px var(--theme-glass-shadow); }
-        .ctrl-btn-small:active { transform: scale(0.85); }
-        .ctrl-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.3rem; transition: all 0.2s; box-shadow: 0 4px 10px var(--theme-glass-shadow); }
-        .ctrl-btn:active { transform: scale(0.9); }
-        .ctrl-btn.play-pause { width: 62px; height: 62px; font-size: 1.7rem; background: var(--theme-primary); color: #111; border: none; box-shadow: 0 8px 20px var(--theme-glass-shadow); }
-
-        .player-progress-bar-container { width: 100%; display: flex; align-items: center; gap: 15px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--theme-glass-border); flex-shrink: 0; }
-        #player-time-current, #player-time-total { font-size: 0.9rem; opacity: 0.6; color: var(--theme-text); width: 48px; text-align: center; font-family: monospace; }
-        .progress-track { flex: 1; height: 8px; background: var(--theme-glass-border); border-radius: 4px; position: relative; cursor: pointer; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--theme-primary), var(--theme-secondary)); border-radius: 4px; width: 0%; pointer-events: none; } 
-        .progress-thumb { width: 16px; height: 16px; position: absolute; top: 50%; transform: translate(-50%, -50%); left: 0%; display: flex; justify-content: center; align-items: center; font-size: 14px; line-height: 1; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-
-        .tech-wave-container { position: relative; width: 200px; height: 200px; display: flex; justify-content: center; align-items: center; margin: 10px auto; }
-        .wave-center { width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle, var(--theme-secondary) 0%, var(--theme-primary) 80%); border: 2px solid var(--theme-glass-border); box-shadow: 0 0 30px var(--theme-glass-shadow), inset 0 2px 5px var(--theme-glass-inset); z-index: 10; display: flex; justify-content: center; align-items: center; }
-        .wave-center::after { content: ''; width: 16px; height: 16px; border-radius: 50%; background: #111; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
-        .wave-ring { position: absolute; width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--theme-primary); opacity: 0; box-shadow: 0 0 15px var(--theme-glass-shadow), inset 0 0 15px var(--theme-glass-inset); }
-        .tech-wave-container.playing .wave-ring { animation: techWavePulse 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
-        .tech-wave-container.playing .wave-ring:nth-child(1) { animation-delay: 0s; }
-        .tech-wave-container.playing .wave-ring:nth-child(2) { animation-delay: 0.8s; }
-        .tech-wave-container.playing .wave-ring:nth-child(3) { animation-delay: 1.6s; }
-        @keyframes techWavePulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3.5); opacity: 0; } }
-        
-        .playlist-box { flex: 1; overflow-y: auto; background: var(--theme-input-bg); border-radius: 16px; padding: 5px; border: 1px solid var(--theme-glass-border); text-align: left; scroll-behavior: smooth; min-height: 0; margin-bottom: 0; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
-        .netease-item { display: flex; align-items: center; padding: 12px 10px; border-radius: 12px; cursor: pointer; transition: background 0.3s; margin-bottom: 5px; }
-        .netease-item:hover { background: var(--theme-glass-border); }
-        .netease-item.active { background: rgba(212, 175, 55, 0.15); border-left: 3px solid var(--theme-primary); }
-        .netease-index { width: 35px; font-size: 1rem; color: var(--theme-text); opacity: 0.5; font-weight: bold; text-align: center; }
-        .netease-item.active .netease-index { color: var(--theme-primary); opacity: 1; }
-        .netease-info { flex: 1; margin-left: 10px; display: flex; flex-direction: column; overflow: hidden; }
-        .netease-title { font-size: 1.05rem; color: var(--theme-text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
-        .netease-item.active .netease-title { color: var(--theme-primary); font-weight: bold; opacity: 1; text-shadow: 0 0 8px var(--theme-glass-shadow); }
-
-        @media (max-width: 768px) {
-            .vinyl-player-container.new-layout { width: 95vw; padding: 20px 15px; height: 92vh; max-height: none; }
-            .close-3d-btn { top: 12px; right: 12px; width: 36px; height: 36px; font-size: 1rem; }
-            .player-main-content { flex-direction: column; gap: 15px; align-items: center; }
-            .player-left-panel { flex: none; width: 100%; min-width: 0; } 
-            #player-track-name { max-width: 85vw; margin-top: 10px; margin-bottom: 5px; font-size: 1.15rem; }
-            .tech-wave-container { margin: 10px auto; width: 140px; height: 140px; }
-            .wave-center { width: 55px; height: 55px; } .wave-ring { width: 55px; height: 55px; }
-            .player-controls-wrapper { margin-top: 10px; max-width: 320px; }
-            .player-right-panel { flex: 1; width: 100%; min-width: 0; } 
-            .playlist-box { flex: 1; min-height: 150px; } 
-            .player-progress-bar-container { margin-top: 10px; padding-top: 15px; }
-        }
 
         /* 操作卡片与按钮精致化重构 */
         .content-card-beautiful {
@@ -362,7 +300,6 @@
 
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
-<!-- 🎵 预加载修正: 使用 metadata 避免未播放就全量下载，配合 Worker 206 实现秒播 -->
 <audio id="bgm-player" preload="metadata"></audio>
 
 <div class="widget-controls" id="theme-widget">
@@ -370,7 +307,7 @@
 </div>
 
 <div class="widget-controls-right">
-    <div class="apple-music-player" id="apple-music-box" onclick="window.showPlayerFromFloat()">
+    <div class="apple-music-player" id="apple-music-box" onclick="window.open('music-player.html', '_blank')">
         <div class="music-icon"></div>
         <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
     </div>
@@ -501,7 +438,6 @@
         </div>
     </div>
 
-    <!-- 🚀 核心重构：底部双阵列按钮，调用回顾全览 -->
     <div class="screen center-content" id="screen-finish" style="padding-top: calc(env(safe-area-inset-top) + 8vh); padding-bottom: calc(env(safe-area-inset-bottom) + 5vh); justify-content: space-between;">
         <div class="glass-panel content-card-beautiful" style="flex:1; margin-bottom:0 !important; display:flex; flex-direction:column; justify-content:center;">
             <h1 style="color: var(--theme-primary); margin-bottom: 1.5rem; text-align:center;">印记已成</h1>
@@ -516,6 +452,17 @@
 </div>
 
 <!-- ================ 模态弹窗区 ================ -->
+
+<div class="modal-overlay" id="qr-modal">
+    <div class="modal-content" style="text-align: center; max-width: 320px;">
+        <h2 style="color: var(--theme-primary); margin-bottom: 20px;">联系站长邮箱</h2>
+        <a href="mailto:yg@3927521.xyz" style="display: block; background: var(--theme-glass-bg); border: 1px dashed var(--theme-primary); padding: 15px; border-radius: 16px; color: var(--theme-text); font-size: 1.15rem; font-weight: bold; text-decoration: none; margin-bottom: 15px; transition: all 0.3s;">
+            yg@3927521.xyz
+        </a>
+        <p style="font-size: 0.85rem; opacity: 0.6; margin-bottom: 20px;">点击上方邮箱地址即可直接发送邮件</p>
+        <button class="btn-glass" style="margin-top: 10px;" onclick="window.hideModal('qr-modal')">关 闭</button>
+    </div>
+</div>
 
 <div class="modal-overlay" id="edit-modal">
     <div class="modal-content">
@@ -891,7 +838,6 @@
     }, 50);
 </script>
 
-<!-- ================= 🚀 载入核心组件池 ================= -->
 <script>
     (function() {
         var autoVersion = new Date().getTime(); 
