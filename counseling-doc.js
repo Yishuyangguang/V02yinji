@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 新增分类重命名、防丢选区、跨端字体，【终极修复】注入状态快照引擎，实现绝对的全局多篇幅一键全量同步
+ * 更新内容: 移除阅读字号文本、电脑端目录常驻不隐藏、苹果手机端自适应排版修复
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.7 (全局多文档状态快照与全量同步版)");
+    console.log("🚀 成功加载知识库引擎 V7.8 (目录常驻与全端适配版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -65,9 +65,10 @@
             .doc-header-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 25px; gap: 15px; }
             
             .doc-title-group { display: flex; align-items: center; gap: 10px; flex: 1; }
-            .btn-toggle-menu { display: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #5f6368; padding: 5px; border-radius: 4px; }
+            
+            /* 汉堡菜单：电脑端隐藏，手机端显示 */
+            .btn-toggle-menu { display: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #5f6368; padding: 5px 10px; border-radius: 4px; }
             .btn-toggle-menu:hover { background: #f1f3f4; }
-            .reader-mode .btn-toggle-menu { display: block; }
 
             .doc-title-input {
                 background: transparent; border: none; color: #202124; font-size: 1.4rem; 
@@ -158,17 +159,17 @@
             
             .empty-state { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #5f6368; font-size: 1.2rem; flex-direction: column; gap: 15px; font-weight: bold; text-align: center; }
             
+            /* 🚀 核心修复：苹果手机端自适应排版 */
             @media (max-width: 768px) {
                 .doc-modal-overlay { flex-direction: column; }
-                .doc-sidebar { width: 100%; height: 35vh; border-right: none; border-bottom: 2px solid #e0e0e0; }
+                .doc-sidebar { width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; }
                 .doc-sidebar.collapsed { display: none; }
-                .doc-main { height: 65vh; }
-                .reader-mode .doc-main { height: 100vh; } 
+                .doc-main { height: auto; flex: 1; min-height: 0; } /* 弹性填充剩余高度，绝对不溢出 */
                 .doc-paper { min-height: 800px; padding: 30px 20px; }
                 .doc-toolbar { overflow-x: auto; flex-wrap: nowrap; padding: 8px 10px; }
                 .doc-tool-btn { flex-shrink: 0; }
-                .btn-toggle-menu { display: block; } 
-                .doc-actions-reader { overflow-x: auto; flex-wrap: nowrap; }
+                .btn-toggle-menu { display: block; } /* 仅在手机端显示汉堡菜单 */
+                .doc-actions-reader { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
             }
         `;
         document.head.appendChild(style);
@@ -187,17 +188,21 @@
     // 2. 注入文档系统的 HTML 骨架
     const docModalHTML = `
         <div class="doc-modal-overlay" id="counseling-doc-modal">
+            <!-- 左侧：知识库导航 -->
             <div class="doc-sidebar" id="doc-sidebar">
                 <div class="doc-sidebar-header">
                     <h2 id="kb-main-title">知识库目录</h2>
                     <button class="btn-close-kb" onclick="window.closeCounselingDoc()">退出</button>
                 </div>
-                <div class="doc-sidebar-content" id="kb-sidebar-content"></div>
+                <div class="doc-sidebar-content" id="kb-sidebar-content">
+                    <!-- 动态分类与文章列表渲染区 -->
+                </div>
                 <div style="padding: 15px;">
                     <button class="btn-add-cat" onclick="window.kbAddCategory()">+ 新增分类</button>
                 </div>
             </div>
 
+            <!-- 右侧：文档编辑区 -->
             <div class="doc-main">
                 <div class="doc-header-wrapper">
                     <div class="doc-header-top">
@@ -210,8 +215,8 @@
                             <button class="btn-doc-save" id="btn-doc-save" onclick="window.saveCounselingDoc()">☁ 云端保存</button>
                         </div>
 
+                        <!-- 🚀 核心修复：移除了阅读字号文字，精简按钮组对称排列 -->
                         <div class="doc-actions-reader">
-                            <span style="font-size:0.85rem; color:#5f6368; font-weight:bold;">阅读字号:</span>
                             <button class="btn-zoom" id="zoom-small" onclick="window.setDocZoom(0.85, 'small')">偏小</button>
                             <button class="btn-zoom active" id="zoom-normal" onclick="window.setDocZoom(1, 'normal')">标准</button>
                             <button class="btn-zoom" id="zoom-large" onclick="window.setDocZoom(1.15, 'large')">稍大</button>
@@ -219,6 +224,7 @@
                         </div>
                     </div>
 
+                    <!-- Google Docs 风格高级工具栏 -->
                     <div class="doc-toolbar" id="doc-toolbar">
                         <button class="doc-tool-btn" onclick="window.docExec('undo')" title="撤销">↩</button>
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
@@ -295,8 +301,7 @@
     let currentSystemId = null; 
     let activeArticleId = null;
 
-    // 🚀 核心修复：全局状态快照引擎 (Memory Flush Engine)
-    // 强制将当前富文本的内容写入全局 db 对象，防止切换页面或同步时发生数据丢失！
+    // 🚀 全局状态快照引擎
     window.flushDocToDB = function() {
         if (!activeArticleId || !currentSystemId || !db || !db.docSystems || !db.docSystems[currentSystemId]) return;
         
@@ -338,13 +343,18 @@
             modal.classList.add('admin-mode');
             modal.classList.remove('reader-mode');
             document.getElementById('doc-editor').setAttribute('contenteditable', 'true');
-            sidebar.classList.remove('collapsed'); 
         } else {
             modal.classList.remove('admin-mode');
             modal.classList.add('reader-mode');
             document.getElementById('doc-editor').setAttribute('contenteditable', 'false');
-            sidebar.classList.add('collapsed'); 
             window.setDocZoom(1, 'normal'); 
+        }
+
+        // 🚀 核心修复：电脑端强制展示侧边栏，手机端默认折叠，实现 Google Docs 级双栏体验
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+        } else {
+            sidebar.classList.remove('collapsed');
         }
 
         window.renderKBSidebar();
@@ -370,7 +380,6 @@
     };
 
     window.closeCounselingDoc = function() {
-        // 🚀 核心修复：关闭面板前，强行将编辑器内容快照写入 db
         window.flushDocToDB();
 
         const modal = document.getElementById('counseling-doc-modal');
@@ -424,9 +433,6 @@
                 `;
                 artItem.onclick = () => {
                     window.kbSelectArticle(cat.id, art.id);
-                    if (window.innerWidth <= 768 || !state.isAdmin) {
-                        document.getElementById('doc-sidebar').classList.add('collapsed');
-                    }
                 };
                 catGroup.appendChild(artItem);
             });
@@ -513,7 +519,6 @@
     };
 
     window.kbSelectArticle = function(catId, artId) {
-        // 🚀 核心修复：切换到新文章前，强行将当前正在编辑的文章写入内存
         window.flushDocToDB();
 
         activeArticleId = artId;
@@ -527,6 +532,11 @@
         document.getElementById('doc-editor').innerHTML = art.content;
         
         window.renderKBSidebar(); 
+
+        // 🚀 核心修复：仅在手机端点击文章后自动收起目录，电脑端始终保持展现，无需点一下缩一下
+        if (window.innerWidth <= 768) {
+            document.getElementById('doc-sidebar').classList.add('collapsed');
+        }
     };
 
     window.kbSaveDocMeta = async function() {
@@ -538,7 +548,6 @@
         }
     };
 
-    // 🚀 全局同步引擎增强版
     window.saveCounselingDoc = async function() {
         if (!activeArticleId) return window.showGlobalToast('请先选择或创建一篇文档', 'error');
         
@@ -559,10 +568,8 @@
             }
         };
 
-        // 🚀 核心修复：保存前，强制将当前编辑器的 DOM 最新状态刷入全局 db 对象
         window.flushDocToDB();
         
-        // window.saveDB() 本身就是提交整个全局 db 变量，只要内存最新，就是真正的全系统同步！
         if (typeof window.saveDB === 'function') {
             await window.saveDB();
             window.showGlobalToast('✅ 全局所有数据已安全同步', 'success');
