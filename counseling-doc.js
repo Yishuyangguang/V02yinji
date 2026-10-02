@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 新增分类重命名、修复排版对齐、修复选区防丢，新增【云端同步按钮状态机与防抖引擎】
+ * 更新内容: 新增防抖引擎、修复排版对齐、修复选区防丢，【终极修复】跨端字体缺失与 CSS 层叠覆盖失效的 Bug
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.5 (完美交互与状态机防抖版)");
+    console.log("🚀 成功加载知识库引擎 V7.6 (跨端字体库完美映射升级版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -101,7 +101,7 @@
                 display: flex; justify-content: center; align-items: center; transition: all 0.2s; font-family: serif; font-weight: bold;
             }
             .doc-tool-btn:hover { background: #e0e6ed; border-color: #c7c7c7; }
-            .doc-tool-select { background: transparent; border: 1px solid transparent; padding: 4px; border-radius: 4px; outline: none; cursor: pointer; color: #444746; font-size: 14px; font-weight: bold; max-width: 130px; }
+            .doc-tool-select { background: transparent; border: 1px solid transparent; padding: 4px; border-radius: 4px; outline: none; cursor: pointer; color: #444746; font-size: 14px; font-weight: bold; max-width: 140px; }
             .doc-tool-select:hover { background: #e0e6ed; }
             .doc-tool-separator { width: 1px; height: 18px; background: #c7c7c7; margin: 0 6px; }
             
@@ -187,7 +187,7 @@
         }
     });
 
-    // 2. 注入文档系统的 HTML 骨架 (为按钮挂载 id="btn-doc-save")
+    // 2. 注入文档系统的 HTML 骨架 (跨端字体栈部署)
     const docModalHTML = `
         <div class="doc-modal-overlay" id="counseling-doc-modal">
             <!-- 左侧：知识库导航 -->
@@ -213,12 +213,10 @@
                             <input type="text" class="doc-title-input" id="doc-title" placeholder="无标题文档" onblur="window.kbSaveDocMeta()">
                         </div>
                         
-                        <!-- 🚀 核心修复：管理员控制台，为按钮精准赋能 ID -->
                         <div class="doc-actions-admin">
                             <button class="btn-doc-save" id="btn-doc-save" onclick="window.saveCounselingDoc()">☁ 云端保存</button>
                         </div>
 
-                        <!-- 游客自动全屏阅读控制台 -->
                         <div class="doc-actions-reader">
                             <span style="font-size:0.85rem; color:#5f6368; font-weight:bold;">阅读字号:</span>
                             <button class="btn-zoom" id="zoom-small" onclick="window.setDocZoom(0.85, 'small')">偏小</button>
@@ -234,13 +232,13 @@
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
                         <div class="doc-tool-separator"></div>
                         
-                        <select class="doc-tool-select" onchange="window.docExec('fontName', this.value); this.selectedIndex=0;" title="字体集">
+                        <!-- 🚀核心修复：配置多系统跨平台安全字族映射 (Mac + Windows) -->
+                        <select class="doc-tool-select" onchange="window.docExec('fontName', this.value); this.selectedIndex=0;" title="字体集" style="width: 110px;">
                             <option value="" disabled selected hidden>修改字体</option>
-                            <option value="Arial">默认字体</option>
-                            <option value="楷体, KaiTi">楷体</option>
-                            <option value="宋体, SimSun">宋体</option>
-                            <option value="微软雅黑, Microsoft YaHei">微软雅黑</option>
-                            <option value="黑体, SimHei">黑体</option>
+                            <option value="system-ui, -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif">系统默认</option>
+                            <option value="'STKaiti', 'Kaiti SC', 'KaiTi', '楷体', serif">楷体 (优雅)</option>
+                            <option value="'STSong', 'Songti SC', 'SimSun', '宋体', serif">宋体 (传统)</option>
+                            <option value="'PingFang SC', 'Microsoft YaHei', '黑体', sans-serif">雅黑 / 黑体</option>
                         </select>
                         <div class="doc-tool-separator"></div>
 
@@ -529,23 +527,21 @@
         }
     };
 
-    // 🚀 核心修复：注入企业级按钮防抖与视觉流转引擎
+    // 🚀 安全锁云端保存引擎
     window.saveCounselingDoc = async function() {
         if (!activeArticleId) return window.showGlobalToast('请先选择或创建一篇文档', 'error');
         const editor = document.getElementById('doc-editor');
-        const saveBtn = document.getElementById('btn-doc-save'); // 锁定焦点按钮
+        const saveBtn = document.getElementById('btn-doc-save'); 
         if (!editor) return;
 
         const content = editor.innerHTML;
         
-        // 步骤1：拦截并发，锁定状态
         if (saveBtn) {
             saveBtn.innerHTML = '⏳ 保存中...';
-            saveBtn.style.pointerEvents = 'none'; // 物理禁用连击
+            saveBtn.style.pointerEvents = 'none';
             saveBtn.style.opacity = '0.8';
         }
 
-        // 统一的回滚重置闭包
         const resetBtn = () => {
             if (saveBtn) {
                 saveBtn.innerHTML = '☁ 云端保存';
@@ -556,7 +552,6 @@
             }
         };
 
-        // 核心安全防崩溃判定
         if (!db) { resetBtn(); return window.showGlobalToast('数据库未就绪', 'error'); }
         if (!db.docSystems) db.docSystems = {};
         if (!db.docSystems[currentSystemId]) { resetBtn(); return window.showGlobalToast('知识库异常', 'error'); }
@@ -575,14 +570,12 @@
             await window.saveDB();
             window.showGlobalToast('文档已安全同步至云端', 'success');
             
-            // 步骤2：数据落盘成功，执行绿灯视觉流转
             if (saveBtn) {
                 saveBtn.innerHTML = '✅ 已同步';
-                saveBtn.style.backgroundColor = '#10b981'; // 成功色
+                saveBtn.style.backgroundColor = '#10b981';
                 saveBtn.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.4)';
                 saveBtn.style.opacity = '1';
                 
-                // 步骤3：2秒后完美复原，静候下一次动作
                 setTimeout(() => { resetBtn(); }, 2000);
             }
         } else {
@@ -602,6 +595,9 @@
             sel.addRange(window.docSavedRange);
         }
         
+        // 🚀 核心修复：开启 CSS 模式，使用 <span style="font-family:..."> 代替废弃的 <font> 标签，彻底解决样式覆盖失效
+        try { document.execCommand('styleWithCSS', false, true); } catch(e) {}
+
         document.execCommand(command, false, value);
     };
 
