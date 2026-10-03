@@ -3,36 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>常用软件与平台 - 恒久印记</title>
-    
+    <title>软件工具存放处 - 恒久印记</title>
+
+    <!-- 🚀 核心保留：腾讯系防封禁与提示拦截器 (确保沉浸式体验不被破坏) -->
+    <script>
+      (function() {
+          var ua = navigator.userAgent.toLowerCase();
+          var isTencentApp = ua.indexOf('micromessenger') !== -1 || ua.indexOf('wxwork') !== -1 || ua.indexOf('qq/') !== -1;
+          if (isTencentApp) {
+              document.write('\
+              <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(248,250,252,0.98);z-index:2147483647;display:flex;flex-direction:column;align-items:center;padding-top:15vh;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,sans-serif;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);touch-action:none;pointer-events:all;overscroll-behavior:none;">\
+                  <svg style="position:absolute;top:15px;right:25px;width:70px;height:70px;animation:wechatBounce 1s infinite alternate;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">\
+                      <path d="M85 15 C 60 15, 30 40, 20 80" stroke="#6366f1" stroke-width="4" stroke-linecap="round" fill="none" stroke-dasharray="8 8"/>\
+                      <path d="M90 10 L 65 20 L 80 35 Z" fill="#6366f1"/>\
+                  </svg>\
+                  <h2 style="font-size:1.6rem;color:#6366f1;margin-bottom:20px;letter-spacing:2px;font-weight:bold;">请在浏览器中打开</h2>\
+                  <p style="font-size:1.15rem;line-height:2;text-align:center;padding:0 30px;opacity:0.9;">为了呈现完美的沉浸式体验<br>并确保功能正常运作</p>\
+                  <div style="background:#ef4444;color:#fff;padding:12px 25px;border-radius:25px;font-weight:bold;margin-top:30px;box-shadow:0 10px 25px rgba(239,68,68,0.3);">点击右上角【···】选择在浏览器打开</div>\
+                  <style>@keyframes wechatBounce { 0% { transform:translate(0,0); } 100% { transform:translate(-10px,10px); } }</style>\
+              </div>\
+              ');
+              document.close();
+              if(window.stop) window.stop();
+          }
+      })();
+    </script>
+
     <style>
         :root {
-            --bg-base: #f4f7f9;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             --card-bg: #ffffff;
-            --item-bg: #fdfdfd;
-            --item-border: #eef2f6;
             --text-main: #1e293b;
             --text-sub: #64748b;
-            --primary: #6366f1;
-            --accent: #f59e0b; /* 标志性橙黄色 */
-            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            --font-title: "Songti SC", "SimSun", serif;
+            --border: #e2e8f0;
+            --warning-bg: #fffbeb;
+            --warning-border: #fef3c7;
+            --warning-text: #b45309;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-        body, html {
-            width: 100vw; max-width: 100vw; min-height: 100vh;
-            background-color: var(--bg-base); color: var(--text-main);
-            font-family: var(--font-main); overflow-x: hidden;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        .main-container {
-            width: 100%; max-width: 900px; margin: 0 auto;
-            padding: calc(env(safe-area-inset-top) + 6vh) 20px calc(env(safe-area-inset-bottom) + 6vh) 20px;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; 
+            background: var(--bg-gradient); 
+            margin: 0; 
+            padding: calc(env(safe-area-inset-top) + 40px) 20px calc(env(safe-area-inset-bottom) + 40px) 20px; 
+            color: var(--text-main); 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* 沉浸式入场动画 */
             animation: fadeInUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            overflow-x: hidden;
         }
 
         @keyframes fadeInUp {
@@ -40,75 +61,155 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ================= 🚀 顶部视觉区 ================= */
-        .header-area { text-align: center; margin-bottom: 30px; width: 100%; }
-        .header-icon { font-size: 4rem; margin-bottom: 10px; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.05)); }
-        .main-title { font-size: 2.2rem; font-family: var(--font-title); font-weight: 900; color: var(--text-main); letter-spacing: 2px; margin-bottom: 15px; }
-        .sub-title { font-size: 1.05rem; color: var(--text-sub); letter-spacing: 1px; }
-
-        /* ================= 🚀 白底大卡容器 ================= */
-        .software-panel {
-            width: 100%; background: var(--card-bg);
-            border-radius: 28px; padding: 40px 35px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.03);
-            border-top: 4px solid var(--accent);
-            margin-bottom: auto;
+        .container { 
+            width: 100%;
+            max-width: 680px; 
+            background: var(--card-bg); 
+            padding: 45px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07), 0 10px 20px -10px rgba(0, 0, 0, 0.04); 
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        .software-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;
+        .header-icon {
+            font-size: 40px;
+            text-align: center;
+            margin-bottom: 10px;
         }
 
-        /* 🚀 管理员动态包裹层 */
-        .software-item-wrapper { position: relative; display: flex; flex-direction: column; }
-
-        /* 极简卡片美学 */
-        .software-item {
-            display: flex; align-items: center; padding: 18px 25px; border-radius: 16px;
-            background: var(--item-bg); border: 1px solid var(--item-border);
-            text-decoration: none; color: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            cursor: pointer; height: 100%;
+        h2 { 
+            margin: 0 0 8px 0; 
+            color: var(--text-main); 
+            text-align: center; 
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
-        .software-item:hover { background: #ffffff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.04); border-color: #cbd5e1; }
-        .software-item:active { transform: scale(0.97); }
 
-        /* 自动提取的高清官网图标 */
-        .app-icon {
-            width: 38px; height: 38px; display: flex; justify-content: center; align-items: center;
-            margin-right: 18px; flex-shrink: 0; border-radius: 8px; overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: #fff;
+        .desc { 
+            text-align: center; 
+            color: var(--text-sub); 
+            font-size: 14px; 
+            margin-bottom: 25px; 
+            font-weight: 400;
         }
-        .app-icon img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* 注意事项提示板块 */
+        .notice-box {
+            background: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            border-left: 4px solid #f59e0b;
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(245, 158, 11, 0.05);
+        }
+        .notice-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .notice-content {
+            font-size: 13px;
+            color: var(--warning-text);
+            line-height: 1.6;
+            font-weight: 500;
+        }
+        .notice-content strong {
+            font-weight: 700;
+        }
         
-        .app-info { flex: 1; overflow: hidden; display: flex; align-items: center; }
-        .app-name { font-size: 1.15rem; font-weight: 800; color: var(--text-main); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; letter-spacing: 0.5px;}
-
-        /* ================= 🚀 站长专属编辑 UI ================= */
-        .admin-badge {
-            position: absolute; top: -10px; right: -5px; display: flex; gap: 8px; z-index: 10;
-            opacity: 0; transition: opacity 0.2s; pointer-events: none;
+        /* 软件卡片：赋予独立的特色边框与高级阴影 */
+        .software-card { 
+            background: #fdfdfd; 
+            border: 1px solid var(--border); 
+            border-radius: 14px; 
+            padding: 18px 22px; 
+            margin-bottom: 16px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 20px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
         }
-        .software-item-wrapper:hover .admin-badge { opacity: 1; pointer-events: auto; }
         
-        .action-icon {
-            width: 28px; height: 28px; border-radius: 50%; background: #ffffff; color: var(--text-main);
-            display: flex; justify-content: center; align-items: center; font-size: 0.85rem; font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s;
+        .software-card:hover { 
+            background: #ffffff;
+            border-color: #cbd5e1; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06); 
+            transform: translateY(-2px);
         }
-        .action-icon:active { transform: scale(0.85); }
-        .action-icon.edit { color: #f59e0b; }
-        .action-icon.del { background: #ef4444; color: #fff; border-color: transparent; }
-
-        .btn-add-software {
-            display: flex; align-items: center; justify-content: center; padding: 18px 25px; border-radius: 16px;
-            background: rgba(99,102,241,0.05); border: 2px dashed #a5b4fc; color: var(--primary);
-            font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.3s; height: 100%;
+        
+        .software-info { 
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .btn-add-software:hover { background: rgba(99,102,241,0.1); border-color: var(--primary); transform: translateY(-2px); }
-        .btn-add-software:active { transform: scale(0.97); }
+        
+        /* 官网图标样式 */
+        .software-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            border-radius: 6px;
+            flex-shrink: 0;
+            background: #f8fafc;
+            padding: 2px;
+            border: 1px solid #e2e8f0;
+        }
 
-        /* ================= 🚀 退出按钮 ================= */
-        .btn-exit-wrapper { width: 100%; display: flex; justify-content: center; margin-top: 50px; flex-shrink: 0; }
+        .text-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .software-name { 
+            font-weight: 700; 
+            font-size: 16px; 
+            color: var(--text-main); 
+        }
+
+        .tag {
+            font-size: 11px;
+            background: #eff6ff;
+            color: #3b82f6;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* 专属动作按钮样式（下载/观看） */
+        .btn-action { 
+            padding: 9px 20px; 
+            border: none; 
+            border-radius: 10px; 
+            background: #f59e0b; 
+            color: #fff; 
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: 600; 
+            transition: all 0.2s ease; 
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        
+        .btn-action:active { transform: scale(0.96); }
+        .btn-action:hover { background: #d97706; box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35); }
+        
+        .btn-watch { background: #10b981 !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important; }
+        .btn-watch:hover { background: #059669 !important; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35) !important; }
+
+        /* ================= 🚀 核心保留：退出按钮自适应样式 ================= */
+        .btn-exit-wrapper { width: 100%; display: flex; justify-content: center; margin-top: 35px; flex-shrink: 0; }
         .btn-exit-software {
             background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 14px 45px; border-radius: 50px;
             font-size: 1.1rem; font-weight: 900; letter-spacing: 4px; cursor: pointer; transition: all 0.3s;
@@ -117,198 +218,147 @@
         .btn-exit-software:hover { background: #f8fafc; border-color: #94a3b8; color: #0f172a; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.04); }
         .btn-exit-software:active { transform: scale(0.95); }
 
-        @media (max-width: 768px) {
-            .main-container { padding: calc(env(safe-area-inset-top) + 20px) 15px calc(env(safe-area-inset-bottom) + 20px) 15px; }
-            .software-panel { padding: 30px 20px; border-radius: 24px; border-top-width: 3px; }
-            .header-icon { font-size: 3.5rem; }
-            .main-title { font-size: 1.8rem; }
-            .software-grid { grid-template-columns: 1fr; gap: 15px; }
-            .admin-badge { opacity: 1; pointer-events: auto; top: 50%; transform: translateY(-50%); right: 10px; }
-            .btn-exit-software { width: 85%; max-width: 260px; padding: 14px; font-size: 1.05rem; }
+        @media (max-width: 600px) {
+            .software-card { flex-direction: column; align-items: stretch; gap: 14px; }
+            .software-info { justify-content: flex-start; }
+            .btn-action { width: 100%; }
+            body { padding: 20px 10px; }
+            .container { padding: 25px 20px; }
+            .btn-exit-software { width: 100%; padding: 14px; font-size: 1.05rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        
-        <div class="header-area">
-            <div class="header-icon">💻</div>
-            <h1 class="main-title">常用软件与平台</h1>
-            <p class="sub-title">恒久印记精选 · 点击即可直达官方进行下载与阅览</p>
-        </div>
+<div class="container">
+    <div class="header-icon">💻</div>
+    <h2>软件工具存放处</h2>
+    <p class="desc">精选常用软件与平台，点击即可直达官方页面</p>
 
-        <div class="software-panel">
-            <div class="software-grid" id="software-grid">
-                <!-- 🚀 云端内容将在此处通过 JS 动态渲染 🚀 -->
-            </div>
+    <!-- 注意事项提示板块 -->
+    <div class="notice-box">
+        <div class="notice-icon">⚠️️</div>
+        <div class="notice-content">
+            <strong>温馨提示：</strong>请勿在微信或QQ内置浏览器中打开链接，请复制链接到手机浏览器中打开。
         </div>
-
-        <div class="btn-exit-wrapper">
-            <button class="btn-exit-software" onclick="closeSoftwarePage()">退 出</button>
-        </div>
-
     </div>
 
-    <!-- 🚀 核心逻辑引擎 -->
-    <script>
-        const isIframe = window !== window.parent;
-        const pWin = window.parent;
-        let isAdmin = false;
-        let localDataList = []; // 内存堆栈
+    <!-- 动态生成的软件列表容器 -->
+    <div id="softwareListContainer"></div>
 
-        // 初始化数据系统
-        function initData() {
-            if (isIframe && pWin.state) {
-                isAdmin = pWin.state.isAdmin;
-            }
+    <!-- 🚀 核心保留：无缝沉浸式退出按钮 -->
+    <div class="btn-exit-wrapper">
+        <button class="btn-exit-software" onclick="closeSoftwarePage()">退 出</button>
+    </div>
+</div>
 
-            // 安全检测：如果跨域或获取不到母体数据库，使用兜底机制
-            if (!isIframe || !pWin.db) {
-                document.getElementById('software-grid').innerHTML = '<p style="text-align:center;width:100%;grid-column:1/-1;">请从印记主页进入以加载云端数据</p>';
-                return;
-            }
+<script>
+// ==========================================
+// 💡 【软件专区配置区】：集中管理软件、精准图标及各自专属特色边框色
+// ==========================================
+const softwareList = [
+    { 
+        name: "诗歌本", 
+        tag: "官方下载", 
+        url: "https://appsky.icu/#/hymn", 
+        icon: "https://www.google.com/s2/favicons?domain=appsky.icu&sz=64",
+        btnText: "点击下载",
+        borderColor: "#3b82f6" // 信仰蓝
+    },
+    { 
+        name: "精读圣经", 
+        tag: "官方下载", 
+        url: "https://appsky.icu/#/bible", 
+        icon: "https://www.google.com/s2/favicons?domain=appsky.icu&sz=64",
+        btnText: "点击下载",
+        borderColor: "#2563eb" // 深蓝
+    },
+    { 
+        name: "微读圣经", 
+        tag: "官方下载", 
+        url: "https://wd.bible/app", 
+        icon: "https://www.google.com/s2/favicons?domain=wd.bible&sz=64",
+        btnText: "点击下载",
+        borderColor: "#1d4ed8" // 靛青蓝
+    },
+    { 
+        name: "Zoom 会议", 
+        tag: "官方客户端", 
+        url: "https://zoom.us/download", 
+        icon: "https://www.google.com/s2/favicons?domain=zoom.us&sz=64",
+        btnText: "点击下载",
+        borderColor: "#0ea5e9" // Zoom蓝
+    },
+    { 
+        name: "小鸽子", 
+        tag: "客户端下载", 
+        url: "https://www.idigest.app/#/appDownload", 
+        icon: "https://www.google.com/s2/favicons?domain=idigest.app&sz=64",
+        btnText: "点击下载",
+        borderColor: "#6366f1" // 灵动紫蓝
+    },
+    { 
+        name: "福音TV", 
+        tag: "视频平台", 
+        url: "https://www.fuyin.tv/", 
+        icon: "https://www.google.com/s2/favicons?domain=fuyin.tv&sz=64",
+        btnText: "点击观看",
+        isWatch: true,
+        borderColor: "#10b981" // 生态绿
+    },
+];
 
-            // 架构补齐：利用 globalMusicConfig 作为绝对安全的数据锚点，防止被 sync-engine 洗掉
-            if (!pWin.db.globalMusicConfig) pWin.db.globalMusicConfig = {};
-            
-            if (!pWin.db.globalMusicConfig.softwareNav) {
-                // 首次访问，注入你要求找回的所有默认官网链接！
-                pWin.db.globalMusicConfig.softwareNav = [
-                    { id: 's1', name: '诗歌本', url: 'https://www.shigeben.com' },
-                    { id: 's2', name: '精读圣经', url: 'https://www.jingdushengjing.com' },
-                    { id: 's3', name: 'ZOOM', url: 'https://zoom.us' },
-                    { id: 's4', name: '福音TV', url: 'https://www.fuyintv.com' },
-                    { id: 's5', name: '微读圣经', url: 'https://wd.bible' },
-                    { id: 's6', name: '小鸽子', url: 'https://xiaogezi.com' },
+// 自动渲染极简美化列表到网页中
+function renderSoftware() {
+    const container = document.getElementById('softwareListContainer');
+    let html = '';
+    
+    softwareList.forEach((item) => {
+        let btnClass = item.isWatch ? "btn-action btn-watch" : "btn-action";
+        
+        html += `
+            <div class="software-card" style="border-left: 5px solid ${item.borderColor};">
+                <div class="software-info">
+                    <img src="${item.icon}" alt="" class="software-icon" onerror="this.src='https://www.google.com/s2/favicons?domain=github.com&sz=64'">
+                    <div class="text-group">
+                        <span class="software-name">${item.name}</span>
+                        <span class="tag">${item.tag}</span>
+                    </div>
+                </div>
+                <button class="${btnClass}" onclick="window.open('${item.url}', '_blank')">${item.btnText}</button>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
 
-                ];
-                // 首次写入无需立即触发网络保存，等站长主动修改时再全量保存
-            }
+// 页面加载完成后自动渲染
+window.onload = renderSoftware;
 
-            localDataList = pWin.db.globalMusicConfig.softwareNav;
-            renderGrid();
+// ==========================================
+// 🚀 核心功能：跨生态页面隐身退出引擎
+// ==========================================
+function closeSoftwarePage() {
+    // 触发页面自身的渐隐动画
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    
+    setTimeout(() => {
+        // 判断：如果是以 iframe 沉浸式形式内嵌在 app.html 中的
+        if (window !== window.parent) {
+            // 发送隐身指令给母体 app.html，完美回到主页且音乐不中断
+            window.parent.postMessage('hide_software', '*'); 
+        } 
+        // 兜底：如果是独立新标签页打开的
+        else {
+            window.opener = null;
+            window.open('', '_self');
+            window.close();
         }
+    }, 300); // 配合 CSS 的淡出动画时长
+}
+</script>
 
-        // 渲染极简网格系统
-        function renderGrid() {
-            const grid = document.getElementById('software-grid');
-            grid.innerHTML = '';
-
-            localDataList.forEach((item) => {
-                let domain = '';
-                try { domain = new URL(item.url).hostname; } catch(e) { domain = ''; }
-                
-                // 🚀 核心：调用 Google 服务自动解析网站官方 128px 高清图标
-                const iconSrc = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAy 12IDJ6bS0xIDE3LjkzYy0zLjk1LS40OS03LTMuODUtNy03LjkzIDAtLjYyLjA4LTEuMjEuMjItMS43OUw5IDE0djFjMCAxLjEgLjkgMiAyIDJ2MS45M3ptNi45LTEuNTRjLS4yNi0uODEtMS0xLjM5LTEuOS0xLjM5aC0xdi0zYzAtLjU1LS40NS0xLTEtMUg4di0yaDVjLjU1IDAgMS0uNDUgMS0xVjhoMmMxLjEgMCAyLS45IDItMnYtLjQxQzE3LjkxIDUuNzcgMjAgOC42MyAyMCAxMmMwIDIuMjgtLjc1IDQuMzgtMi4xIDYuMzl6Ii8+PC9zdmc+';
-
-                const card = document.createElement('div');
-                card.className = 'software-item-wrapper';
-
-                card.innerHTML = `
-                    <a href="${item.url}" class="software-item" target="_blank">
-                        <div class="app-icon"><img src="${iconSrc}" onerror="this.style.display='none'"></div>
-                        <div class="app-info">
-                            <div class="app-name">${item.name}</div>
-                        </div>
-                    </a>
-                `;
-
-                // 只有管理员才能看到悬浮编辑按钮
-                if (isAdmin) {
-                    const badge = document.createElement('div');
-                    badge.className = 'admin-badge';
-                    badge.innerHTML = `
-                        <div class="action-icon edit" onclick="editItem('${item.id}')">✎</div>
-                        <div class="action-icon del" onclick="deleteItem('${item.id}')">✖</div>
-                    `;
-                    card.appendChild(badge);
-                }
-
-                grid.appendChild(card);
-            });
-
-            // 站长专属的添加按钮
-            if (isAdmin) {
-                const addBtn = document.createElement('div');
-                addBtn.className = 'btn-add-software';
-                addBtn.innerHTML = '<span style="font-size:24px;margin-right:6px;">+</span> 新增网址';
-                addBtn.onclick = addItem;
-                grid.appendChild(addBtn);
-            }
-        }
-
-        // 极速上云同步引擎
-        async function triggerCloudSync() {
-            if (pWin && typeof pWin.saveDB === 'function') {
-                if(typeof pWin.showGlobalToast === 'function') pWin.showGlobalToast('正在同步更新...', 'loading');
-                await pWin.saveDB();
-                if(typeof pWin.showGlobalToast === 'function') pWin.showGlobalToast('✅ 全局同步成功', 'success');
-            }
-        }
-
-        // 站长操作：添加
-        async function addItem() {
-            const name = prompt("请输入应用/平台名称：", "新应用");
-            if (!name || name.trim() === '') return;
-            
-            let url = prompt("请输入完整网址 (必须包含 http:// 或 https://)：", "https://");
-            if (!url || url.trim() === '') return;
-            if (!url.startsWith('http')) url = 'https://' + url;
-
-            localDataList.push({ id: 's_' + Date.now(), name: name.trim(), url: url.trim() });
-            renderGrid();
-            await triggerCloudSync();
-        }
-
-        // 站长操作：编辑
-        async function editItem(id) {
-            const item = localDataList.find(i => i.id === id);
-            if (!item) return;
-
-            const name = prompt("修改应用名称：", item.name);
-            if (!name || name.trim() === '') return;
-            
-            let url = prompt("修改网址 (将自动提取新图标)：", item.url);
-            if (!url || url.trim() === '') return;
-            if (!url.startsWith('http')) url = 'https://' + url;
-
-            item.name = name.trim();
-            item.url = url.trim();
-            renderGrid();
-            await triggerCloudSync();
-        }
-
-        // 站长操作：删除
-        async function deleteItem(id) {
-            if (!confirm("确定要彻底删除该软件导航吗？")) return;
-            const idx = localDataList.findIndex(i => i.id === id);
-            if (idx > -1) {
-                localDataList.splice(idx, 1);
-                renderGrid();
-                await triggerCloudSync();
-            }
-        }
-
-        // 🚀 沉浸式隐身退出引擎
-        function closeSoftwarePage() {
-            document.body.style.opacity = '0';
-            document.body.style.transition = 'opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
-            
-            setTimeout(() => {
-                if (isIframe) {
-                    pWin.postMessage('hide_software', '*'); 
-                } else {
-                    window.opener = null;
-                    window.open('', '_self');
-                    window.close();
-                }
-            }, 300); 
-        }
-
-        // 启动引擎
-        window.onload = initData;
-
-    </script>
 </body>
 </html>
