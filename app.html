@@ -190,134 +190,80 @@
 
         /* 操作卡片与按钮精致化重构 */
         .content-card-beautiful {
-            width: 92% !important; 
-            max-width: 760px !important; 
-            flex: 1 !important; 
-            min-height: 0 !important; 
-            overflow-y: auto !important; 
-            margin: 0 auto 2vh auto !important; 
-            padding: 40px 30px !important;
-            border-radius: 28px !important;
-            background: rgba(255, 255, 255, 0.95) !important; 
-            backdrop-filter: blur(25px) saturate(150%) !important;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.04), inset 0 2px 5px rgba(255,255,255,1) !important;
-            border: 1px solid rgba(255,255,255,0.8) !important;
+            width: 92% !important; max-width: 760px !important; flex: 1 !important; min-height: 0 !important; overflow-y: auto !important; margin: 0 auto 2vh auto !important; padding: 40px 30px !important; border-radius: 28px !important;
+            background: rgba(255, 255, 255, 0.95) !important; backdrop-filter: blur(25px) saturate(150%) !important; box-shadow: 0 20px 40px rgba(0,0,0,0.04), inset 0 2px 5px rgba(255,255,255,1) !important; border: 1px solid rgba(255,255,255,0.8) !important;
         }
 
         .btn-beautiful {
-            width: 85% !important;
-            max-width: 220px !important; 
-            border-radius: 50px !important;
-            padding: 14px !important;
-            font-size: 1.05rem !important;
-            font-weight: bold !important;
-            letter-spacing: 2px !important;
-            margin: 0 auto !important; 
-            display: flex; 
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+            width: 85% !important; max-width: 220px !important; border-radius: 50px !important; padding: 14px !important; font-size: 1.05rem !important; font-weight: bold !important; letter-spacing: 2px !important; margin: 0 auto !important; display: flex; justify-content: center; align-items: center; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
         }
 
-        .btn-purple-gradient {
-            background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
-            color: #fff !important;
-            border: none !important;
-            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3), inset 0 2px 4px rgba(255,255,255,0.2) !important;
-        }
-        .btn-purple-gradient:active {
-            transform: scale(0.96) !important;
-            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2) !important;
-        }
+        .btn-purple-gradient { background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important; color: #fff !important; border: none !important; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3), inset 0 2px 4px rgba(255,255,255,0.2) !important; }
+        .btn-purple-gradient:active { transform: scale(0.96) !important; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2) !important; }
 
-        .btn-white-outline {
-            background: rgba(255, 255, 255, 0.9) !important;
-            color: #1e293b !important;
-            border: 1px solid #cbd5e1 !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.04) !important;
-        }
-        .btn-white-outline:active {
-            transform: scale(0.96) !important;
-            background: #f1f5f9 !important;
-        }
+        .btn-white-outline { background: rgba(255, 255, 255, 0.9) !important; color: #1e293b !important; border: 1px solid #cbd5e1 !important; box-shadow: 0 10px 25px rgba(0,0,0,0.04) !important; }
+        .btn-white-outline:active { transform: scale(0.96) !important; background: #f1f5f9 !important; }
 
-        .long-press-area {
-            width: 130px !important; height: 130px !important; 
-            border-radius: 50% !important;
-            background: #ffffff !important; 
-            border: 1px solid #e2e8f0 !important;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08), inset 0 4px 10px rgba(255,255,255,0.8) !important;
-            display: flex; justify-content: center; align-items: center;
-            margin: 0 auto !important; 
-            overflow: hidden; position: relative;
-            cursor: pointer; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-            -webkit-user-select: none; user-select: none; touch-action: none;
-        }
-        .long-press-area.pressing {
-            transform: scale(0.92) !important;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05), inset 0 6px 15px rgba(0,0,0,0.05) !important;
-        }
-        .press-text {
-            font-weight: 900 !important; color: #1e293b !important;
-            z-index: 5 !important; font-size: 1.15rem !important; 
-            text-align: center; pointer-events: none;
-            letter-spacing: 1px; text-shadow: none !important; transition: 0.3s;
-        }
-        .press-fill {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
-            background: linear-gradient(to top, #6366f1, #818cf8) !important;
-            z-index: 1 !important; opacity: 0.95;
-            transition: height 1.5s linear !important; 
-            pointer-events: none;
-        }
-        .long-press-area.pressing .press-fill {
-            height: 100% !important;
-        }
-        .long-press-area.filled .press-text, .long-press-area.pressing.filled .press-text {
-            color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-        }
+        .long-press-area { width: 130px !important; height: 130px !important; border-radius: 50% !important; background: #ffffff !important; border: 1px solid #e2e8f0 !important; box-shadow: 0 15px 35px rgba(0,0,0,0.08), inset 0 4px 10px rgba(255,255,255,0.8) !important; display: flex; justify-content: center; align-items: center; margin: 0 auto !important; overflow: hidden; position: relative; cursor: pointer; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); -webkit-user-select: none; user-select: none; touch-action: none; }
+        .long-press-area.pressing { transform: scale(0.92) !important; box-shadow: 0 5px 15px rgba(0,0,0,0.05), inset 0 6px 15px rgba(0,0,0,0.05) !important; }
+        .press-text { font-weight: 900 !important; color: #1e293b !important; z-index: 5 !important; font-size: 1.15rem !important; text-align: center; pointer-events: none; letter-spacing: 1px; text-shadow: none !important; transition: 0.3s; }
+        .press-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to top, #6366f1, #818cf8) !important; z-index: 1 !important; opacity: 0.95; transition: height 1.5s linear !important; pointer-events: none; }
+        .long-press-area.pressing .press-fill { height: 100% !important; }
+        .long-press-area.filled .press-text, .long-press-area.pressing.filled .press-text { color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; }
 
-        .card-new-badge {
-            position: absolute; top: -6px; right: -6px;
-            background: linear-gradient(135deg, #ff4757, #ff6b81);
-            color: white; font-size: 0.75rem; font-weight: 900;
-            padding: 4px 10px; border-radius: 12px 12px 12px 0;
-            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4), inset 0 1px 2px rgba(255,255,255,0.4);
-            z-index: 10; pointer-events: none; letter-spacing: 1px;
-            animation: pulse-badge 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes pulse-badge {
-            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4); }
-            50% { transform: scale(1.08); box-shadow: 0 6px 15px rgba(255, 71, 87, 0.6); }
-            100% { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4); }
-        }
-
+        .card-new-badge { position: absolute; top: -6px; right: -6px; background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; font-size: 0.75rem; font-weight: 900; padding: 4px 10px; border-radius: 12px 12px 12px 0; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4), inset 0 1px 2px rgba(255,255,255,0.4); z-index: 10; pointer-events: none; letter-spacing: 1px; animation: pulse-badge 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes pulse-badge { 0% { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4); } 50% { transform: scale(1.08); box-shadow: 0 6px 15px rgba(255, 71, 87, 0.6); } 100% { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4); } }
     </style>
 </head>
 <body class="light-theme">
 
-<!-- ================= 🚀 独立沉浸式音乐引擎 Iframe 容器 ================= -->
-<iframe id="yinji-player-iframe" allow="autoplay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483646; border:none; background:transparent;"></iframe>
+<!-- ================= 🚀 核心更新：双隐形引擎 (播放器 + 软件导航) ================= -->
+<iframe id="yinji-player-iframe" allow="autoplay" style="display:none; opacity:0; transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483646; border:none; background:transparent;"></iframe>
+
+<!-- 新增软件导航专属隐形层 -->
+<iframe id="yinji-software-iframe" allow="autoplay" style="display:none; opacity:0; transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483647; border:none; background:transparent;"></iframe>
 
 <script>
-    // 拦截 window.open 实现 iframe 内联加载，保障背景音乐不中断
+    // 🚀 终极防护：拦截所有内部页面的跳转，强制吸入 Iframe
     const originalWindowOpen = window.open;
     window.open = function(url, target, features) {
-        if (url && url.includes('music-player.html')) {
+        if (!url) return originalWindowOpen.apply(this, arguments);
+        
+        // 1. 拦截音律播放器
+        if (url.includes('music-player.html')) {
             const iframe = document.getElementById('yinji-player-iframe');
-            if (!iframe.src) {
-                iframe.src = url; // 仅首次点击时加载，节约内存
-            }
+            if (!iframe.src || iframe.src !== url) iframe.src = url;
             iframe.style.display = 'block';
+            setTimeout(() => iframe.style.opacity = '1', 10);
             return null;
         }
+        
+        // 2. 拦截所有本地内部 HTML（比如你配置的软件导航页，不限文件名）
+        // 判断依据：只要是以 .html 结尾，且不是外部链接（或属于同一域名的链接）
+        const isInternalHtml = url.includes('.html') && (!url.startsWith('http') || url.includes(window.location.hostname));
+        
+        if (isInternalHtml) {
+            const iframe = document.getElementById('yinji-software-iframe');
+            if (!iframe.src || iframe.src !== url) iframe.src = url;
+            iframe.style.display = 'block';
+            setTimeout(() => iframe.style.opacity = '1', 10);
+            return null;
+        }
+        
+        // 3. 其他真实的外部链接正常打开新标签页
         return originalWindowOpen.apply(this, arguments);
     };
 
-    // 接收来自播放器的隐藏指令和状态同步指令
+    // 接收来自隐身子页面的指令
     window.addEventListener('message', function(e) {
         if (e.data === 'hide_player') {
-            document.getElementById('yinji-player-iframe').style.display = 'none';
+            const iframe = document.getElementById('yinji-player-iframe');
+            iframe.style.opacity = '0';
+            setTimeout(() => iframe.style.display = 'none', 400); 
+        } else if (e.data === 'hide_software') {
+            const iframe = document.getElementById('yinji-software-iframe');
+            iframe.style.opacity = '0';
+            setTimeout(() => iframe.style.display = 'none', 400); 
         } else if (e.data && e.data.type === 'player_state') {
             const floatBox = document.getElementById('apple-music-box');
             if (floatBox) {
@@ -327,13 +273,16 @@
         }
     });
 
-    // 拦截注销动作，销毁播放器释放内存
     const checkLogoutInterval = setInterval(() => {
         if (typeof window.logout === 'function' && !window.logout.isPatchedForPlayer) {
             const origLogout = window.logout;
             window.logout = function() {
-                const iframe = document.getElementById('yinji-player-iframe');
-                if (iframe) { iframe.src = ''; iframe.style.display = 'none'; }
+                const pIframe = document.getElementById('yinji-player-iframe');
+                if (pIframe) { pIframe.src = ''; pIframe.style.display = 'none'; }
+                
+                const sIframe = document.getElementById('yinji-software-iframe');
+                if (sIframe) { sIframe.src = ''; sIframe.style.display = 'none'; }
+                
                 const floatBox = document.getElementById('apple-music-box');
                 if (floatBox) floatBox.classList.remove('playing');
                 origLogout.apply(this, arguments);
