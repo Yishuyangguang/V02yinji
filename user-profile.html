@@ -184,7 +184,7 @@
     if (isIframe && pWin.currentUserAccount) activeUser = pWin.currentUserAccount;
     
     const isAdmin = localStorage.getItem('isAdminAuth') === 'true';
-    const authHeader = isAdmin ? 'yishuyangguang' : '';
+    const authHeader = isAdmin ? activeUser : '';
 
     if (!activeUser) {
         alert("鉴权丢失：未登录或状态已过期");
