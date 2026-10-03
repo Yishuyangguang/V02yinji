@@ -118,7 +118,6 @@
         .theme-toggle-btn { background: var(--theme-glass-bg); border: 1px solid var(--theme-glass-border); color: var(--theme-text); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 20px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); font-size: 1.2rem; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); transition: all 0.3s; }
         .theme-toggle-btn:active { transform: scale(0.9); }
 
-        /* 右上角音乐快捷入口，跳转至专属独立播放器 */
         .apple-music-player { background: var(--theme-glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 25px var(--theme-glass-shadow), inset 0 1px 1px var(--theme-glass-inset); border: 1px solid var(--theme-glass-border); opacity: 0; pointer-events: none; transition: opacity 0.5s; cursor: pointer; height: 44px; }
         .apple-music-player.playing { opacity: 1; pointer-events: auto; }
         .music-icon { width: 22px; height: 22px; border-radius: 6px; background-size: cover; background-position: center; background-image: url('music-artwork.png'); }
@@ -242,7 +241,6 @@
             background: #f1f5f9 !important;
         }
 
-        /* 核心修复：长按圆圈等比例缩放与完美居中 */
         .long-press-area {
             width: 130px !important; height: 130px !important; 
             border-radius: 50% !important;
@@ -298,9 +296,56 @@
 </head>
 <body class="light-theme">
 
+<!-- ================= 🚀 独立沉浸式音乐引擎 Iframe 容器 ================= -->
+<iframe id="yinji-player-iframe" allow="autoplay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483646; border:none; background:transparent;"></iframe>
+
+<script>
+    // 拦截 window.open 实现 iframe 内联加载，保障背景音乐不中断
+    const originalWindowOpen = window.open;
+    window.open = function(url, target, features) {
+        if (url && url.includes('music-player.html')) {
+            const iframe = document.getElementById('yinji-player-iframe');
+            if (!iframe.src) {
+                iframe.src = url; // 仅首次点击时加载，节约内存
+            }
+            iframe.style.display = 'block';
+            return null;
+        }
+        return originalWindowOpen.apply(this, arguments);
+    };
+
+    // 接收来自播放器的隐藏指令和状态同步指令
+    window.addEventListener('message', function(e) {
+        if (e.data === 'hide_player') {
+            document.getElementById('yinji-player-iframe').style.display = 'none';
+        } else if (e.data && e.data.type === 'player_state') {
+            const floatBox = document.getElementById('apple-music-box');
+            if (floatBox) {
+                if (e.data.playing) floatBox.classList.add('playing');
+                else floatBox.classList.remove('playing');
+            }
+        }
+    });
+
+    // 拦截注销动作，销毁播放器释放内存
+    const checkLogoutInterval = setInterval(() => {
+        if (typeof window.logout === 'function' && !window.logout.isPatchedForPlayer) {
+            const origLogout = window.logout;
+            window.logout = function() {
+                const iframe = document.getElementById('yinji-player-iframe');
+                if (iframe) { iframe.src = ''; iframe.style.display = 'none'; }
+                const floatBox = document.getElementById('apple-music-box');
+                if (floatBox) floatBox.classList.remove('playing');
+                origLogout.apply(this, arguments);
+            };
+            window.logout.isPatchedForPlayer = true;
+            clearInterval(checkLogoutInterval);
+        }
+    }, 100);
+</script>
+
 <div id="bg-gradient"></div>
 <canvas id="particle-canvas"></canvas>
-<audio id="bgm-player" preload="metadata"></audio>
 
 <div class="widget-controls" id="theme-widget">
     <div class="theme-toggle-btn" onclick="window.toggleTheme()" id="btn-theme">☀️</div>
