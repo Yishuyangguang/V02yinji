@@ -393,7 +393,7 @@
                 await window.parent.saveDB(); // 唤起母体的极速同步引擎
             } else {
                 const h = {'Content-Type': 'application/json'};
-                if(localStorage.getItem('isAdminAuth')==='true') h['x-admin-auth']='yishuyangguang';
+                if(localStorage.getItem('isAdminAuth')==='true') h['x-admin-auth'] = activeUser;
                 await fetch('/api/db', { method: 'POST', headers: h, body: JSON.stringify(db) });
             }
         } catch(e) {}
