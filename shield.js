@@ -1,2 +1,45 @@
-/* 🛡️ HengjiuYinji Core Security Engine V2.0 - DO NOT MODIFY */
-!(function(){const _0x1a=['\x46\x31\x32','\x49','\x69','\x4a','\x6a','\x55','\x75','\x53','\x73','\x50','\x70','\x43','\x63'];setInterval(()=>{console['\x63\x6c\x65\x61\x72']();},2e3);document['\x61\x64\x64\x45\x76\x65\x6e\x74\x4c\x69\x73\x74\x65\x6e\x65\x72']('\x6b\x65\x79\x64\x6f\x77\x6e',_0x2b=>{if(_0x2b['key']==='\x46\x31\x32'||_0x2b['keyCode']===123)return _0x2b['\x70\x72\x65\x76\x65\x6e\x74\x44\x65\x66\x61\x75\x6c\x74'](),!1;if((_0x2b['ctrlKey']||_0x2b['metaKey'])&&(_0x2b['shiftKey']||_0x1a['includes'](_0x2b['key']))){if(_0x2b['\x74\x61\x72\x67\x65\x74']['\x74\x61\x67\x4e\x61\x6d\x65']!=='\x49\x4e\x50\x55\x54'&&_0x2b['\x74\x61\x72\x67\x65\x74']['\x74\x61\x67\x4e\x61\x6d\x65']!=='\x54\x45\x58\x54\x41\x52\x45\x41')return _0x2b['\x70\x72\x65\x76\x65\x6e\x74\x44\x65\x66\x61\x75\x6c\x74'](),!1}});const _0x3c=_0x4d=>{if(_0x4d['\x74\x61\x72\x67\x65\x74']['\x74\x61\x67\x4e\x61\x6d\x65']!=='\x49\x4e\x50\x55\x54'&&_0x4d['\x74\x61\x72\x67\x65\x74']['\x74\x61\x67\x4e\x61\x6d\x65']!=='\x54\x45\x58\x54\x41\x52\x45\x41')_0x4d['\x70\x72\x65\x76\x65\x6e\x74\x44\x65\x66\x61\x75\x6c\x74']();};document['\x61\x64\x64\x45\x76\x65\x6e\x74\x4c\x69\x73\x74\x65\x6e\x65\x72']('\x63\x6f\x6e\x74\x65\x78\x74\x6d\x65\x6e\x75',_0x3c);document['\x61\x64\x64\x45\x76\x65\x6e\x74\x4c\x69\x73\x74\x65\x6e\x65\x72']('\x73\x65\x6c\x65\x63\x73\x74\x61\x72\x74',_0x3c);document['\x61\x64\x64\x45\x76\x65\x6e\x74\x4c\x69\x73\x74\x65\x6e\x65\x72']('\x63\x6f\x70\x79',_0x3c);document['\x61\x64\x64\x45\x76\x65\x6e\x74\x4c\x69\x73\x74\x65\x6e\x65\x72']('\x64\x72\x61\x67\x73\x74\x61\x72\x74',_0x3c);try{setInterval(function(){Function('\x64\x65\x62\x75\x67\x67\x65\x72')();},Math['random']()*50+50);}catch(_0x5e){}let _0x6f=Date['now']();setInterval(()=>{if(Date['now']()-_0x6f>200)document['\x62\x6f\x64\x79']['\x69\x6e\x6e\x65\x72\x48\x54\x4d\x4c']='\x3c\x64\x69\x76\x20\x73\x74\x79\x6c\x65\x3d\x22\x64\x69\x73\x70\x6c\x61\x79\x3a\x66\x6c\x65\x78\x3b\x6a\x75\x73\x74\x69\x66\x79\x2d\x63\x6f\x6e\x74\x65\x6e\x74\x3a\x63\x65\x6e\x74\x65\x72\x3b\x61\x6c\x69\x67\x6e\x2d\x69\x74\x65\x6d\x73\x3a\x63\x65\x6e\x74\x65\x72\x3b\x68\x65\x69\x67\x68\x74\x3a\x31\x30\x30\x76\x68\x3b\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x3a\x23\x31\x31\x31\x3b\x63\x6f\x6c\x6f\x72\x3a\x23\x65\x66\x34\x34\x34\x34\x3b\x66\x6f\x6e\x74\x2d\x73\x69\x7a\x65\x3a\x32\x30\x70\x78\x3b\x66\x6f\x6e\x74\x2d\x77\x65\x69\x67\x68\x74\x3a\x62\x6f\x6c\x64\x3b\x22\x3e\u26a0\ufe0f\x20\u975e\u6cd5\u64cd\u4f5c\uff1a\u65f6\u7a7a\u5370\u8bb0\u9632\u5fa1\u77e9\u9635\u5df2\u542f\u52a8\u3002\x3c\x2f\x64\x69\x76\x3e';_0x6f=Date['now']();},50);new MutationObserver(_0x7a=>{_0x7a['forEach'](_0x8b=>{_0x8b['removedNodes']['forEach'](_0x9c=>{if(_0x9c['\x74\x61\x67\x4e\x61\x6d\x65']==='\x53\x43\x52\x49\x50\x54'&&_0x9c['\x73\x72\x63']['includes']('\x73\x68\x69\x65\x6c\x64\x2e\x6a\x73')){document['\x62\x6f\x64\x79']['\x69\x6e\x6e\x65\x72\x48\x54\x4d\x4c']='\u26a0\ufe0f';window['location']['\x72\x65\x6c\x6f\x61\x64']();}});});})['observe'](document['documentElement'],{childList:!0,subtree:!0});if(window['location']['\x70\x72\x6f\x74\x6f\x63\x6f\x6c']==='\x66\x69\x6c\x65\x3a')document['\x62\x6f\x64\x79']['\x69\x6e\x6e\x65\x72\x48\x54\x4d\x4c']='\u7981\u6b62\u672c\u5730\u8fd0\u884c';})();
+/**
+ * 恒久印记 - 智能安全防御盾 V3.0 (Smart Shield)
+ * 特性：站长免检通行、温和防御、不干扰主线程、杜绝误伤
+ */
+(function() {
+    // 🚀 核心更新：站长免检通道（白名单机制）
+    // 如果检测到当前是管理员登录状态，直接终止防御，放行所有操作！
+    if (localStorage.getItem('isAdminAuth') === 'true') {
+        console.log("%c 🛡️ 站长您好，防御矩阵已为您主动休眠，祝您畅快管理！", "color:#10b981; font-size: 14px; font-weight: bold;");
+        return; // 直接退出函数，后面的防御代码对你完全无效！
+    }
+
+    console.log("%c 🛡️ 恒久印记安全引擎已启动", "color:#d4af37; font-size: 12px;");
+
+    // ==========================================
+    // 下方是针对普通用户的常规防御（不含任何自毁逻辑，只做物理拦截）
+    // ==========================================
+
+    // 1. 基础防护：拦截开发者快捷键 (F12, 审查元素, 保存, 打印)
+    document.addEventListener('keydown', function(e) {
+        const forbiddenKeys = ['F12', 'I', 'i', 'J', 'j', 'U', 'u', 'S', 's', 'P', 'p', 'C', 'c'];
+        if (e.key === 'F12' || e.keyCode === 123) { 
+            e.preventDefault(); return false; 
+        }
+        if ((e.ctrlKey || e.metaKey) && (e.shiftKey || forbiddenKeys.includes(e.key))) {
+            // 放行输入框内的全选(Ctrl+A)或复制(Ctrl+C)
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault(); return false;
+            }
+        }
+    });
+
+    // 2. 行为限制：智能禁用右键菜单、复制、文本选择、拖拽
+    const preventAction = (e) => {
+        // 允许用户在输入框（如登录填密码、卡密）里右键粘贴或选中
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+        }
+    };
+    
+    document.addEventListener('contextmenu', preventAction); // 禁右键
+    document.addEventListener('selectstart', preventAction); // 禁选中
+    document.addEventListener('copy', preventAction);        // 禁复制
+    document.addEventListener('dragstart', preventAction);   // 禁拖拽图片
+})();
