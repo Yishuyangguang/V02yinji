@@ -119,7 +119,7 @@
 
         /* 曲目信息 */
         .track-info { text-align: center; width: 100%; margin-bottom: 30px; padding: 0 15px;}
-        .track-title { font-size: 1.5rem; font-weight: 900; color: var(--text-main); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 1px; }
+        .track-title { font-size: 1.5rem; font-weight: 900; color: var(--text-main); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 1px; text-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .track-artist { font-size: 0.95rem; color: var(--primary); font-weight: bold; letter-spacing: 2.5px; opacity: 0.9; }
 
         /* 网易云级精细进度条 */
@@ -215,7 +215,7 @@
             .main-stage { flex-direction: column; padding: 10px 20px 30px 20px; gap: 20px; overflow-y: auto; }
             .left-panel { min-height: auto; padding: 35px 15px; flex: none; border-radius: 28px; }
             .vinyl-beat-wrapper { width: 230px; height: 230px; margin-bottom: 30px; }
-            .right-panel { flex: none; height: 500px; } /* 移动端给予固定高支持滚动 */
+            .right-panel { flex: none; height: 500px; } 
         }
 
         /* SVG 隐式注入区 */
@@ -255,7 +255,8 @@
 
 <div class="player-container">
     <div class="nav-bar">
-        <button class="btn-back" onclick="window.location.href='app.html'">
+        <!-- 🚀 核心修复：调用 goBack()，拦截跨视窗跳转 -->
+        <button class="btn-back" onclick="goBack()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>返回印记
         </button>
         <div class="nav-title">印记音律</div>
@@ -265,7 +266,6 @@
     <div class="main-stage">
         <!-- 左侧黑胶 -->
         <div class="left-panel">
-            <!-- 🚀 核心：双轴隔离架构 -->
             <div class="vinyl-beat-wrapper" id="vinyl-beat">
                 <div class="vinyl-wrapper spin-paused" id="vinyl-disc">
                     <div class="vinyl-center"></div>
@@ -325,10 +325,36 @@
 </div>
 
 <script>
-    // ================== 核心引擎与状态 ==================
-    const activeUser = localStorage.getItem('activeUser');
-    if (!activeUser) { alert("鉴权丢失，请重新登录"); window.location.href = 'app.html'; }
+    // ================== 🚀 核心修复：Iframe 跨视窗桥接引擎 ==================
+    const isIframe = window !== window.parent;
+    
+    // 解决鉴权丢失：优先从母体继承登录态，杜绝 localStorage 获取不到报错
+    let activeUser = localStorage.getItem('activeUser');
+    if (isIframe && window.parent.currentUserAccount) {
+        activeUser = window.parent.currentUserAccount;
+    }
 
+    if (!activeUser) { 
+        alert("鉴权丢失，请重新登录"); 
+        if (isIframe) {
+            window.parent.postMessage('hide_player', '*');
+        } else {
+            window.location.href = 'app.html'; 
+        }
+    }
+
+    // 🚀 返回按钮核心逻辑：隐身代替销毁
+    function goBack() {
+        if (isIframe) {
+            // 向母体发送隐身指令，音乐在后台继续播放
+            window.parent.postMessage('hide_player', '*');
+        } else {
+            // 如果用户是直接在新标签页打开的，则正常跳转
+            window.location.href = 'app.html';
+        }
+    }
+
+    // ================== 核心数据与状态 ==================
     let db = null;
     let mState = { 
         cat: 'favorites', playCat: '', playlist: [], playQueue: [], 
@@ -342,23 +368,33 @@
         clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
     }
 
+    // 🚀 核心：直接共享母体内存，不仅快而且零网络开销
     async function loadDB() {
         try {
-            const res = await fetch('/api/db?t=' + Date.now());
-            if (!res.ok) throw new Error();
-            db = await res.json();
+            if (isIframe && window.parent.db) {
+                db = window.parent.db; // 直接指针引用，实时共享！
+            } else {
+                const res = await fetch('/api/db?t=' + Date.now());
+                if (!res.ok) throw new Error();
+                db = await res.json();
+            }
+            
             if(!db.users[activeUser].favorites) db.users[activeUser].favorites = [];
             
             renderTabs();
             switchCat('favorites');
-        } catch(e) { showToast('⚠️ 连接云端失败'); }
+        } catch(e) { showToast('⚠️ 连接云端/母体失败'); }
     }
 
     async function saveDB() {
         try {
-            const h = {'Content-Type': 'application/json'};
-            if(localStorage.getItem('isAdminAuth')==='true') h['x-admin-auth']='yishuyangguang';
-            await fetch('/api/db', { method: 'POST', headers: h, body: JSON.stringify(db) });
+            if (isIframe && typeof window.parent.saveDB === 'function') {
+                await window.parent.saveDB(); // 唤起母体的极速同步引擎
+            } else {
+                const h = {'Content-Type': 'application/json'};
+                if(localStorage.getItem('isAdminAuth')==='true') h['x-admin-auth']='yishuyangguang';
+                await fetch('/api/db', { method: 'POST', headers: h, body: JSON.stringify(db) });
+            }
         } catch(e) {}
     }
 
@@ -394,13 +430,11 @@
         
         analyser.getByteFrequencyData(dataArray);
         
-        // 抓取极低频重低音段落 (0-10 个频段)
         let sum = 0;
         const bassRange = 10; 
         for(let i = 0; i < bassRange; i++) { sum += dataArray[i]; }
         let avg = sum / bassRange;
         
-        // 映射为缩放比例 (1.00 到 1.08)
         let scale = 1 + (avg / 255) * 0.08;
         
         const beatBox = document.getElementById('vinyl-beat');
@@ -477,7 +511,6 @@
             audio.load();
         }
         
-        // 唤醒音频上下文
         if (!audioCtx) initAudioVisualizer();
         else if (audioCtx.state === 'suspended') audioCtx.resume();
         
@@ -486,6 +519,8 @@
             disc.classList.remove('spin-paused');
             disc.classList.add('spin');
             renderList(); 
+            // 🚀 通知主页右上角悬浮小图标开始跳动
+            if (isIframe) window.parent.postMessage({ type: 'player_state', playing: true }, '*');
         }).catch(()=>{});
         
         injectAppleGhostProbe(track.url);
@@ -501,10 +536,12 @@
             audio.play();
             btnPlay.innerHTML = '<svg><use href="#icon-pause"></use></svg>';
             disc.classList.remove('spin-paused');
+            if (isIframe) window.parent.postMessage({ type: 'player_state', playing: true }, '*');
         } else {
             audio.pause();
             btnPlay.innerHTML = '<svg><use href="#icon-play"></use></svg>';
             disc.classList.add('spin-paused');
+            if (isIframe) window.parent.postMessage({ type: 'player_state', playing: false }, '*');
         }
     }
 
@@ -576,26 +613,24 @@
         closeTimer();
     }
 
-    // 🚀 核心修复：定时结束彻底阻断与强行暂停
     audio.onended = () => {
         if(mState.playQueue.length === 0) return;
         
-        // 1. 处理定时定量逻辑
         if(mState.limit > 0) {
             mState.limit--;
             if(mState.limit === 0) {
                 audio.pause(); 
                 document.getElementById('btn-play').innerHTML = '<svg><use href="#icon-play"></use></svg>';
                 document.getElementById('vinyl-disc').classList.add('spin-paused');
+                if (isIframe) window.parent.postMessage({ type: 'player_state', playing: false }, '*');
                 
                 mState.limit = -1; 
                 document.getElementById('btn-timer').classList.remove('active');
                 showToast('定时结束，已暂停');
-                return; // 终止后续操作，绝不重播
+                return; 
             }
         }
         
-        // 2. 正常切歌或循环
         if(mState.mode === 'sin') { 
             audio.currentTime = 0; 
             audio.play().catch(e=>{}); 
