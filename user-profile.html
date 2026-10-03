@@ -17,7 +17,12 @@
             font-family: var(--font-main); 
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; padding: 20px;
+            /* 🚀 注入：丝滑淡入动画 */
+            opacity: 0; animation: pageFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            overflow-x: hidden;
         }
+
+        @keyframes pageFadeIn { to { opacity: 1; } }
 
         /* 核心卡片：完美对称、防挤压溢出 */
         .profile-card {
@@ -27,7 +32,11 @@
             padding: 40px 30px;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
             display: flex; flex-direction: column; align-items: center;
+            /* 🚀 注入：卡片上浮动画 */
+            transform: translateY(20px); animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
+
+        @keyframes slideUp { to { transform: translateY(0); } }
 
         .page-title {
             color: #6366f1; font-size: 1.8rem; font-weight: bold; letter-spacing: 2px; margin-bottom: 30px; text-shadow: 0 1px 2px rgba(99,102,241,0.2);
@@ -161,17 +170,24 @@
 </div>
 
 <script>
+    // 🚀 核心判定：是否处于主页的 Iframe 沉浸空间中
+    const isIframe = window !== window.parent;
+    const pWin = window.parent;
+
     let db = null;
     let toastTimer;
     
     // 跨域读取在 app.html 点击头像时存储的用户状态
-    const activeUser = localStorage.getItem('activeUser');
+    let activeUser = localStorage.getItem('activeUser');
+    // 兜底：如果存储丢失，尝试从母体共享内存拉取鉴权
+    if (isIframe && pWin.currentUserAccount) activeUser = pWin.currentUserAccount;
+    
     const isAdmin = localStorage.getItem('isAdminAuth') === 'true';
     const authHeader = isAdmin ? 'yishuyangguang' : '';
 
     if (!activeUser) {
         alert("鉴权丢失：未登录或状态已过期");
-        window.location.href = 'app.html';
+        goBack();
     }
 
     function showToast(msg) {
@@ -182,17 +198,34 @@
         toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
+    // 🚀 核心：修改为沉浸式无缝隐身退出
     function goBack() {
-        window.location.href = 'app.html';
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        
+        setTimeout(() => {
+            if (isIframe) {
+                // 通知母体关闭这个 overlay，底下音乐和网页完美保留！
+                pWin.postMessage('hide_software', '*'); 
+            } else {
+                // 兜底物理跳转
+                window.location.href = 'app.html';
+            }
+        }, 300);
     }
 
     async function loadData() {
         try {
-            const res = await fetch('/api/db?t=' + Date.now(), { 
-                headers: isAdmin ? { 'x-admin-auth': authHeader } : {} 
-            });
-            if (!res.ok) throw new Error("网络错误");
-            db = await res.json();
+            // 🚀 极速读取：如果是 iframe，优先直接抽取母体内存里的数据库
+            if (isIframe && pWin.db) {
+                db = pWin.db;
+            } else {
+                const res = await fetch('/api/db?t=' + Date.now(), { 
+                    headers: isAdmin ? { 'x-admin-auth': authHeader } : {} 
+                });
+                if (!res.ok) throw new Error("网络错误");
+                db = await res.json();
+            }
             
             if (!db.users || !db.users[activeUser]) {
                 alert("云端查无此账号记录");
@@ -275,18 +308,26 @@
             db.users[activeUser].avatar = imgEl.src;
         }
         
+        // 🚀 保存并唤起母体同步引擎
         try {
-            const headers = { 'Content-Type': 'application/json' };
-            if(isAdmin) headers['x-admin-auth'] = authHeader;
-            
-            const res = await fetch('/api/db', {
-                method: 'POST', headers: headers, body: JSON.stringify(db)
-            });
-            if(res.ok) {
-                showToast('✅ 资料已保存至云端');
-                setTimeout(() => goBack(), 1000);
+            if (isIframe && typeof pWin.saveDB === 'function') {
+                if(pWin.showGlobalToast) pWin.showGlobalToast('正在保存...', 'loading');
+                await pWin.saveDB();
+                if(pWin.showGlobalToast) pWin.showGlobalToast('✅ 资料已保存', 'success');
+                setTimeout(() => goBack(), 500); // 丝滑返回
             } else {
-                showToast('⚠️ 保存失败');
+                const headers = { 'Content-Type': 'application/json' };
+                if(isAdmin) headers['x-admin-auth'] = authHeader;
+                
+                const res = await fetch('/api/db', {
+                    method: 'POST', headers: headers, body: JSON.stringify(db)
+                });
+                if(res.ok) {
+                    showToast('✅ 资料已保存至云端');
+                    setTimeout(() => goBack(), 1000);
+                } else {
+                    showToast('⚠️ 保存失败');
+                }
             }
         } catch(e) {
             showToast('⚠️ 网络异常');
@@ -311,9 +352,13 @@
             db.users[activeUser].expireAt = data.expireAt;
             db.users[activeUser].status = 'normal';
             
-            const headers = { 'Content-Type': 'application/json' };
-            if(isAdmin) headers['x-admin-auth'] = authHeader;
-            await fetch('/api/db', { method: 'POST', headers, body: JSON.stringify(db) });
+            if (isIframe && typeof pWin.saveDB === 'function') {
+                await pWin.saveDB();
+            } else {
+                const headers = { 'Content-Type': 'application/json' };
+                if(isAdmin) headers['x-admin-auth'] = authHeader;
+                await fetch('/api/db', { method: 'POST', headers, body: JSON.stringify(db) });
+            }
             
             document.getElementById('ipt-renew-key').value = '';
             showToast(`✅ 续费成功！时空叠加 ${data.days} 天`);
