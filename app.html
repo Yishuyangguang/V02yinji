@@ -188,7 +188,6 @@
         .modal-content::-webkit-scrollbar { display: none; }
         .qr-image { width: 200px; height: auto; border-radius: 16px; margin: 20px auto; display: block; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
 
-        /* 操作卡片与按钮精致化重构 */
         .content-card-beautiful {
             width: 92% !important; max-width: 760px !important; flex: 1 !important; min-height: 0 !important; overflow-y: auto !important; margin: 0 auto 2vh auto !important; padding: 40px 30px !important; border-radius: 28px !important;
             background: rgba(255, 255, 255, 0.95) !important; backdrop-filter: blur(25px) saturate(150%) !important; box-shadow: 0 20px 40px rgba(0,0,0,0.04), inset 0 2px 5px rgba(255,255,255,1) !important; border: 1px solid rgba(255,255,255,0.8) !important;
@@ -238,8 +237,7 @@
             return null;
         }
         
-        // 2. 拦截所有本地内部 HTML（比如你配置的软件导航页，不限文件名）
-        // 判断依据：只要是以 .html 结尾，且不是外部链接（或属于同一域名的链接）
+        // 2. 拦截所有本地内部 HTML（比如你配置的软件导航页、个人中心页等）
         const isInternalHtml = url.includes('.html') && (!url.startsWith('http') || url.includes(window.location.hostname));
         
         if (isInternalHtml) {
@@ -306,7 +304,8 @@
         <div class="music-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
     </div>
     
-    <div class="user-profile-btn" id="user-widget" onclick="if(typeof currentUserAccount !== 'undefined' && currentUserAccount) { localStorage.setItem('activeUser', currentUserAccount); localStorage.setItem('isAdminAuth', state.isAdmin); window.location.href='user-profile.html'; }">
+    <!-- 🚀 核心修改点：头像点击改为 window.open() 触发沉浸式拦截器 -->
+    <div class="user-profile-btn" id="user-widget" onclick="if(typeof currentUserAccount !== 'undefined' && currentUserAccount) { localStorage.setItem('activeUser', currentUserAccount); localStorage.setItem('isAdminAuth', state.isAdmin); window.open('user-profile.html', '_blank'); }">
         <img id="user-widget-avatar" class="user-avatar-preview" src="">
         <svg id="user-widget-svg" class="user-svg-icon" viewBox="0 0 24 24">
             <circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path>
