@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 全局多文档状态快照，极简固定四色下拉取色器（点击锁定版防误触）
+ * 更新内容: 新增高级 6D 玻璃一键返回顶部按钮，重构用户端阅读区返回目录逻辑
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V8.1 (四色取色器 稳定防误触版)");
+    console.log("🚀 成功加载知识库引擎 V8.2 (6D悬浮 & 智能目录路由版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -117,7 +117,6 @@
                 display: none; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 100;
                 cursor: default; flex-wrap: wrap; width: 100px; justify-content: center;
             }
-            /* 废除 Hover 触发，改为靠 class 控制显示与隐藏 */
             .color-dropdown-menu.show { display: flex; }
             
             .color-option {
@@ -180,6 +179,26 @@
             
             .empty-state { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #5f6368; font-size: 1.2rem; flex-direction: column; gap: 15px; font-weight: bold; text-align: center; }
             
+            /* ================= 🚀 6D 玻璃悬浮返回顶部按钮 ================= */
+            .btn-back-to-top {
+                position: absolute; right: 25px; bottom: 35px;
+                width: 42px; height: 42px; border-radius: 50%;
+                background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 100%);
+                backdrop-filter: blur(15px) saturate(150%); -webkit-backdrop-filter: blur(15px) saturate(150%);
+                border: 1px solid rgba(255,255,255,0.6);
+                box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15), inset 0 2px 3px rgba(255,255,255,0.8);
+                color: #1a73e8; display: flex; justify-content: center; align-items: center;
+                cursor: pointer; z-index: 1000; opacity: 0; pointer-events: none;
+                transform: translateY(20px); transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            }
+            .btn-back-to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+            .btn-back-to-top:hover {
+                background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 100%);
+                box-shadow: 0 12px 40px rgba(0,0,0,0.15), inset 0 2px 5px rgba(255,255,255,1);
+                transform: translateY(-4px);
+            }
+            .btn-back-to-top:active { transform: translateY(2px) scale(0.95); }
+
             @media (max-width: 768px) {
                 .doc-modal-overlay { flex-direction: column; }
                 .doc-sidebar { width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; }
@@ -190,6 +209,7 @@
                 .doc-tool-btn { flex-shrink: 0; }
                 .btn-toggle-menu { display: block; } /* 仅在手机端显示汉堡菜单 */
                 .doc-actions-reader { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+                .btn-back-to-top { right: 15px; bottom: 20px; width: 38px; height: 38px; }
             }
         `;
         document.head.appendChild(style);
@@ -239,7 +259,8 @@
                             <button class="btn-zoom" id="zoom-small" onclick="window.setDocZoom(0.85, 'small')">偏小</button>
                             <button class="btn-zoom active" id="zoom-normal" onclick="window.setDocZoom(1, 'normal')">标准</button>
                             <button class="btn-zoom" id="zoom-large" onclick="window.setDocZoom(1.15, 'large')">稍大</button>
-                            <button class="btn-reader-close" onclick="window.closeCounselingDoc()">退出</button>
+                            <!-- 🚀 逻辑重构：红底退出按钮现在连接到 backToDirectory -->
+                            <button class="btn-reader-close" onclick="window.backToDirectory()">退出</button>
                         </div>
                     </div>
 
@@ -325,10 +346,38 @@
                         <div class="doc-drag-overlay">松开鼠标，极速上传并插入到文档中</div>
                     </div>
                 </div>
+                
+                <!-- 🚀 注入高级 6D 玻璃一键返回顶部按钮 -->
+                <div class="btn-back-to-top" id="btn-back-to-top" onclick="window.docScrollToTop()" title="回到顶部">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                </div>
             </div>
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', docModalHTML);
+
+    // ================== 🚀 新增：滚动监听与回到顶部引擎 ==================
+    setTimeout(() => {
+        const scrollArea = document.querySelector('.doc-body-scroll');
+        const topBtn = document.getElementById('btn-back-to-top');
+        if (scrollArea && topBtn) {
+            scrollArea.addEventListener('scroll', () => {
+                // 向下滚动超过 300px 时显示悬浮按钮
+                if (scrollArea.scrollTop > 300) {
+                    topBtn.classList.add('show');
+                } else {
+                    topBtn.classList.remove('show');
+                }
+            });
+        }
+    }, 500);
+
+    window.docScrollToTop = function() {
+        const scrollArea = document.querySelector('.doc-body-scroll');
+        if (scrollArea) {
+            scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     // ================== 数据结构与状态 ==================
     let currentSystemId = null; 
@@ -383,7 +432,6 @@
             window.setDocZoom(1, 'normal'); 
         }
 
-        // 🚀 核心修复：电脑端强制展示侧边栏，手机端默认折叠，实现 Google Docs 级双栏体验
         if (window.innerWidth <= 768) {
             sidebar.classList.add('collapsed');
         } else {
@@ -412,12 +460,24 @@
         setTimeout(() => modal.style.opacity = '1', 10);
     };
 
+    // 🚀 核心保留：彻底退出系统，回到登录主页
     window.closeCounselingDoc = function() {
         window.flushDocToDB();
 
         const modal = document.getElementById('counseling-doc-modal');
         modal.style.opacity = '0';
         setTimeout(() => modal.style.display = 'none', 300);
+    };
+
+    // 🚀 新增：退回目录（不清空系统，仅返回目录视图）
+    window.backToDirectory = function() {
+        window.flushDocToDB(); // 离开前先默默保存一下用户的阅读状态
+        window.kbShowEmptyState(); // 清理右侧，显示引导语
+        
+        // 手机端如果目录被收起了，把它弹出来
+        if (window.innerWidth <= 768) {
+            document.getElementById('doc-sidebar').classList.remove('collapsed');
+        }
     };
 
     window.toggleDocSidebar = function() {
@@ -569,7 +629,6 @@
         
         window.renderKBSidebar(); 
 
-        // 🚀 核心修复：仅在手机端点击文章后自动收起目录，电脑端始终保持展现，无需点一下缩一下
         if (window.innerWidth <= 768) {
             document.getElementById('doc-sidebar').classList.add('collapsed');
         }
@@ -626,7 +685,7 @@
 
     // ================== R2 富文本与多媒体引擎 ==================
     
-    // 🚀 全新注入：面板开关与全局事件监听
+    // 🚀 面板开关与全局事件监听
     window.closeColorMenus = function() {
         document.querySelectorAll('.color-dropdown-menu').forEach(m => m.classList.remove('show'));
     };
@@ -660,7 +719,7 @@
     });
 
     window.docExec = function(command, value = null) {
-        window.closeColorMenus(); // 👈 任何排版操作都会自动收起面板，极其人性化
+        window.closeColorMenus(); // 任何排版操作都会自动收起面板
         const editor = document.getElementById('doc-editor');
         editor.focus();
         
