@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 目录全屏化路由重构，退回目录时彻底隐藏右侧编辑区，拒绝冗余退出按钮
+ * 更新内容: 完美修复手机端退回目录时只有半屏的 BUG，保留上下分屏阅读体验
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V8.4 (全屏纯净目录重构版)");
+    console.log("🚀 成功加载知识库引擎 V8.5 (手机端全屏目录修复版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -27,8 +27,12 @@
             }
             .doc-sidebar.collapsed { display: none; }
             
-            /* 🚀 新增：目录全屏模式样式 */
-            .doc-sidebar.full-screen { width: 100% !important; max-width: none !important; border-right: none !important; }
+            /* 🚀 核心修复：彻底解决半屏问题，强制 100% 高度和宽度 */
+            .doc-sidebar.full-screen { 
+                width: 100% !important; max-width: none !important; 
+                height: 100% !important; flex: 1 !important;
+                border-right: none !important; border-bottom: none !important; 
+            }
             
             .doc-sidebar-header {
                 padding: 20px; border-bottom: 1px solid #f1f3f4; display: flex; justify-content: space-between; align-items: center;
@@ -64,7 +68,7 @@
             /* ================= 右侧：文档编辑与阅读主区域 ================= */
             .doc-main { flex: 1; display: flex; flex-direction: column; position: relative; height: 100%; background: #f8f9fa; min-width: 0; }
             
-            /* 🚀 新增：彻底隐藏右侧区域的控制类 */
+            /* 彻底隐藏右侧区域 */
             .doc-main.hidden { display: none !important; }
 
             .doc-header-wrapper { background: #ffffff; border-bottom: 1px solid #e0e0e0; display: flex; flex-direction: column; flex-shrink: 0; }
@@ -112,7 +116,7 @@
             .doc-tool-select:hover { background: #e0e6ed; }
             .doc-tool-separator { width: 1px; height: 18px; background: #c7c7c7; margin: 0 6px; }
             
-            /* ================= 🚀 极简高级下拉四色取色器 (点击触发版) ================= */
+            /* ================= 🚀 极简高级下拉四色取色器 ================= */
             .color-dropdown-wrap { position: relative; display: flex; align-items: center; cursor: pointer; }
             .color-picker-icon { width: 32px; height: 32px; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: bold; transition: background 0.2s; }
             .color-picker-icon:hover { background: #e0e6ed; }
@@ -154,14 +158,11 @@
                 text-align: left;
             }
             
-            /* 阻断全局样式污染 */
             .doc-paper * { text-align-last: auto !important; }
-            
             .doc-paper p { margin-bottom: 15px; } 
             .doc-paper h1, .doc-paper h2, .doc-paper h3, .doc-paper h4 { margin: 20px 0 15px 0; }
             .doc-paper ul, .doc-paper ol { padding-left: 2.5em; margin-bottom: 15px; }
             .doc-paper li { margin-bottom: 5px; }
-            
             .doc-paper img, .doc-paper video { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
             .doc-paper audio { width: 100%; margin: 15px 0; outline: none; }
             .doc-paper a.doc-file-link { 
@@ -171,7 +172,6 @@
             }
             .doc-paper a.doc-file-link:hover { background: #f1f3f4; border-color: #1a73e8; }
             
-            /* 拖拽上传全屏遮罩层 */
             .doc-drag-overlay {
                 position: absolute; top: 0; left: 0; width: 100%; height: 100%;
                 background: rgba(26, 115, 232, 0.9); backdrop-filter: blur(5px);
@@ -182,7 +182,6 @@
             .doc-paper-wrapper.drag-over .doc-drag-overlay { display: flex; }
             
             [contenteditable="true"]:empty:before { content: attr(placeholder); opacity: 0.4; pointer-events: none; display: block; }
-            
             .empty-state { width: 100%; height: 100%; display: none; justify-content: center; align-items: center; color: #5f6368; font-size: 1.2rem; flex-direction: column; gap: 15px; font-weight: bold; text-align: center; }
             
             /* ================= 🚀 6D 玻璃悬浮返回顶部按钮 ================= */
@@ -205,11 +204,15 @@
             }
             .btn-back-to-top:active { transform: translateY(2px) scale(0.95); }
 
-            /* 响应式调整 */
+            /* 响应式调整 (手机端) */
             @media (max-width: 768px) {
                 .doc-modal-overlay { flex-direction: column; }
                 .doc-sidebar { width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; }
                 .doc-sidebar.collapsed { display: none; }
+                
+                /* 🚀 核心修复：全屏目录强制覆盖 40vh 设定 */
+                .doc-sidebar.full-screen { height: 100% !important; flex: 1 !important; max-height: none !important; border-bottom: none !important; }
+                
                 .doc-main { height: auto; flex: 1; min-height: 0; }
                 .doc-paper { min-height: 800px; padding: 30px 20px; }
                 .doc-toolbar { overflow-x: auto; flex-wrap: nowrap; padding: 8px 10px; }
@@ -232,14 +235,13 @@
         }
     });
 
-    // 2. 注入文档系统的 HTML 骨架 (注意：给 doc-main 加上了 id)
+    // 2. 注入文档系统的 HTML 骨架
     const docModalHTML = `
         <div class="doc-modal-overlay" id="counseling-doc-modal">
             <!-- 左侧：知识库导航 -->
             <div class="doc-sidebar" id="doc-sidebar">
                 <div class="doc-sidebar-header">
                     <h2 id="kb-main-title">知识库目录</h2>
-                    <!-- 真正全局退出到主页的按钮 -->
                     <button class="btn-close-kb" onclick="window.closeCounselingDoc()">退出</button>
                 </div>
                 <div class="doc-sidebar-content" id="kb-sidebar-content">
@@ -267,7 +269,7 @@
                             <button class="btn-zoom" id="zoom-small" onclick="window.setDocZoom(0.85, 'small')">偏小</button>
                             <button class="btn-zoom active" id="zoom-normal" onclick="window.setDocZoom(1, 'normal')">标准</button>
                             <button class="btn-zoom" id="zoom-large" onclick="window.setDocZoom(1.15, 'large')">稍大</button>
-                            <!-- 🚀 退出阅读模式，隐藏右侧，让目录全屏 -->
+                            <!-- 退回目录模式 -->
                             <button class="btn-reader-close" onclick="window.backToDirectory()">退出</button>
                         </div>
                     </div>
@@ -303,7 +305,7 @@
                         <button class="doc-tool-btn" onclick="window.docExec('strikeThrough')" style="text-decoration:line-through;" title="删除线">S</button>
                         <div class="doc-tool-separator"></div>
 
-                        <!-- 🚀 极简高级四色下拉取色器（点击触发机制） -->
+                        <!-- 极简高级四色下拉取色器 -->
                         <div class="color-dropdown-wrap" title="文本颜色">
                             <div class="color-picker-icon" style="color: #ea4335; border-bottom: 3px solid #ea4335;" onclick="window.toggleColorMenu(event, 'menu-forecolor')">A</div>
                             <div class="color-dropdown-menu" id="menu-forecolor">
@@ -425,6 +427,7 @@
         }
 
         const modal = document.getElementById('counseling-doc-modal');
+        const sidebar = document.getElementById('doc-sidebar');
         
         if (state.isAdmin) {
             modal.classList.add('admin-mode');
@@ -436,6 +439,9 @@
             document.getElementById('doc-editor').setAttribute('contenteditable', 'false');
             window.setDocZoom(1, 'normal'); 
         }
+
+        // 默认取消目录收起状态，保持双栏或分屏显示
+        sidebar.classList.remove('collapsed');
 
         window.renderKBSidebar();
         
@@ -601,7 +607,7 @@
     window.kbShowEmptyState = function() {
         activeArticleId = null;
         
-        // 核心修改：让右侧文章区完全物理隐藏，让左侧目录区100%宽全屏展示！
+        // 核心修改：让右侧文章区完全物理隐藏，让左侧目录区100%宽高度全屏展示！
         document.getElementById('doc-main').classList.add('hidden');
         const sidebar = document.getElementById('doc-sidebar');
         sidebar.classList.add('full-screen');
@@ -628,11 +634,6 @@
         document.getElementById('doc-editor').innerHTML = art.content;
         
         window.renderKBSidebar(); 
-
-        // 手机端：点击文章后，自动收起左边目录，为阅读留出最大空间
-        if (window.innerWidth <= 768) {
-            document.getElementById('doc-sidebar').classList.add('collapsed');
-        }
     };
 
     window.kbSaveDocMeta = async function() {
