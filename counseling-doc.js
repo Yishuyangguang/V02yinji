@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 全局多文档状态快照，【终极修复】苹果iOS设备WebKit引擎引号解析Bug导致字体无法切换的问题
+ * 更新内容: 全局多文档状态快照，极简固定四色下拉取色器（黑、蓝、红、紫）
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V7.9 (苹果iOS端字体完美映射版)");
+    console.log("🚀 成功加载知识库引擎 V8.0 (极简四色高级取色引擎版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -106,10 +106,30 @@
             .doc-tool-select:hover { background: #e0e6ed; }
             .doc-tool-separator { width: 1px; height: 18px; background: #c7c7c7; margin: 0 6px; }
             
-            .color-picker-wrap { position: relative; display: flex; align-items: center; cursor: pointer; }
-            .color-picker-wrap input[type="color"] { opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; }
-            .color-picker-icon { width: 32px; height: 32px; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: bold; }
+            /* ================= 🚀 极简高级下拉四色取色器 ================= */
+            .color-dropdown-wrap { position: relative; display: flex; align-items: center; cursor: pointer; }
+            .color-picker-icon { width: 32px; height: 32px; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: bold; transition: background 0.2s; }
             .color-picker-icon:hover { background: #e0e6ed; }
+            
+            .color-dropdown-menu {
+                position: absolute; top: calc(100% + 5px); left: 50%; transform: translateX(-50%);
+                background: #ffffff; border: 1px solid #dadce0; border-radius: 8px; padding: 12px;
+                display: none; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 100;
+                cursor: default; flex-wrap: wrap; width: 100px; justify-content: center;
+            }
+            .color-dropdown-wrap:hover .color-dropdown-menu { display: flex; }
+            
+            .color-option {
+                width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+                border: 1px solid rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .color-option:hover { transform: scale(1.2); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+            
+            .color-clear-btn {
+                width: 100%; font-size: 12px; text-align: center; color: #5f6368; cursor: pointer; 
+                padding-top: 8px; border-top: 1px solid #f1f3f4; margin-top: -4px; transition: 0.2s;
+            }
+            .color-clear-btn:hover { color: #ea4335; font-weight: bold; }
 
             /* ================= 🔥 A4 纸张排版强力修正区 🔥 ================= */
             .doc-body-scroll {
@@ -228,7 +248,7 @@
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
                         <div class="doc-tool-separator"></div>
                         
-                        <!-- 🚀核心修复：剥离所有内部单引号，完美兼容 iOS Safari 的 execCommand 解析 -->
+                        <!-- 剥离所有内部单引号，完美兼容 iOS Safari 的 execCommand 解析 -->
                         <select class="doc-tool-select" onchange="window.docExec('fontName', this.value); this.selectedIndex=0;" title="字体集" style="width: 110px;">
                             <option value="" disabled selected hidden>修改字体</option>
                             <option value="system-ui, -apple-system, BlinkMacSystemFont, PingFang SC, Microsoft YaHei, sans-serif">系统默认</option>
@@ -254,13 +274,26 @@
                         <button class="doc-tool-btn" onclick="window.docExec('strikeThrough')" style="text-decoration:line-through;" title="删除线">S</button>
                         <div class="doc-tool-separator"></div>
 
-                        <div class="color-picker-wrap" title="文本颜色">
+                        <!-- 🚀 极简高级四色下拉取色器（黑、蓝、红、紫） -->
+                        <div class="color-dropdown-wrap" title="文本颜色">
                             <div class="color-picker-icon" style="color: #ea4335; border-bottom: 3px solid #ea4335;">A</div>
-                            <input type="color" onchange="window.docExec('foreColor', this.value)">
+                            <div class="color-dropdown-menu">
+                                <div class="color-option" style="background: #111111;" onclick="window.docExec('foreColor', '#111111')" title="纯黑色"></div>
+                                <div class="color-option" style="background: #1a73e8;" onclick="window.docExec('foreColor', '#1a73e8')" title="深水蓝"></div>
+                                <div class="color-option" style="background: #ea4335;" onclick="window.docExec('foreColor', '#ea4335')" title="樱桃红"></div>
+                                <div class="color-option" style="background: #9333ea;" onclick="window.docExec('foreColor', '#9333ea')" title="葡萄紫"></div>
+                            </div>
                         </div>
-                        <div class="color-picker-wrap" title="背景高亮">
+
+                        <div class="color-dropdown-wrap" title="背景高亮">
                             <div class="color-picker-icon" style="background: #fbbc04; color: #fff;">✎</div>
-                            <input type="color" onchange="window.docExec('hiliteColor', this.value)">
+                            <div class="color-dropdown-menu">
+                                <div class="color-option" style="background: #111111;" onclick="window.docExec('hiliteColor', '#111111')" title="纯黑色"></div>
+                                <div class="color-option" style="background: #1a73e8;" onclick="window.docExec('hiliteColor', '#1a73e8')" title="深水蓝"></div>
+                                <div class="color-option" style="background: #ea4335;" onclick="window.docExec('hiliteColor', '#ea4335')" title="樱桃红"></div>
+                                <div class="color-option" style="background: #9333ea;" onclick="window.docExec('hiliteColor', '#9333ea')" title="葡萄紫"></div>
+                                <div class="color-clear-btn" onclick="window.docExec('hiliteColor', 'transparent')">清除高亮</div>
+                            </div>
                         </div>
                         <div class="doc-tool-separator"></div>
 
