@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 新增高级 6D 玻璃一键返回顶部按钮，重构用户端阅读区返回目录逻辑
+ * 更新内容: 新增高级 6D 玻璃一键返回顶部按钮，重构用户端阅读区返回目录逻辑，优化手机端悬浮按钮高度防遮挡
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V8.2 (6D悬浮 & 智能目录路由版)");
+    console.log("🚀 成功加载知识库引擎 V8.3 (6D悬浮防遮挡 & 智能目录路由版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -199,17 +199,20 @@
             }
             .btn-back-to-top:active { transform: translateY(2px) scale(0.95); }
 
+            /* 🚀 核心优化：手机端大幅上浮按钮，避免被浏览器地址栏或手势条遮挡 */
             @media (max-width: 768px) {
                 .doc-modal-overlay { flex-direction: column; }
                 .doc-sidebar { width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; }
                 .doc-sidebar.collapsed { display: none; }
-                .doc-main { height: auto; flex: 1; min-height: 0; } /* 弹性填充剩余高度，绝对不溢出 */
+                .doc-main { height: auto; flex: 1; min-height: 0; }
                 .doc-paper { min-height: 800px; padding: 30px 20px; }
                 .doc-toolbar { overflow-x: auto; flex-wrap: nowrap; padding: 8px 10px; }
                 .doc-tool-btn { flex-shrink: 0; }
-                .btn-toggle-menu { display: block; } /* 仅在手机端显示汉堡菜单 */
+                .btn-toggle-menu { display: block; }
                 .doc-actions-reader { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
-                .btn-back-to-top { right: 15px; bottom: 20px; width: 38px; height: 38px; }
+                
+                /* 将 bottom 提升至 85px，完美躲开 Safari 和微信底栏 */
+                .btn-back-to-top { right: 15px; bottom: 85px; width: 38px; height: 38px; }
             }
         `;
         document.head.appendChild(style);
@@ -259,7 +262,6 @@
                             <button class="btn-zoom" id="zoom-small" onclick="window.setDocZoom(0.85, 'small')">偏小</button>
                             <button class="btn-zoom active" id="zoom-normal" onclick="window.setDocZoom(1, 'normal')">标准</button>
                             <button class="btn-zoom" id="zoom-large" onclick="window.setDocZoom(1.15, 'large')">稍大</button>
-                            <!-- 🚀 逻辑重构：红底退出按钮现在连接到 backToDirectory -->
                             <button class="btn-reader-close" onclick="window.backToDirectory()">退出</button>
                         </div>
                     </div>
@@ -270,7 +272,6 @@
                         <button class="doc-tool-btn" onclick="window.docExec('redo')" title="重做">↪</button>
                         <div class="doc-tool-separator"></div>
                         
-                        <!-- 剥离所有内部单引号，完美兼容 iOS Safari 的 execCommand 解析 -->
                         <select class="doc-tool-select" onchange="window.docExec('fontName', this.value); this.selectedIndex=0;" title="字体集" style="width: 110px;">
                             <option value="" disabled selected hidden>修改字体</option>
                             <option value="system-ui, -apple-system, BlinkMacSystemFont, PingFang SC, Microsoft YaHei, sans-serif">系统默认</option>
@@ -347,7 +348,7 @@
                     </div>
                 </div>
                 
-                <!-- 🚀 注入高级 6D 玻璃一键返回顶部按钮 -->
+                <!-- 🚀 高级 6D 玻璃一键返回顶部按钮 -->
                 <div class="btn-back-to-top" id="btn-back-to-top" onclick="window.docScrollToTop()" title="回到顶部">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
                 </div>
@@ -469,7 +470,7 @@
         setTimeout(() => modal.style.display = 'none', 300);
     };
 
-    // 🚀 新增：退回目录（不清空系统，仅返回目录视图）
+    // 🚀 核心逻辑：退回目录（不清空系统，仅返回目录视图）
     window.backToDirectory = function() {
         window.flushDocToDB(); // 离开前先默默保存一下用户的阅读状态
         window.kbShowEmptyState(); // 清理右侧，显示引导语
