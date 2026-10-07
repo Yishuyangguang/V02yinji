@@ -1,11 +1,11 @@
 /**
  * 恒久印记 - 极速云端知识库与富文本引擎 (Google Docs + Wiki Style)
  * 文件名: counseling-doc.js
- * 更新内容: 全局多文档状态快照，极简固定四色下拉取色器（黑、蓝、红、紫）
+ * 更新内容: 全局多文档状态快照，极简固定四色下拉取色器（点击锁定版防误触）
  */
 
 (function initCounselingDocEngine() {
-    console.log("🚀 成功加载知识库引擎 V8.0 (极简四色高级取色引擎版)");
+    console.log("🚀 成功加载知识库引擎 V8.1 (四色取色器 稳定防误触版)");
 
     // 1. 注入极简高级的 UI 样式
     if (!document.getElementById('counseling-doc-style')) {
@@ -106,7 +106,7 @@
             .doc-tool-select:hover { background: #e0e6ed; }
             .doc-tool-separator { width: 1px; height: 18px; background: #c7c7c7; margin: 0 6px; }
             
-            /* ================= 🚀 极简高级下拉四色取色器 ================= */
+            /* ================= 🚀 极简高级下拉四色取色器 (点击触发版) ================= */
             .color-dropdown-wrap { position: relative; display: flex; align-items: center; cursor: pointer; }
             .color-picker-icon { width: 32px; height: 32px; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: bold; transition: background 0.2s; }
             .color-picker-icon:hover { background: #e0e6ed; }
@@ -117,7 +117,8 @@
                 display: none; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 100;
                 cursor: default; flex-wrap: wrap; width: 100px; justify-content: center;
             }
-            .color-dropdown-wrap:hover .color-dropdown-menu { display: flex; }
+            /* 废除 Hover 触发，改为靠 class 控制显示与隐藏 */
+            .color-dropdown-menu.show { display: flex; }
             
             .color-option {
                 width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
@@ -274,10 +275,10 @@
                         <button class="doc-tool-btn" onclick="window.docExec('strikeThrough')" style="text-decoration:line-through;" title="删除线">S</button>
                         <div class="doc-tool-separator"></div>
 
-                        <!-- 🚀 极简高级四色下拉取色器（黑、蓝、红、紫） -->
+                        <!-- 🚀 极简高级四色下拉取色器（改为点击触发机制） -->
                         <div class="color-dropdown-wrap" title="文本颜色">
-                            <div class="color-picker-icon" style="color: #ea4335; border-bottom: 3px solid #ea4335;">A</div>
-                            <div class="color-dropdown-menu">
+                            <div class="color-picker-icon" style="color: #ea4335; border-bottom: 3px solid #ea4335;" onclick="window.toggleColorMenu(event, 'menu-forecolor')">A</div>
+                            <div class="color-dropdown-menu" id="menu-forecolor">
                                 <div class="color-option" style="background: #111111;" onclick="window.docExec('foreColor', '#111111')" title="纯黑色"></div>
                                 <div class="color-option" style="background: #1a73e8;" onclick="window.docExec('foreColor', '#1a73e8')" title="深水蓝"></div>
                                 <div class="color-option" style="background: #ea4335;" onclick="window.docExec('foreColor', '#ea4335')" title="樱桃红"></div>
@@ -286,8 +287,8 @@
                         </div>
 
                         <div class="color-dropdown-wrap" title="背景高亮">
-                            <div class="color-picker-icon" style="background: #fbbc04; color: #fff;">✎</div>
-                            <div class="color-dropdown-menu">
+                            <div class="color-picker-icon" style="background: #fbbc04; color: #fff;" onclick="window.toggleColorMenu(event, 'menu-hilitecolor')">✎</div>
+                            <div class="color-dropdown-menu" id="menu-hilitecolor">
                                 <div class="color-option" style="background: #111111;" onclick="window.docExec('hiliteColor', '#111111')" title="纯黑色"></div>
                                 <div class="color-option" style="background: #1a73e8;" onclick="window.docExec('hiliteColor', '#1a73e8')" title="深水蓝"></div>
                                 <div class="color-option" style="background: #ea4335;" onclick="window.docExec('hiliteColor', '#ea4335')" title="樱桃红"></div>
@@ -624,7 +625,42 @@
     };
 
     // ================== R2 富文本与多媒体引擎 ==================
+    
+    // 🚀 全新注入：面板开关与全局事件监听
+    window.closeColorMenus = function() {
+        document.querySelectorAll('.color-dropdown-menu').forEach(m => m.classList.remove('show'));
+    };
+
+    window.toggleColorMenu = function(e, menuId) {
+        e.stopPropagation(); // 阻止事件冒泡，防止被全局 click 瞬间关闭
+        
+        // 确保点击时先恢复选区，这样光标位置和选中的文字绝对不会丢失
+        const editor = document.getElementById('doc-editor');
+        if (window.docSavedRange && editor) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(window.docSavedRange);
+        }
+
+        // 先关闭所有其他菜单
+        document.querySelectorAll('.color-dropdown-menu').forEach(m => {
+            if (m.id !== menuId) m.classList.remove('show');
+        });
+        
+        // 弹出当前点击的菜单
+        const target = document.getElementById(menuId);
+        if (target) target.classList.toggle('show');
+    };
+
+    // 全局监听：点击任意空白处，自动收起色盘
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.color-dropdown-wrap')) {
+            window.closeColorMenus();
+        }
+    });
+
     window.docExec = function(command, value = null) {
+        window.closeColorMenus(); // 👈 任何排版操作都会自动收起面板，极其人性化
         const editor = document.getElementById('doc-editor');
         editor.focus();
         
